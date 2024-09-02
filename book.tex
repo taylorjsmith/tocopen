@@ -1,0 +1,157 @@
+% !TEX TS-program = pdflatexmk
+\documentclass{book}
+
+%%%%%%%%%%
+% BOOK METADATA
+
+\newcommand{\editionnumber}{$\alpha$ pre-publication}
+\newcommand{\editionyear}{2024}
+\newcommand{\editionmonth}{September}
+
+\title{Theory of Computing: \\ An Open Introduction}
+\author{Taylor J. Smith \\ St. Francis Xavier University}
+\date{\editionmonth\ \editionyear}
+
+%%%%%%%%%%
+% BOOK STYLE FLAG
+
+\newif\ifstyle
+%\styletrue
+
+%%%%%%%%%%
+% DRAFT VERSION FLAG
+
+\newif\ifdraft
+%\drafttrue
+
+%%%%%%%%%%
+% PRINT VERSION FLAGS
+
+\newif\ifprint
+%\printtrue
+
+\newif\ifprintmarks
+%\printmarkstrue
+
+%%%%%%%%%%
+% BOOK PREAMBLE
+
+\input{./bookpreamble}
+
+%%%%%%%%%%
+% BOOK STYLE
+
+\ifstyle
+	\input{./bookstyle}
+\fi
+
+%%%%%%%%%%
+% TITLE PAGE
+
+\begin{document}
+
+\pagestyle{empty}
+
+\ifstyle
+	\ifprint
+	\else
+	\includepdf{./cover/coverfrontcropped.pdf}
+	\cleardoublepage
+	\fi
+	\input{titlepage}
+\else
+	\maketitle
+	\cleardoublepage
+\fi
+
+%%%%%%%%%%
+% COPYRIGHT PAGE
+
+\ifstyle
+	\input{copyrightpage}
+\else
+	\vspace*{\fill}
+	\noindent
+	Copyright \textcopyright\ Taylor J.\ Smith \editionyear \\
+	\url{https://taylorjsmith.xyz} \par
+	
+	\noindent
+	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. For license details, visit \\ \url{https://creativecommons.org/licenses/by-sa/4.0/}. \par
+	
+	\noindent
+	Typeset in Computer Modern using \LaTeX \\
+	Figures produced using Ti\textit{k}Z \par
+	
+	\noindent
+	\ifdraft
+		\textbf{Draft} \editionnumber\ edition (\today) \par
+	\else
+		\editionnumber\ edition, \editionmonth\ \editionyear \par
+	\fi
+	\cleardoublepage
+\fi
+
+%%%%%%%%%%
+% FRONT MATTER (table of contents, preface, etc.)
+
+\clearpage
+
+\ifstyle
+	\pagestyle{fancy}
+\else
+	\pagestyle{plain}
+\fi
+
+\frontmatter
+
+\tableofcontents
+
+\input{./chapters/preface}
+
+%%%%%%%%%%
+% MAIN MATTER
+
+\mainmatter
+
+\input{./chapters/regular}
+\input{./chapters/contextfree}
+\input{./chapters/decidablesemidecidable}
+\input{./chapters/decisionproblems}
+\input{./chapters/undecidability}
+
+%%%%%%%%%%
+% APPENDICES
+
+\bookmarksetup{startatroot}						% make bookmarks in PDF appear correctly
+\appendix
+
+\input{./appendices/mathematicalbackground}
+%\input{./appendices/ordernotation}
+\input{./appendices/greekalphabet}
+
+%%%%%%%%%%
+% BACK MATTER (bibliography, index, etc.)
+
+\backmatter
+
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plainnat}
+\bibliography{./references}
+%\markboth{\textsc{bibliography}}{\textsc{bibliography}}
+
+%\cleardoublepage
+%\phantomsection
+%\addcontentsline{toc}{chapter}{Index}
+%\printindex
+%\markboth{\textsc{index}}{\textsc{index}}
+
+\ifstyle
+	\ifprint
+	\else
+	\includepdf{./cover/coverbackcropped.pdf}
+	\fi
+\else
+\fi
+
+\end{document}

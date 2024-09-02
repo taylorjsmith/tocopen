@@ -1,0 +1,332 @@
+%%%%%%%%%%
+% PACKAGES (DEFAULT)
+
+\usepackage{algorithm}					% algorithms
+\usepackage[noend]{algpseudocode}		% "
+\usepackage{amsmath}					% math environments and symbols
+\usepackage{amssymb}					% "
+\usepackage{amsthm}					% "
+\usepackage{caption, subcaption}			% captions
+\usepackage[noautomatic]{imakeidx}			% indexing
+\usepackage{natbib}						% bibliography formatting
+\usepackage[dvipsnames]{xcolor}			% colours
+
+%%%%%%%%%%
+% PACKAGES (CUSTOM)
+
+\usepackage{bm}						% bold math symbols
+\usepackage{booktabs}					% better tabular design
+\usepackage{cancel}						% command to cancel/"slash out" symbols
+\usepackage[scale=1.3]{ccicons}			% Creative Commons licence icons
+\usepackage{complexity}					% complexity theory classes
+\usepackage{enumitem}					% list spacing customization
+\usepackage{listings}					% source code listings
+\usepackage{mathtools}					% \xRightarrow command
+\usepackage{multicol}					% multiple columns
+\usepackage{qtree}						% drawing trees
+\usepackage{rotating}					% rotated figures/pages
+\usepackage{soul}						% strikeout and underline commands
+\usepackage{tipa}						% IPA symbols
+\usepackage[hyphens]{url}				% URL formatting
+
+\usepackage{array}						% tabular customization
+\usepackage{arydshln}					% dashed lines in tabular
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcommand{\linebreakcell}[3][t]{\begin{tabular}[#1]{@{}#2@{}}#3\end{tabular}}
+
+%%%%%%%%%%
+% GRAPHICS PACKAGES (DEFAULT)
+
+\usepackage{tikz}						% vector graphics
+\usetikzlibrary{calc}						% "
+
+%%%%%%%%%%
+% GRAPHICS PACKAGES (CUSTOM)
+
+\usetikzlibrary{arrows.meta}				% 
+\usetikzlibrary{automata}					% 
+\usetikzlibrary{decorations.pathmorphing}		% 
+\usetikzlibrary{graphs}					% 
+\usetikzlibrary{graphs.standard}				% 
+\usetikzlibrary{patterns}					% 
+\usetikzlibrary{positioning}					% 
+\usetikzlibrary{shapes}					% 
+\usetikzlibrary{shapes.multipart}			% 
+\usetikzlibrary{shapes.symbols}				% 
+\usetikzlibrary{trees}						% 
+
+%%%%%%%%%%
+% HYPERLINK AND BOOKMARK PACKAGES
+
+\ifdraft
+	\usepackage[backref=page]{hyperref}	%
+\else
+	\usepackage{hyperref}				% 
+\fi
+\usepackage{bookmark}					% 
+
+%%%%%%%%%%
+% DRAFT MODE
+
+\ifdraft
+	\usepackage[%						% add "DRAFT" watermark
+		angle=45,%
+		color=lightgray!15!white,%
+		pos={0.5\paperwidth,0.5\paperheight},%
+		scale=6,%
+		text=\normalfont\textsf{DRAFT}%
+	]{draftwatermark}
+	\renewcommand*{\backrefalt}[4]{%		% add page backreferences to bibliography
+		\ifcase #1 %
+		{\footnotesize No citations.}%
+		\or
+		{\footnotesize (cit.\ on p.\ #2).}%
+		\else
+		{\footnotesize (cit.\ on pp.\ #2).}%
+		\fi
+	}
+\fi
+
+%%%%%%%%%%
+% PRINT MODE
+
+\hypersetup{hypertexnames=true, linktocpage=true}
+\ifprint
+	\hypersetup{hidelinks, linktocpage=false}
+\else
+	\hypersetup{colorlinks}
+\fi
+
+%%%%%%%%%%
+% AMSTHM ENVIRONMENTS
+
+\theoremstyle{plain}						% AMS theorem styles
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}					% AMS definition styles
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\ifstyle
+\else
+	\theoremstyle{remark}				% AMS remark styles
+	\newtheorem*{remark}{Remark}
+	\newtheorem*{note}{Note}
+\fi
+
+%%%%%%%%%%
+% INDEXING
+
+\makeindex
+
+%%%%%%%%%%
+% CUSTOM COMMANDS/ENVIRONMENTS
+
+% commands for advanced ("starred") sections/subsections
+\makeatletter
+\newcommand\advancedsection[2][section]{
+	\def\@seccntformat##1{\protect\llap{\large*}\csname the##1\endcsname\quad}%
+	\addtocontents{toc}{%
+		\let\protect\mtnumberline\protect\numberline%
+		\def\protect\numberline{%
+			\hskip0pt%
+			\global\let\protect\numberline\protect\mtnumberline%
+			\protect\llap{\normalfont\normalsize*}%
+			\protect\mtnumberline%
+		}%
+	}%
+	\csname #1\endcsname{#2}%
+	\def\@seccntformat##1{\csname the##1\endcsname\quad}%
+}
+\newcommand\advancedsubsection[2][subsection]{\advancedsection[#1]{#2}}
+\makeatother
+
+% under construction environment
+\newenvironment{construction}{%
+	\par\medskip\noindent
+	\sbox0{\raisebox{-1.4em}{\includegraphics{./images/bc-aux-301.pdf}}\space}%
+	\hangindent\wd0
+	\parindent\hangindent
+	\hangafter=-2
+	\smash{\llap{\box0}}%
+	\slshape
+	\ignorespaces
+}{\par\medskip}
+
+% dangerous bend environment
+\newenvironment{dangerous}{%
+	\par\medskip\noindent
+	\sbox0{\raisebox{-1.4em}{\includegraphics{./images/dbend.pdf}}\space}%
+	\hangindent\wd0
+	\parindent\hangindent
+	\hangafter=-2
+	\smash{\llap{\box0}}%
+	\ignorespaces
+}{\par\medskip}
+
+% command for epigraphs
+\newcommand{\epigraph}[4]{
+	\null
+	\hfill
+	\begin{minipage}{0.85\textwidth}
+	\begin{flushright} 
+	{\setlength{\parskip}{-2pt} \itshape #1} \\
+	\if\relax\detokenize{#4}\relax
+		--- {\scshape #2}
+	\else
+		--- {\scshape #2 (#4)}
+	\fi
+	\end{flushright}
+	\end{minipage}
+	\par
+}
+
+% command for future sections/subsections/subsubsections
+\newcommand{\futuresection}[1]{
+	\section{\texorpdfstring{#1 $\diamond$}{#1}}
+}
+\newcommand{\futuresubsection}[1]{
+	\subsection{\texorpdfstring{#1 $\diamond$}{#1}}
+}
+\newcommand{\futuresubsubsection}[1]{
+	\subsubsection{\texorpdfstring{#1 $\diamond$}{#1}}
+}
+
+% command for unnumbered sections (listed in ToC)
+\newcommand{\unnumberedsection}[1]{
+	\phantomsection
+	\section*{#1}
+	\addcontentsline{toc}{section}{#1}
+	\markright{#1}
+}
+
+%%%%%%%%%%
+% CUSTOM COMMANDS/ENVIRONMENTS
+% (only when book style file is not included)
+
+% custom colours
+\newcommand{\maincolour}{black}
+\newcommand{\secondcolour}{\maincolour!75}
+\newcommand{\thirdcolour}{\maincolour!45}
+\newcommand{\fourthcolour}{\maincolour!15}
+\newcommand{\fifthcolour}{\maincolour!5}
+\newcommand{\neutralcolour}{gray}
+
+\ifstyle
+\else
+	% algorithm styling
+	\captionsetup[algorithm]{labelsep=colon}
+	\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+	\algrenewcommand\algorithmicensure{\textbf{Output:}}
+
+	% custom environments
+	\newcommand{\firstwords}[1]{#1}
+	\newenvironment{algorithmbox}[1][.]{\begin{algorithm}\begin{algorithmic}\caption{#1}}{\end{algorithmic}\end{algorithm}}
+	\newenvironment{colouredbox}{}{}
+	\newenvironment{customtitlebox}[1][.]{\medskip\noindent\textbf{#1.}}{\medskip}
+	\newenvironment{exercises}{\begin{enumerate}}{\end{enumerate}}
+	\newenvironment{proofbox}[1][.]{\medskip\noindent\textit{Proof of #1.}}{\medskip}
+	\newcommand{\tmalgorithm}[3][1.0]{#3}
+\fi
+
+%%%%%%%%%%
+% OTHER CUSTOM COMMANDS/ENVIRONMENTS
+
+% general mathematical notation
+\newcommand{\from}{\colon}								% function notation, corresponds with \to
+\newcommand{\bigdot}[1]{\overset{\mbox{\large\bfseries .}}{#1}}	% big version of dot to go over symbols
+\newcommand{\symdiff}{\mathbin{\triangle}}					% symmetric difference of two sets
+
+% notation specific to regular languages/models
+\newcommand{\regex}[1]{\ensuremath{\bm #1}}
+\renewcommand{\RE}{\textsf{RE}}
+\newcommand{\DFA}{\textsf{DFA}}
+\newcommand{\NFA}{\textsf{NFA}}
+\mathchardef\mhyphen="2D
+\newcommand{\ENFA}{\ensuremath{\epsilon\mhyphen\textsf{NFA}}}
+
+% notation specific to context-free languages/models
+\newcommand{\CFG}{\textsf{CFG}}
+\newcommand{\PDA}{\textsf{PDA}}
+
+% notation specific to Turing machines and decidable/semidecidable languages
+\renewcommand{\D}{\textsf{D}}
+\newcommand{\SD}{\textsf{SD}}
+\newcommand{\TM}{\textsf{TM}}
+\def\blankspace{\leavevmode\hbox{\tt\char`\ }}					% visible space
+
+% notation specific to reductions
+\newcommand{\mreducesto}{\leq_{\mathrm{m}}}
+
+% notation specific to complexity classes
+\newclass{\NEXPSPACE}{NEXPSPACE}
+
+% command to highlight mathematical text
+\newcommand{\highlightmath}[1]{\colorbox{\fourthcolour}{\color{\maincolour}$\mathstrut\displaystyle#1$}}
+
+% commands to draw illustration of film reel
+\newcommand\rulebox[1]{%
+	\begingroup
+	\fontsize{100}{5}\selectfont
+	\fboxsep0.1pt%
+	\colorbox{white}{\raisebox{0pt}[0.85cm][0.25cm]{\makebox[2.2cm][c]{\textcolor{black}{#1}}}}%
+	\endgroup
+}
+\newcommand{\whitebox}{\hfill\textcolor{white}{\rule[1mm]{1.4mm}{2.8mm}}\hfill}
+\newcommand{\whiteboxlarge}[1]{\hfill\rulebox{#1}\hfill}
+\newcommand{\filmbox}[1]{%
+	\setlength{\fboxsep}{0pt}%
+	\colorbox{black}{%
+	\begin{minipage}{2.4cm}
+		\rule{0mm}{4.8mm}\whitebox\whitebox\whitebox\whitebox\whitebox%
+		\whitebox\whitebox\whitebox\whitebox\null\\%
+		\null\hfill\whiteboxlarge{\texttt{#1}}\hfill\null\\[1mm]%
+		\null\whitebox\whitebox\whitebox\whitebox\whitebox%
+		\whitebox\whitebox\whitebox\whitebox\null
+	\end{minipage}}}
+
+% commands to set style of code listings
+\lstdefinestyle{codeblock}{
+	% How/what to match
+	sensitive=true,
+	% Border (above and below)
+	frame=lines,
+	% Extra margin on line (align with paragraph)
+	xleftmargin=\parindent,
+	% Put extra space under caption
+	belowcaptionskip=1\baselineskip,
+	% Colors
+	backgroundcolor=\color{white},
+	basicstyle=\color{black}\ttfamily,
+	keywordstyle=\color{gray},
+	commentstyle=\color{gray},
+	stringstyle=\color{gray},
+	numberstyle=\color{gray},
+	identifierstyle=\color{gray},
+	% Break long lines into multiple lines?
+	breaklines=true,
+	% Show a character for spaces?
+	showstringspaces=false,
+	tabsize=2,
+	escapechar={!},
+}
+
+% command to add vertical strikethrough to character
+% (used specifically in CPL code example)
+\newcommand*{\vertchar}[2][0pt]{%
+	\tikz[
+		inner sep=0pt,
+		shorten >=-.15ex,
+		shorten <=-.15ex,
+		line cap=round,
+		baseline=(c.base),
+	]\draw
+	(0,0) node (c) {#2}
+	($(c.south)+(#1,0)$) -- ($(c.north)+(#1,0)$);%
+}
