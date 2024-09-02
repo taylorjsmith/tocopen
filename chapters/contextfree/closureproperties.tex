@@ -1,0 +1,42 @@
+\section{Closure Properties}\label{sec:closurepropertiescontextfree}
+
+\begin{construction}
+Much like in the chapter on regular languages, here I intend to summarize the closure properties of various operations applied to context-free languages. This section may prove to be more interesting, since certain operations turn out not to be closed for the class of context-free languages.
+\end{construction}
+
+\subsubsection*{Intersection}
+
+While it is true that context-free languages are closed under union, it is in fact \emph{not} true that they're also closed under intersection.
+
+\begin{theorem}\label{thm:CFLnonclosureintersection}
+The class of context-free languages is not closed under intersection.
+
+\begin{proof}
+Consider the languages
+\begin{align*}
+L_{1}	&= \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{m} \mid m, n \geq 0\} \text{ and} \\
+L_{2}	&= \{\texttt{a}^{m}\texttt{b}^{n}\texttt{c}^{n} \mid m, n \geq 0\}.
+\end{align*}
+Both of these languages are context-free, so if the class of context-free languages were closed under intersection, the language $L_{1} \cap L_{2}$ must also be context-free. However, we can see that
+\begin{equation*}
+L_{1} \cap L_{2} = \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n} \mid n \geq 0\}.
+\end{equation*}
+This language is not context-free, and we can reason informally about this fact as follows: we can use the stack of a pushdown automaton to count $n$ \texttt{a}s and match these symbols to $n$ \texttt{b}s, but after this point we can no longer use the stack to count an equal number of \texttt{c}s.
+\end{proof}
+\end{theorem}
+
+\begin{remark}
+In the following section, we will formally prove that the language $L_{1} \cap L_{2} = \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n} \mid n \geq 0\}$ is non-context-free.
+\end{remark}
+
+\subsubsection*{Complement}
+
+We saw in our study of regular language closure properties that, if closure holds under both union and intersection, then closure must also hold under complement by De Morgan's laws. Since the class of context-free languages is not closed under intersection, it is therefore also not closed under complement.
+
+\begin{theorem}\label{thm:CFLnonclosurecomplement}
+The class of context-free languages is not closed under complement.
+
+\begin{proof}
+Follows as a consequence of non-closure of context-free languages under intersection.
+\end{proof}
+\end{theorem}

@@ -1,0 +1,132 @@
+\section{A Non-Semidecidable Problem for Turing Machines}\label{sec:nonsemidecidableTM}
+
+\firstwords{Now that we know} the membership problem $\mathit{A}_{\TM}$ is semidecidable but not decidable, we can be fairly sure that obtaining a positive decidability result for other Turing machine decision problems is hopeless. After all, if we can't even decide the membership of a word in a Turing machine's language, what other questions about the language can we hope to decide?
+
+In order to crush our spirits even further, let's prove another fact about languages and their relation to Turing machines. Earlier, we showed that the class of decidable languages was a proper subset of the class of semidecidable languages by proving that $\mathit{A}_{\TM}$ is semidecidable, but not decidable. The semidecidable languages are the ``largest" class we've studied thus far in this book. However, semidecidability is not the upper limit when it comes to language classes! We can in fact show via a familiar argument that there exist languages that lie even outside of the class of semidecidable languages.
+
+\begin{theorem}\label{thm:nonsemidecidablelanguages}
+There exist languages that are not semidecidable.
+
+\begin{proof}
+In order for a language to be (at least) semidecidable, it must be recognized by some Turing machine. Recall that we can describe any Turing machine $\mathcal{M}$ with a unique encoding $\langle \mathcal{M} \rangle$. Although there is an infinite number of Turing machines, each of these encodings has a finite length, so we can enumerate them (say, lexicographically). By associating each encoding with a natural number according to that encoding's position in our enumeration, we obtain a bijection between encodings and the set of natural numbers $\mathbb{N}$, which means that the set of all Turing machines is countably infinite.
+
+Now, consider the set of all words over some alphabet $\Sigma$. Again, even though this set is infinite, each of these words has a finite length, so we can enumerate them (say, lexicographically); denote the enumerated set by $\{w_{0}, w_{1}, w_{2}, \dots\}$. From this, we can define languages in terms of the words $w_{i}$ that belong to the language: we represent each language as an infinite-length binary word where the $i$th symbol of the word is \texttt{1} if $w_{i} \in L$, and \texttt{0} otherwise.
+
+However, the set of all languages cannot be countably infinite: by Cantor's diagonal argument, if we could enumerate all of the infinite-length binary words representing every language, then it would be possible to construct a new infinite-length word representing a language not included in our enumeration. Therefore, the set of all languages must be uncountably infinite, and so there must exist languages that are not recognized by any Turing machine.
+\end{proof}
+\end{theorem}
+
+Looking a bit more closely at our proof, we find ourselves confronted by a perhaps-uncomfortable fact: not only do non-semidecidable languages exist, but \emph{uncountably many} non-semidecidable languages exist. Thus, if we were to choose a language uniformly at random from the set of all languages, that language will---in the probabilistic sense---almost never be decidable by any Turing machine. In other words, the probability that a computer can solve the problem corresponding to our randomly chosen language is \emph{zero}!
+
+Theorem~\ref{thm:nonsemidecidablelanguages} is an example of a theorem having a \emph{non-constructive} proof: the proof tells us that there exist languages that are not semidecidable, but it doesn't actually give us an example of such a language. We will, of course, see such an example momentarily, but first we must come up with one more definition.
+
+\subsubsection*{Co-Semidecidability}
+
+The property of semidecidability, at its core, is non-symmetric. Recall the decision problem $\mathit{A}_{\TM}$: we are guaranteed to get an answer in the positive case, if the Turing machine accepts its input, but in the negative case if the Turing machine loops forever, we will never end up with an answer.
+
+What if we wanted to guarantee answers in the negative case, though? Consider how we might define a ``looping" decision problem, where we want to decide whether a Turing machine \emph{will} loop forever on some input. In the positive case, if the Turing machine does in fact loop forever, we will again never end up with an answer. But in the negative case, if the Turing machine halts, we are guaranteed to get an answer! We can't reasonably call this new decision problem semidecidable, since its behaviour doesn't line up with our definition of semidecidability. We need some new terminology.
+
+Let $\overline{L}$ denote the complement of a language $L$. If we know something about this language $L$---namely, that it is semidecidable---then we can draw a straightforward conclusion about the complement of this language.
+
+\begin{definition}[Co-semidecidable language]\label{def:cosemidecidablelanguage}
+If a language $L$ is semidecidable, then we say that the complement of this language, $\overline{L}$, is co-semidecidable. \medskip
+
+\noindent
+Alternatively, given a Turing machine $\mathcal{M}$, we say that the language $L(\mathcal{M})$ is co-semidecidable if,
+\begin{itemize}
+\item whenever $w \in L(\mathcal{M})$, then either $\mathcal{M}$ accepts $w$ or $\mathcal{M}$ enters an infinite loop; and
+\item whenever $w \not\in L(\mathcal{M})$, then $\mathcal{M}$ rejects $w$.
+\end{itemize}
+\end{definition}
+
+Observe that the definition of co-semidecidability takes the non-symmetric definition of semidecidability and flips it around: now, we are guaranteed an answer in the negative case when $w \not\in L(\mathcal{M})$, whereas semidecidability guaranteed us an answer in the positive case when $w \in L(\mathcal{M})$.
+
+\begin{dangerous}
+Saying that $\overline{L}$ is co-semidecidable is another way of saying that we can \emph{\ul{semidecide}} the \emph{\ul{co}}mplement of $\overline{L}$; that is, we can semidecide $\overline{\overline{L}} = L$.
+\end{dangerous}
+
+One might wonder, if we have a Turing machine that semidecides some language $L$, whether we need a separate Turing machine to co-semidecide $\overline{L}$? In fact, we don't always need a new machine: the original language $L$ and the language of all words \emph{not} in the complement language $\overline{L}$ are one and the same. (Think about why this is the case.) Thus, if we want to, we can use the existing Turing machine $\mathcal{M}$ that semidecides $L$ also to co-semidecide $\overline{L}$: if $\mathcal{M}$ accepts some input, then we know that input cannot belong to $\overline{L}$, and so we can treat it as if it were rejected.
+
+Going a step further, if we know something about the co-semidecidability of a language, does this say anything about the semidecidability of the same language? By Definition~\ref{def:cosemidecidablelanguage}, we know that $\overline{L}$ is co-semidecidable whenever $L$ is semidecidable, but this in itself does not suggest or imply that $\overline{L}$ is semidecidable. If we could further show that $\overline{L}$ were also semidecidable, then $L$ would be co-semidecidable, again by our definition. In this situation where $L$ is both semidecidable and co-semidecidable, we can ``upgrade" the class to which $L$ belongs.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, thick, fill=\fourthcolour, rounded corners] (1,-1) rectangle (7.2,3.5);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (2.75,1) rectangle (4.25,2.5);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (2.75,-0.75) rectangle (4.25,0.75);
+
+\node[draw=none, color=\maincolour] at (2,2.85) {\large$\mathcal{M}_{\text{D}}$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center] at (3.5,1.75) {\large$\mathcal{M}_{\text{SD}}$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center] at (3.5,0) {\large$\mathcal{M}_{\text{coSD}}$};
+
+\coordinate (A) at (0.1,0.9);
+\coordinate (B) at (1.5,0.9);
+\coordinate (C) at (2,1.75);
+\coordinate (D) at (2,0);
+\coordinate (E) at (2.75,1.75);
+\coordinate (F) at (2.75,0);
+\draw[-latex, color=\maincolour, thick] (A) -- (B) -- (C) -- (E);
+\draw[-latex, color=\maincolour, thick] (A) -- (B) -- (D) -- (F);
+\node[draw=none, color=\maincolour] at (0.5,1.2) {\footnotesize$w$};
+
+\coordinate (G) at (4.25,1.75);
+\coordinate (H) at (4.25,0);
+\coordinate (I) at (9.7,1.75);
+\coordinate (J) at (9.7,0);
+\draw[-latex, color=\maincolour, thick] (G) -- (I);
+\draw[-latex, color=\maincolour, thick] (H) -- (J);
+\node[draw=none, color=\maincolour] at (5.7,2.15) {\footnotesize$\mathcal{M}_{\text{SD}}$ accepts $w$};
+\node[draw=none, color=\maincolour] at (5.7,0.35) {\footnotesize$\mathcal{M}_{\text{coSD}}$ accepts $w$};
+\node[draw=none, color=\maincolour] at (8.5,2.15) {\footnotesize$\mathcal{M}_{\text{D}}$ accepts $w$};
+\node[draw=none, color=\maincolour] at (8.5,0.35) {\footnotesize$\mathcal{M}_{\text{D}}$ rejects $w$};
+\end{tikzpicture}
+\caption{The Turing machine $\mathcal{M}_{\text{D}}$ from the proof of Theorem~\ref{thm:decidablesemidecidable}}
+\label{fig:decidablesemidecidableproofMD}
+\end{figure}
+
+\begin{theorem}\label{thm:decidablesemidecidable}
+A language $L$ is decidable if and only if $L$ is both semidecidable and co-semidecidable.
+
+\begin{proof}
+$(\Rightarrow)$: Suppose $L$ is decidable. Since all decidable languages are also semidecidable, we have that $L$ is semidecidable. If we take the Turing machine deciding $L$ and exchange the accepting and rejecting outputs, then we get a machine that decides $\overline{L}$. Thus, $\overline{L}$ is semidecidable, and so $L$ is co-semidecidable.
+
+$(\Leftarrow)$: Suppose $L$ is both semidecidable and co-semidecidable. Then there exists a Turing machine $\mathcal{M}_{\text{SD}}$ semideciding $L$ and a Turing machine $\mathcal{M}_{\text{coSD}}$ co-semideciding $L$. Using these two Turing machines, we can construct a Turing machine $\mathcal{M}_{\text{D}}$ that takes as input a word $w$ and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\text{D}}$}{
+\begin{enumerate}
+\item Run both $\mathcal{M}_{\text{SD}}$ and $\mathcal{M}_{\text{coSD}}$ on the input word $w$ in parallel.
+\item If $\mathcal{M}_{\text{SD}}$ accepts, then accept. If $\mathcal{M}_{\text{coSD}}$ accepts, then reject.
+\end{enumerate}
+}
+\noindent
+Figure~\ref{fig:decidablesemidecidableproofMD} depicts the behaviour of $\mathcal{M}_{\text{D}}$ visually.
+
+Since every word $w$ must belong to either $L$ or $\overline{L}$, either $\mathcal{M}_{\text{SD}}$ or $\mathcal{M}_{\text{coSD}}$ must accept $w$. Moreover, since $\mathcal{M}_{\text{D}}$ halts whenever either $\mathcal{M}_{\text{SD}}$ or $\mathcal{M}_{\text{coSD}}$ accepts, we have that $\mathcal{M}_{\text{D}}$ decides $L$, and so $L$ is decidable.
+\end{proof}
+\end{theorem}
+
+\subsubsection*{The Non-membership Problem}
+
+To motivate our study of co-semidecidability, we considered a ``looping" decision problem, but our formulation of this problem was rather ad hoc and imprecise. Since co-semidecidability is fundamentally a property of the complement of a language, let's further motivate our study by taking an existing decision problem that we have already formally defined and studying its complement. Namely, consider the Turing machine ``non-membership" problem:
+\begin{align*}
+\overline{\mathit{A}_{\TM}} = \{\langle \mathcal{M}, w \rangle \mid \ & \mathcal{M} \text{ is a Turing machine that} \\[-0.2em]
+	&\text{ does \emph{not} accept input word } w\}.
+\end{align*}
+
+Taking all that we know about decidability, we can say that a decidable problem is one where we can always obtain an answer for both the problem itself and for the complement of the problem. Because both $\mathit{A}_{\DFA}$ and $\mathit{A}_{\CFG}$ are decidable, their Turing machines always halt and either accept or reject any input word given to them. This means that the corresponding ``non-membership" problems $\overline{\mathit{A}_{\DFA}}$ and $\overline{\mathit{A}_{\CFG}}$ are also decidable, since we can use the same Turing machines to decide these problems by exchanging accept and reject outputs, and so studying these complementary decision problems isn't too interesting. The Turing machine ``non-membership" problem $\overline{\mathit{A}_{\TM}}$, on the other hand, is different, since $\mathit{A}_{\TM}$ is only semidecidable. A semidecidable problem is one where we can always obtain an answer for the problem itself, but not necessarily for the complement of the problem. Thus, it makes sense for us to study $\overline{\mathit{A}_{\TM}}$ independently of $\mathit{A}_{\TM}$.
+
+So, what is the decidability status of $\overline{\mathit{A}_{\TM}}$? Instead of approaching a proof from first principles, as we did in showing that $\mathit{A}_{\TM}$ was undecidable, we will use a different (and easier!) approach with $\overline{\mathit{A}_{\TM}}$ that focuses on what we already know about $\mathit{A}_{\TM}$.
+
+Since Theorem~\ref{thm:ATMsemidecidable} tells us that $\mathit{A}_{\TM}$ is semidecidable, we know that $\overline{\mathit{A}_{\TM}}$ is co-semidecidable by Definition~\ref{def:cosemidecidablelanguage}. However, if $\overline{\mathit{A}_{\TM}}$ were also semidecidable, then Definition~\ref{def:cosemidecidablelanguage} would likewise tell us that $\mathit{A}_{\TM}$ is co-semidecidable, and this would present quite a problem! Therefore, we can conclude the following.
+
+\begin{theorem}\label{thm:coATMnotsemidecidable}
+$\overline{\mathit{A}_{\TM}}$ is not semidecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\overline{\mathit{A}_{\TM}}$ is semidecidable. Then $\mathit{A}_{\TM}$ would be co-semidecidable, and by Theorem~\ref{thm:decidablesemidecidable}, $\mathit{A}_{\TM}$ would be decidable, which contradicts Theorem~\ref{thm:ATMundecidable}.
+\end{proof}
+\end{theorem}
+
+This theorem reveals a remarkable fact: $\overline{\mathit{A}_{\TM}}$ is not only undecidable as we might expect, but it's also non-semidecidable, and so it lies in an entirely different part of our language hierarchy!
+
+As we observed at the beginning of the section, uncountably many non-semidecidable languages exist, and so we shouldn't be too surprised by the fact that we found an example of such a language. In the next chapter, we'll see a number of other examples of languages that are neither decidable nor semidecidable; in some cases, these languages are co-semidecidable, while in other cases, not even co-semidecidability holds.

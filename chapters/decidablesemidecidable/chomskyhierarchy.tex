@@ -1,0 +1,75 @@
+\section{The Chomsky Hierarchy}\label{sec:chomskyhierarchy}
+
+\begin{construction}
+I plan to expand this short section about the Chomsky hierarchy to tie together all that we have learned about language classes and models of computation.
+\end{construction}
+
+The Chomsky hierarchy was initially proposed by Noam Chomsky~\citeyearpar{Chomsky1956ThreeModels, Chomsky1959FormalPropertiesGrammars} and further refined in Chomsky's joint work with the mathematician Marcel-Paul Sch\"{u}tzenberger~\citeyearpar{ChomskySchutzenberger1963ContextFree}. There are two major differences between the hierarchy we developed and Chomsky's hierarchy: in our hierarchy, we included the class of finite languages as a subset of the regular languages, while Chomsky's hierarchy includes the class of \emph{context-sensitive languages} that we briefly discussed, but otherwise left aside.
+
+\begin{table}
+\centering
+\caption{The Chomsky hierarchy}
+\label{tab:chomskyhierarchy}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Language class}	& \textbf{Model of computation}		& \textbf{Grammar} \\
+\midrule
+Recursively enumerable	& Turing machines				& Type 0 \\
+Context-sensitive		& Linear-bounded automata		& Type 1 \\
+Context-free			& Pushdown automata			& Type 2 \\
+Regular				& Finite automata				& Type 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\maincolour, fill=\maincolour, thick, rounded corners, shift={(2,1)}] (-5.5,-3.2) rectangle (4.875,6.3);
+\draw[draw=\maincolour, pattern=north east lines, pattern color=\maincolour, thick, dashed, rounded corners, shift={(2,1)}] (-4.875,-4.7) rectangle (5.5,4.8);
+\fill[\secondcolour, draw=\secondcolour, thick, shift={(2,1)}] (-4.875,-3.2) {[rounded corners] -- (4.875,-3.2)} -- (4.875,4.8) {[rounded corners] -- (-4.875,4.8)} -- cycle {};
+\draw[white, thick, shift={(2,1)}] (4.875,4.8) {[rounded corners] -- (-4.875,4.8) -- (-4.875,-3.2)} {};
+\draw[draw=\thirdcolour, fill=\thirdcolour, thick, rounded corners, shift={(2,1)}] (-4.25,-2.6) rectangle (4.25,3.4);
+\draw[draw=\fourthcolour, fill=\fourthcolour, thick, rounded corners, shift={(2,1)}] (-3,-2) rectangle (3,2);
+\draw[draw=\fifthcolour, fill=\fifthcolour, thick, rounded corners, shift={(2,1)}] (-1.75,-1.4) rectangle (1.75,0.6);
+
+\node[color=\maincolour] at (2,1.15) {Finite Languages};
+\node[color=\maincolour] at (2,0) {\textit{Acyclic DFAs}};
+\node[color=black] at (1,0.6) {$\{\epsilon\}$};
+\node[color=black] at (2,0.6) {$\{a\}$};
+\node[color=black] at (3,0.6) {$\emptyset$};
+
+\node[color=\maincolour] at (2,2.6) {Regular Languages};
+\node[color=\maincolour] at (2,-0.667) {\textit{Finite Automata}};
+\node[color=black] at (-0.35,1.25) {$\Sigma^{*}$};
+\node[color=black] at (0.25,2) {$\texttt{a} \cup \texttt{ba}$};
+\node[color=black] at (2,2) {$\{\texttt{a}, \texttt{b}\}^{*}\texttt{c}$};
+\node[color=black] at (3.75,2) {$\texttt{01}^{*} \cup \texttt{1}$};
+\node[color=black] at (4.35,1.25) {$\texttt{a}^{n}$};
+
+\node[color=\maincolour] at (2,4) {Context-Free Languages};
+\node[color=\maincolour] at (2,-1.3) {\textit{Pushdown Automata}};
+\node at (-1.6,1.5) {$w\overline{w}$};
+\node at (-1.6,2.5) {$L_{\texttt{()}}$};
+\node at (-0.75,3.5) {$L_{a>b}$};
+\node at (1.1,3.5) {$\texttt{a}^{n}\texttt{b}^{n}$};
+\node at (2.9,3.5) {$\texttt{a}^{i}\texttt{\#}\texttt{b}^{i}$};
+\node at (4.75,3.5) {$ww^{\text{R}}$};
+\node at (5.65,2.5) {$\texttt{a}^{i}\texttt{b}^{j}\texttt{c}^{k}$};
+\node at (5.62,2) {{\footnotesize$(i=j \text{ or}$}};
+\node at (5.65,1.65) {{\footnotesize$j=k)$}};
+
+\node[color=white] at (2,5.4) {Decidable Languages};
+\node[color=white] at (2,-1.925) {\textit{Halting Turing Machines}};
+\node[color=white] at (0.25,4.85) {$w\#w$};
+\node[color=white] at (3.75,4.85) {$\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n}$};
+
+\node[color=white] at (2,6.8) {Semidecidable Languages};
+\node[color=white] at (2,6.35) {\textit{Turing Machines}};
+
+\node[color=\maincolour, fill=white, inner sep=2pt, rounded corners=2pt] at (2,-2.75) {Co-Semidecidable Languages};
+\node[color=\maincolour, fill=white, inner sep=2pt, rounded corners=2pt] at (2,-3.2) {\textit{Turing Machines}};
+\end{tikzpicture}
+\caption{Our hierarchy of language classes and models of computation, based on the Chomsky hierarchy}
+\label{fig:chomskyhierarchy}
+\end{figure}

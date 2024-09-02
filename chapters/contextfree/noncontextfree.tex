@@ -1,0 +1,234 @@
+\section{Proving a Language is Non-Context-Free}\label{sec:noncontextfree}
+
+\firstwords{At the end} of our discussion on regular languages, we saw that there exist certain languages that are nonregular, and we also saw that we can prove a language is nonregular by using the pumping lemma. One of the biggest obstacles we observed that results in a language being nonregular was, broadly speaking, having to count or otherwise keep track of symbols. Fortunately, by augmenting our machine model with a stack and creating a pushdown automaton, we were able to overcome this obstacle. Surely, this means that we can now recognize any language we want, right?
+
+Well, not exactly. While the stack goes a long way in helping us to recognize more than just the class of regular languages, it isn't the magic solution we need in order to recognize \emph{any} language. Consider, for example, the language
+\begin{equation*}
+L_{\text{a}=\text{b}=\text{c}} = \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n} \mid n \geq 0\}.
+\end{equation*}
+We know that a pushdown automaton can accept words of the form $\texttt{a}^{n}\texttt{b}^{n}$ by pushing one symbol to the stack for each \texttt{a} that is read, and then popping one symbol from the stack for each \texttt{b} that is read. When it comes to recognizing words of the form $\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n}$, however, we run into a problem: after we read all of the \texttt{b}s in the word, our stack will be empty and we will therefore have forgotten the value of $n$ by the time we have to count the \texttt{c}s! We also can't cheat our way around this problem by, for example, pushing two symbols to the stack for each \texttt{a} we read; if we try that, then reading either \texttt{b} or \texttt{c} would require us to pop the same symbol, and we can draw a conclusion that such an approach would result in the pushdown automaton accidentally accepting words where \texttt{b}s and \texttt{c}s are either out of order or having mismatched counts.
+
+Thus, there do indeed exist languages that are not context-free, and so we require a technique to prove the non-context-freeness of a language. Fortunately, we're mostly familiar with such a technique already: the pumping lemma for regular languages is a special case of the more general pumping lemma for context-free languages.
+
+\subsection{The Pumping Lemma for Context-Free Languages}
+
+You might be wondering at this point what we mean by the pumping lemma for regular languages being a ``special case". Since regular languages are, in a sense, simpler than context-free languages, our formulation of the pumping lemma for regular languages was accordingly simpler: pumping the middle portion of any sufficiently long word in a regular language results in us obtaining another word that also belongs to the language. Pumping this middle portion of the word essentially corresponds to us traversing a loop somewhere in the finite automaton recognizing the language.
+
+With context-free languages, however, we can't just pump one portion of the word. To understand why not, recall that we can represent the derivation of a word in a context-free language using a parse tree. If our word is sufficiently long, then the parse tree will be rather deep. Then, since we have only a finite number of both rules and nonterminal symbols, the pigeonhole principle tells us that there must exist some path from the root of the parse tree to a leaf of the parse tree where some nonterminal symbol $R$ appears more than once along that path.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[relative]
+\draw (0,0) -- (3,-3) -- (-3,-3) -- cycle;
+\draw[fill=\fifthcolour] (0,-1) -- (2,-3) -- (-2,-3) -- cycle;
+\draw[fill=\fourthcolour] (0,-2) -- (1,-3) -- (-1,-3) -- cycle;
+
+\draw[fill=white] (0,0) circle [radius=0.3] node (S) {$S$};
+\draw[fill=white] (0,-1) circle [radius=0.3] node (R1) {$R$};
+\draw[fill=white] (0,-2) circle [radius=0.3] node (R2) {$R$};
+
+\node[anchor=north] at (-2.5, -3.15) {$u$};
+\node[anchor=north] at (-1.5, -3.15) {\color{\secondcolour}$v$};
+\node[anchor=north] at (0, -3.15) {\color{\maincolour}$x$};
+\node[anchor=north] at (1.5, -3.15) {\color{\secondcolour}$y$};
+\node[anchor=north] at (2.5, -3.15) {$z$};
+
+\draw[dashed, thick, color=\maincolour] (S.240) to[out=-60, in=100] (R1.40);
+\draw[dashed, thick, color=\maincolour] (R1.290) to[out=100, in=-60] (R2.130);
+\draw[dashed, thick, color=\maincolour] (R2.290) to[out=20, in=180] (0,-3);
+
+\draw[fill=white] (0,0) circle [radius=0.3] node {$S$};
+\draw[fill=\maincolour] (0,-1) circle [radius=0.3] node {\color{white}$R$};
+\draw[fill=\maincolour] (0,-2) circle [radius=0.3] node {\color{white}$R$};
+\end{tikzpicture}
+\caption{A path through a parse tree that visits some nonterminal symbol $R$ more than once}
+\label{fig:pumpingparsetree}
+\end{figure}
+
+\begin{remark}
+``Sufficiently long" in this context is measured in terms of both the maximum number of symbols on the right-hand side of any rule of the context-free grammar and the size of the set of nonterminal symbols.
+\end{remark}
+
+Suppose that we decompose our word $w$ not into three parts as we did with the regular languages, but into five parts, denoted $uvxyz$. This decomposition, represented as a parse tree, is shown in Figure~\ref{fig:pumpingparsetree}. Considering the subtree rooted at the first occurrence of $R$, we can regard everything ``outside of" this subtree as the $u$ and $z$ portions of the word, while everything ``inside of" this subtree comprises the $vxy$ portion of the word. Since we know that $R$ reappears at some point within this subtree, we can further consider the subtree rooted at the second occurrence of $R$, where everything ``inside of" this subtree is the middle $x$ portion of the word. Observe that we can repeat the first subtree rooted at $R$ as many times as we want by appending the subtree to some later occurrence of $R$. In doing this, we are effectively pumping the segment of the subtree ``between" both occurrences of $R$ when we perform this repetition; that is, we are pumping the $v$ and $y$ portions of the word together, as depicted in Figure~\ref{fig:pumpingparsetreepumped}.
+
+\begin{figure}
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[relative]
+\draw (0,0) -- (3,-3) -- (-3,-3) -- cycle;
+\draw (0,-1) -- (2,-3) -- (-2,-3) -- cycle;
+\draw[fill=\fourthcolour] (0,-1) -- (1,-2) -- (-1,-2) -- cycle;
+
+\draw[color=white, thick] (-1.98,-3) -- (1.98,-3);
+
+\draw[fill=white] (0,0) circle [radius=0.3] node (S) {$S$};
+\draw[fill=white] (0,-1) circle [radius=0.3] node (R2) {$R$};
+
+\node[anchor=north] at (-2.5, -3.15) {$u$};
+\node[anchor=north] at (0, -2.15) {\color{\maincolour}$x$};
+\node[anchor=north] at (2.5, -3.15) {$z$};
+
+\draw[dashed, thick, color=\maincolour] (S.240) to[out=-60, in=100] (R1.40);
+\draw[dashed, thick, color=\maincolour] (R2.290) to[out=20, in=180] (0,-2);
+
+\draw[fill=white] (0,0) circle [radius=0.3] node {$S$};
+\draw[fill=\maincolour] (0,-1) circle [radius=0.3] node {\color{white}$R$};
+\end{tikzpicture}
+\caption{``Pumping" the parse subtree rooted at $R$ zero times}
+\end{subfigure}
+
+\bigskip
+
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[relative]
+\draw (0,0) -- (3,-3) -- (-3,-3) -- cycle;
+\draw[fill=\fifthcolour] (0,-1) -- (2,-3) -- (-2,-3) -- cycle;
+\draw[fill=\fourthcolour] (0,-2) -- (1,-3) -- (-1,-3) -- cycle;
+
+\draw[fill=white] (0,0) circle [radius=0.3] node (S) {$S$};
+\draw[fill=white] (0,-1) circle [radius=0.3] node (R1) {$R$};
+\draw[fill=white] (0,-2) circle [radius=0.3] node (R2) {$R$};
+
+\node[anchor=north] at (-2.5, -3.15) {$u$};
+\node[anchor=north] at (-1.5, -3.15) {\color{\secondcolour}$v$};
+\node[anchor=north] at (0, -3.15) {\color{\maincolour}$x$};
+\node[anchor=north] at (1.5, -3.15) {\color{\secondcolour}$y$};
+\node[anchor=north] at (2.5, -3.15) {$z$};
+
+\draw[dashed, thick, color=\maincolour] (S.240) to[out=-60, in=100] (R1.40);
+\draw[dashed, thick, color=\maincolour] (R1.290) to[out=100, in=-60] (R2.130);
+\draw[dashed, thick, color=\maincolour] (R2.290) to[out=20, in=180] (0,-3);
+
+\draw[fill=white] (0,0) circle [radius=0.3] node {$S$};
+\draw[fill=\maincolour] (0,-1) circle [radius=0.3] node {\color{white}$R$};
+\draw[fill=\maincolour] (0,-2) circle [radius=0.3] node {\color{white}$R$};
+\end{tikzpicture}
+\caption{``Pumping" the parse subtree rooted at $R$ one time}
+\end{subfigure}
+
+\bigskip
+
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[relative]
+\draw (0,0) -- (3,-3) -- (-3,-3) -- cycle;
+\draw[fill=\fifthcolour] (0,-1) -- (2,-3) -- (-2,-3) -- cycle;
+\draw[fill=\fifthcolour] (0,-2) -- (2,-4) -- (-2,-4) -- cycle;
+\draw[fill=\fourthcolour] (0,-3) -- (1,-4) -- (-1,-4) -- cycle;
+
+\draw[fill=white] (0,0) circle [radius=0.3] node (S) {$S$};
+\draw[fill=white] (0,-1) circle [radius=0.3] node (R1) {$R$};
+\draw[fill=white] (0,-2) circle [radius=0.3] node (R2) {$R$};
+\draw[fill=white] (0,-3) circle [radius=0.3] node (R3) {$R$};
+
+\node[anchor=north] at (-2.5, -3.15) {$u$};
+\node[anchor=north] at (-1.7, -3.15) {\color{\secondcolour}$v$};
+\node[anchor=north] at (-1.5, -4.15) {\color{\secondcolour}$v$};
+\node[anchor=north] at (0, -4.15) {\color{\maincolour}$x$};
+\node[anchor=north] at (1.5, -4.15) {\color{\secondcolour}$y$};
+\node[anchor=north] at (1.7, -3.15) {\color{\secondcolour}$y$};
+\node[anchor=north] at (2.5, -3.15) {$z$};
+
+\draw[dashed, thick, color=\maincolour] (S.240) to[out=-60, in=100] (R1.40);
+\draw[dashed, thick, color=\maincolour] (R1.290) to[out=100, in=-60] (R2.130);
+\draw[dashed, thick, color=\maincolour] (R2.290) to[out=100, in=-60] (R3.130);
+\draw[dashed, thick, color=\maincolour] (R3.290) to[out=20, in=180] (0,-4);
+
+\draw[fill=white] (0,0) circle [radius=0.3] node {$S$};
+\draw[fill=\maincolour] (0,-1) circle [radius=0.3] node {\color{white}$R$};
+\draw[fill=\maincolour] (0,-2) circle [radius=0.3] node {\color{white}$R$};
+\draw[fill=\maincolour] (0,-3) circle [radius=0.3] node {\color{white}$R$};
+\end{tikzpicture}
+\caption{``Pumping" the parse subtree rooted at $R$ two times}
+\end{subfigure}
+\caption{Three examples of the pumping lemma for context-free languages applied to the parse tree depicted in Figure~\ref{fig:pumpingparsetree}}
+\label{fig:pumpingparsetreepumped}
+\end{figure}
+
+With this idea in mind, the formal statement of the pumping lemma for context-free languages is quite similar to that of the pumping lemma for regular languages, modulo the appropriate changes.
+
+\begin{lemma}[Pumping lemma for context-free languages]\label{lem:pumpingcontextfree}
+For all context-free languages $L$, there exists $p \geq 1$ where, for all $w \in L$ with $|w| \geq p$, there exists a decomposition of $w$ into five parts $w = uvxyz$ such that
+\begin{enumerate}
+\item $|vy| > 0$;
+\item $|vxy| \leq p$; and
+\item for all $i \geq 0$, $uv^{i}xy^{i}z \in L$.
+\end{enumerate}
+\end{lemma}
+
+\begin{construction}
+I plan on adding a little more motivation for the proof here, before we jump right into the fine details.
+\end{construction}
+
+\begin{proofbox}[Lemma~\ref{lem:pumpingcontextfree}]
+Let $G = (V, \Sigma, R, S)$ be a context-free grammar such that $L(G) = L$, and let $b \geq 2$ denote the \emph{branching factor} of $G$; that is, the maximum number of terminal and nonterminal symbols occurring on the right-hand side of any rule of $G$. If the height of some parse tree of $G$ is $h$, then the length of any word derived using that parse tree will be at most $b^{h}$.
+
+Let $n = |V|$ denote the number of nonterminal symbols of $G$, and take $p = b^{n + 1}$. By our earlier observation, any word generated by $G$ whose parse tree contains no path with a repeated nonterminal must have length at most $b^{n}$. Moreover, since $b \geq 2$, we must have that $b^{n+1} > b^{n}$.
+
+Let $w$ be any word in $L(G)$ where $|w| \geq p$, and let $T$ be a parse tree for $w$ of minimal size. We know, again by our earlier observation, that $T$ must have a height of at least $n + 1$. Choose some path in $T$ with length at least $n + 1$, and take $R$ to be the deepest nonterminal in the parse tree that occurs more than once in this path.
+
+Decompose the word $w$ into five parts, $uvxyz$, such that the subtree rooted at the upper occurrence of $R$ has height at most $n + 1$ and the parts $u$ and $z$ are outside of the subtree rooted at the upper occurrence of $R$. We must have that $|vy| > 0$, since otherwise there would exist a smaller parse tree for $w$, which contradicts our assumption that $T$ was of minimal size. Furthermore, the yield of this subtree, $vxy$, is a subword with length at most $p = b^{n + 1}$. Finally, the word $uxz$ is in $L$ since we could replace the subtree rooted at the upper occurrence of $R$ with the subtree rooted at the lower occurrence of $R$ that yields only the part $x$, and for $i \geq 1$, all words of the form $uv^{i}xy^{i}z$ are in $L$ since we can place copies of the subtree rooted at the upper occurrence of $R$ at each subsequent occurrence of $R$. Therefore, all three conditions of the pumping lemma are satisfied.
+\end{proofbox}
+
+\subsubsection*{Using the Pumping Lemma}
+
+Just like before, we can write a proof that some language is non-context-free by simply following a common set of steps. As a consequence, all non-context-freeness proofs share a similar structure. To see such an example of a proof, let's revisit the language we introduced at the beginning of this section.
+
+\begin{example}
+Let $\Sigma = \{\texttt{a}, \texttt{b}, \texttt{c}\}$, and consider the language
+\begin{equation*}
+L_{\text{a}=\text{b}=\text{c}} = \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n} \mid n \geq 0\}.
+\end{equation*}
+We will use the pumping lemma to show that this language is non-context-free.
+
+Assume by way of contradiction that the language is context-free, and let $p$ denote the pumping constant given by the pumping lemma. We choose the word $w = \texttt{a}^{p}\texttt{b}^{p}\texttt{c}^{p}$. Clearly, $w \in L_{\text{a}=\text{b}=\text{c}}$ and $|w| \geq p$. Thus, there exists a decomposition $w = uvxyz$ satisfying the three conditions of the pumping lemma.
+
+Observe that the first condition of the pumping lemma requires that \emph{either} part $v$ or part $y$ is nonempty; potentially both could be nonempty. We consider two cases, depending on the contents of the parts $v$ and $y$ of the word $w$:
+\begin{enumerate}
+\item Both part $v$ and part $y$ contain some number of a single alphabet symbol; that is, $v$ contains only \texttt{a}s, only \texttt{b}s, or only \texttt{c}s, and likewise for $y$. (Note that $v$ and $y$ do not need to contain the \emph{same} alphabet symbol; for example, $v$ could contain only \texttt{a}s and $y$ could contain only \texttt{b}s.)
+
+In this case, pumping $v$ and $y$ once to obtain the word $uv^{2}xy^{2}z$ results in the word containing unequal numbers of \texttt{a}s, \texttt{b}s, and \texttt{c}s. This violates the third condition of the pumping lemma.
+
+\item Either part $v$ or part $y$ contains some number of multiple alphabet symbols; that is, either $v$ or $y$ contains both \texttt{a}s and \texttt{b}s, or both \texttt{b}s and \texttt{c}s.
+
+In this case, pumping $v$ and $y$ once to obtain the word $uv^{2}xy^{2}z$ results in the word containing symbols out of order. This violates the third condition of the pumping lemma.
+\end{enumerate}
+
+In all cases, one of the conditions of the pumping lemma is violated. As a consequence, the language cannot be context-free.
+\end{example}
+
+By a similar line of reasoning, we can show that the language
+\begin{equation*}
+L_{\text{a}=\text{c}/\text{b}=\text{d}} = \{\texttt{a}^{n}\texttt{b}^{m}\texttt{c}^{n}\texttt{d}^{m} \mid m, n \geq 1\}
+\end{equation*}
+is non-context-free, since there's no way for us to separate the counts of \texttt{a}s/\texttt{c}s and \texttt{b}s/\texttt{d}s using only one stack.
+
+Recall that, before, we used the pumping lemma for regular languages to show that the language $L_{\text{pal}} = \{ww^{\text{R}} \mid w \in \Sigma^{*}\}$ was nonregular. We can easily show that the language of palindromes is context-free. However, suppose we modify the language of palindromes so that the reversed occurrence of the word $w$ is instead just a repetition of $w$. This ``doubled" language has an almost identical structure to the language of palindromes, but it happens to be non-context-free!
+
+\begin{example}
+Let $\Sigma = \{\texttt{a}, \texttt{b}\}$, and consider the language
+\begin{equation*}
+L_{\text{double}} = \{ww \mid w \in \Sigma^{*}\}.
+\end{equation*}
+We will use the pumping lemma to show that this language is non-context-free.
+
+Assume by way of contradiction that the language is context-free, and let $p$ denote the pumping constant given by the pumping lemma. We choose the word $s = \texttt{a}^{p}\texttt{b}^{p}\texttt{a}^{p}\texttt{b}^{p}$. Clearly, $s \in L_{\text{double}}$ and $|s| \geq p$. Thus, there exists a decomposition $s = uvxyz$ satisfying the three conditions of the pumping lemma.
+
+Observe that the second condition of the pumping lemma requires that $|vxy| \leq p$. Here, we will consider two cases, depending on the contents of the middle portion $vxy$ of the word $s$:
+\begin{enumerate}
+\item If $vxy$ occurs entirely within the first half of $s$ (that is, within the first occurrence of $\texttt{a}^{p}\texttt{b}^{p}$), then as a consequence of the fact that $|vxy| \leq p$, we must have one of the following subcases: $vxy$ contains all \texttt{a}s, $vxy$ contains all \texttt{b}s, or $vxy$ contains both \texttt{a}s and \texttt{b}s, where all \texttt{a}s occur before \texttt{b}s.
+
+In any of these three subcases, pumping $v$ and $y$ once to obtain the word $uv^{2}xy^{2}z$ results in the first half of the word differing from the second half of the word. We can make an analogous argument if $vxy$ occurs entirely in the second half of $s$. This violates the third condition of the pumping lemma.
+
+\item If $vxy$ straddles both halves of $s$, then $v$ and $y$ must contain different symbols as a consequence of the fact that $|vxy| \leq p$. Pumping $v$ and $y$ down to obtain the word $uv^{0}xy^{0}z = uxz$ results in the first half containing fewer \texttt{b}s than the second half, and the second half containing fewer \texttt{a}s than the first half. This violates the third condition of the pumping lemma.
+\end{enumerate}
+
+In all cases, one of the conditions of the pumping lemma is violated. As a consequence, the language cannot be context-free.
+\end{example}
+
+\futuresubsection{Ogden's Lemma}
+
+\begin{construction}
+Sometimes the pumping lemma fails in that non-context-free languages may satisfy the lemma's conditions (see, e.g., \citet{Wise1976StrongPumpingLemmaCFLs} and \citet{Horvath1978LanguagesSatisfyingBarHillel}). Ogden's lemma~\citeyearpar{Ogden1968ProvingInherentAmbiguity} is a stronger formulation of the pumping lemma and, although it is still imperfect (see, e.g., \citet{Boasson1978LanguagesSatisfyingOgdensLemma}, \citet{BaderMoura1982GeneralizationOgdensLemma}, and \citet{Kracht2004TooManyLanguagesOgden}), it allows us to establish non-context-freeness for more languages as well as to prove inherent ambiguity rather more easily.
+\end{construction}

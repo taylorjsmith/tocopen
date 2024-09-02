@@ -1,0 +1,179 @@
+\section{Universal Turing Machines}\label{sec:universalturingmachines}
+
+\firstwords{Up to now}, we have had to construct different specific Turing machines for each language we wished to recognize. In fact, we have had to construct specific machines for \emph{every} language we wished to recognize in this course, whether that machine be a finite automaton, or a pushdown automaton, or indeed, a Turing machine.
+
+However, we know that Turing machines are capable of performing quite complicated computations, and we know also that we can construct Turing machines that can simulate the computations of other variant Turing machines. What if we took this idea and generalized it as much as possible? That is, what if we constructed some Turing machine that could simulate the computation of \emph{any} other Turing machine?
+
+Alan Turing considered this exact idea in the paper that introduced the model of computation that would eventually be named after him. Turing described the process of constructing a machine $\mathcal{U}$ that is capable of simulating the computation of any other machine $\mathcal{M}$, so long as we give an appropriate encoding of $\mathcal{M}$ as part of the input to $\mathcal{U}$: \par
+\epigraph{It is possible to invent a single machine which can be used \par
+to compute any computable sequence. If this machine U \par
+is supplied with a tape on the beginning of which is written \par
+the S.D.\ [standard description] of some computing machine M, \par
+then U will compute the same sequence as M.}{Alan Turing}{On Computable Numbers, with an Application to the Entscheidungsproblem}{}
+\vspace{1em}
+\noindent
+Here, like Turing did before us, we will show how to construct such a machine $\mathcal{U}$, which is nowadays called a \emph{universal Turing machine}.
+
+\begin{remark}
+It's important to note that, in this context, ``universal" does not mean that the Turing machine $\mathcal{U}$ can compute \emph{everything}. It only means that $\mathcal{U}$ can compute whatever other Turing machines can compute.
+\end{remark}
+
+The main benefit of having such a machine is that we will no longer have to construct specific Turing machines for each language we consider; now, we can just give a high-level description of the Turing machine's computation, and we can feasibly ``program" the universal Turing machine to perform its computation in a similar way. These high-level descriptions will be quite similar to what we saw in the proofs of Theorems~\ref{thm:NTMDTMequivalent}, \ref{thm:ktapeequivalent}, and \ref{thm:onewayequivalent}, where we simply listed the steps of the machine's computation instead of explicitly writing out each component of the machine.
+
+Suppose that the input we give to our universal Turing machine $\mathcal{U}$ is of the form $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is an encoding of the Turing machine we wish to simulate and $w$ is the input word given to $\mathcal{M}$. Given an input of this form, our machine $\mathcal{U}$ must satisfy three criteria:
+\begin{colouredbox}
+\begin{enumerate}
+\item $\mathcal{U}$ halts its computation on input $\langle \mathcal{M}, w \rangle$ if and only if $\mathcal{M}$ halts its computation on input $w$;
+\item $\mathcal{U}$ enters its accepting state if and only if $\mathcal{M}$ enters its accepting state; and
+\item $\mathcal{U}$ enters its rejecting state if and only if $\mathcal{M}$ enters its rejecting state.
+\end{enumerate}
+\end{colouredbox}
+
+We now go through with the construction of this machine $\mathcal{U}$.
+
+\begin{theorem}
+There exists a universal Turing machine $\mathcal{U}$ that, given an input $\langle \mathcal{M}, w \rangle$, is capable of simulating the computation of a Turing machine $\mathcal{M}$ on an input word $w$.
+
+\begin{proof}
+We will construct $\mathcal{U}$ in the form of a multitape Turing machine, just as we did in our procedure to determinise a nondeterministic Turing machine.
+
+For this construction, we need only three tapes:
+\begin{itemize}
+\item The first tape will initially contain the input $\langle \mathcal{M}, w \rangle$, and after the computation of $\mathcal{U}$ begins, it will simulate the contents of the tape of $\mathcal{M}$.
+\item The second tape will contain the encoding of the machine $\mathcal{M}$.
+\item The third tape will keep track of which state we are currently in during the computation of $\mathcal{M}$ by maintaining the current state as a binary number.
+\end{itemize}
+
+At the beginning of its computation, $\mathcal{U}$ will contain only the input $\langle \mathcal{M}, w \rangle$ on its first tape, and its other two tapes will be blank.
+
+\begin{center}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\hspace*{0.75pt}$\langle$\hspace*{0.75pt}
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}\hspace*{-2pt}\footnotesize$\mathcal{M}$\hspace*{-2.1pt}
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}\hspace*{1.25pt},\hspace*{1.25pt}
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}\hspace*{-1.1pt}$w$\hspace*{-1.1pt}
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}\hspace*{0.75pt}$\rangle$\hspace*{0.75pt}
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}$\blankspace$
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}$\blankspace$
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}$\blankspace$
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}$\blankspace$
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}$\blankspace$
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}$\blankspace$
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}$\blankspace$
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}$\blankspace$
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\end{center}
+
+Now, we can describe how $\mathcal{U}$ simulates the computation of $\mathcal{M}$ on $w$:
+\begin{enumerate}
+\item Initialize the tapes in the following way:
+	\begin{enumerate}
+	\item Transfer the encoding of $\mathcal{M}$ from the first tape to the second tape by writing $\langle \mathcal{M} \rangle$ to the second tape and erasing it from the first tape.
+	\item Read the encoding of $\mathcal{M}$ on the second tape to determine the number of states in $\mathcal{M}$. If $\mathcal{M}$ contains $k$ states, then write $\lceil\log_{2}(k)\rceil$ copies of \texttt{0} to the third tape.
+	
+	\textit{(Remember, the current state is being maintained as a binary number, so we need a logarithmic amount of bits to represent a given state's number $k$.)}
+	\end{enumerate}
+	
+After initialization, the tape will look like the following:
+\begin{center}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}$\blankspace$
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}$\blankspace$
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}\hspace*{0.75pt}$\langle$\hspace*{0.75pt}
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}\hspace*{-1.1pt}$w$\hspace*{-1.1pt}
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}\hspace*{0.75pt}$\rangle$\hspace*{0.75pt}
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\hspace*{0.75pt}$\langle$\hspace*{0.75pt}
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}\hspace*{-2pt}\footnotesize$\mathcal{M}$\hspace*{-2.1pt}
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}\hspace*{0.75pt}$\rangle$\hspace*{0.75pt}
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}$\blankspace$
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\begin{tikzpicture}[tape/.style={fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center}]
+\node[tape=13] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{0}
+\nodepart{four}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{five}\texttt{0}
+\nodepart{six}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{seven}\texttt{0}
+\nodepart{eight}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}\raisebox{1pt}{\makebox[0.52em][c]{.\hfil.\hfil.}}
+\nodepart{eleven}$\blankspace$
+\nodepart{twelve}$\blankspace$
+\nodepart{thirteen}$\cdots$
+};
+\end{tikzpicture}
+\end{center}
+\item Move the input head of the first tape to the first symbol of $w$. Move the input head of the second tape to the first symbol of $\langle \mathcal{M} \rangle$. Move the input head of the third tape to the first symbol of the sequence of \texttt{0}s.
+\item Repeat the following steps until $\mathcal{M}$ halts:
+	\begin{enumerate}
+	\item For each computation step of $\mathcal{M}$, scan the second tape to find a transition that matches the current input symbol and state written on the first and third tapes, respectively.
+	\item Modify the contents of the first and third tapes to reflect the transition that was just taken.
+	\item If no transition exists for the current state/symbol pair, then halt and go to step 4.
+	\end{enumerate}
+\item Transition to $q_{\text{accept}}$ if $\mathcal{M}$ transitioned to its accepting state. Transition to $q_{\text{reject}}$ if $\mathcal{M}$ transitioned to its rejecting state. \qedhere
+\end{enumerate}
+\end{proof}
+\end{theorem}
+
+Let's now verify that this construction does, in fact, satisfy the three criteria we laid out earlier. First, we require that $\mathcal{U}$ halts its computation on input $\langle \mathcal{M}, w \rangle$ if and only if $\mathcal{M}$ halts its computation on input $w$. Since $\mathcal{U}$ uses the description of $\mathcal{M}$ to see what it would do after reading each symbol of $w$, $\mathcal{U}$ behaves in a manner identical to $\mathcal{M}$, and so $\mathcal{U}$ halts on its input if and only if $\mathcal{M}$ also halts on its input. Second, we require that $\mathcal{U}$ accepts if and only if $\mathcal{M}$ accepts, and we see immediately that this happens by Step 4 of the simulation procedure. In fact, $\mathcal{U}$ can't reach its accepting state unless $\mathcal{M}$ has done the same. Third, we require the same behaviour for rejecting inputs, and the argument in this case is nearly identical to the one we had for accepting inputs. Therefore, the universal Turing machine $\mathcal{U}$ satisfies all of our criteria and performs a correct simulation of any other Turing machine we provide as input!

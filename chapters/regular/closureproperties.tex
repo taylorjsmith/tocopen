@@ -1,0 +1,254 @@
+\section{Closure Properties}\label{sec:closurepropertiesregular}
+
+\firstwords{Another important consideration} when we discuss any model of computation is that of \emph{closure properties}, since they allow us to determine whether we can apply certain operations to words or languages while still allowing the same model to accept or recognize the result.
+
+We say that a set $S$ is \emph{closed} under an operation $\circ$ if, given any two elements $a, b \in S$, we have that $a \circ b \in S$ as well. You might be familiar with the notion of closure from elsewhere in mathematics: for example, the set of integers is closed under the operations of addition, subtraction, and multiplication, since for all integers $a$ and $b$, we know that $a + b$, $a - b$, and $a \times b$ are integers. On the other hand, the set of integers is not closed under the operation of division, since (for example) $1, 2 \in \mathbb{Z}$ but $1/2 \not\in \mathbb{Z}$.
+
+We can prove all kinds of closure results for the class of regular languages, but here we will focus only on a few basic operations: the regular operations of union, concatenation, and Kleene star, together with two new set-inspired operations, complement and intersection, which will come in handy later. For each result, we will follow the same general style of proof to establish closure. If the operation $\circ$ is binary, as is the case for union, concatenation, and intersection, then we will take two finite automata $\mathcal{M}$ and $\mathcal{N}$ recognizing languages $L(\mathcal{M})$ and $L(\mathcal{N})$ and directly construct a new finite automaton recognizing the operation language $L(\mathcal{M}) \circ L(\mathcal{N})$. On the other hand, if the operation is unary, as is the case for Kleene star and complement, then we need only take one finite automaton $\mathcal{M}$ recognizing the language $L(\mathcal{M})$ and directly construct a new finite automaton recognizing the operation language $L(\mathcal{M})^{\circ}$.
+
+\subsubsection*{Union}
+
+We begin by considering the union operation. To determine whether some input word belongs to the union of two languages $L(\mathcal{A})$ and $L(\mathcal{B})$, we must check that the word is accepted by either $\mathcal{A}$ or $\mathcal{B}$, or by both. Thus, we must essentially perform two parallel ``subcomputations" for each of these finite automata. This parallelism means we must also incorporate nondeterminism into our computation, since we don't know in advance which of the two finite automata will accept the word.
+
+\begin{theorem}\label{thm:FAclosureunion}
+The class of regular languages is closed under the operation of union.
+
+\begin{proof}
+Suppose we are given two finite automata, denoted $\mathcal{A} = (Q_{\mathcal{A}}, \Sigma, \allowbreak \delta_{\mathcal{A}}, q_{0_{\mathcal{A}}}, F_{\mathcal{A}})$ and $\mathcal{B} = (Q_{\mathcal{B}}, \Sigma, \delta_{\mathcal{B}}, q_{0_{\mathcal{B}}}, F_{\mathcal{B}})$. We construct a nondeterministic finite automaton with epsilon transitions $\mathcal{C}$ recognizing the language $L(\mathcal{A}) \cup L(\mathcal{B})$ in the following way:
+\begin{itemize}
+\item Take $Q_{\mathcal{C}} = Q_{\mathcal{A}} \cup Q_{\mathcal{B}} \cup \{q_{0}\}$.
+\item Take $q_{0_{\mathcal{C}}} = q_{0}$.
+\item Take $F_{\mathcal{C}} = F_{\mathcal{A}} \cup F_{\mathcal{B}}$.
+\item Define $\delta_{\mathcal{C}}$ such that, for all $q \in Q_{\mathcal{C}}$ and for all $a \in \Sigma \cup \{\epsilon\}$,
+\begin{equation*}
+\delta_{\mathcal{C}}(q, a) = 
+\begin{cases}
+\delta_{\mathcal{A}}(q, a)					& \text{if } q \in Q_{\mathcal{A}}; \\
+\delta_{\mathcal{B}}(q, a)					& \text{if } q \in Q_{\mathcal{B}}; \text{ and} \\
+\{q_{0_{\mathcal{A}}}, q_{0_{\mathcal{B}}}\}	& \text{if } q = q_{0} \text{ and } a = \epsilon.
+\end{cases}
+\qedhere
+\end{equation*}
+\end{itemize}
+\end{proof}
+\end{theorem}
+
+The ``union" finite automaton $\mathcal{C}$ is depicted in Figure~\ref{subfig:unionautomaton}. Note that, since we now know that all of our models of finite automata are equivalent to one another (and equivalent to regular expressions), the fact that we used nondeterministic finite automata with epsilon transitions in our proof is irrelevant. We did so mainly because it makes the construction easier on us.
+
+\subsubsection*{Concatenation}
+
+Next, we consider the concatenation operation. To determine whether some input word belongs to the concatenation language $L(\mathcal{A})L(\mathcal{B})$, we again need to perform two ``subcomputations" on both finite automata $\mathcal{A}$ and $\mathcal{B}$, but this time in series. The first part of the word should take us to a final state of $\mathcal{A}$, at which point we will jump to $\mathcal{B}$ to read the remaining second part of the word. However, since we don't know where this ``jumping point" is within the word, we again need nondeterminism to guess when we have reached a final state of $\mathcal{A}$.
+
+\begin{theorem}\label{thm:FAclosureconcatenation}
+The class of regular languages is closed under the operation of concatenation.
+
+\begin{proof}
+Suppose we are given two finite automata, denoted $\mathcal{A} = (Q_{\mathcal{A}}, \Sigma, \allowbreak \delta_{\mathcal{A}}, q_{0_{\mathcal{A}}}, F_{\mathcal{A}})$ and $\mathcal{B} = (Q_{\mathcal{B}}, \Sigma, \delta_{\mathcal{B}}, q_{0_{\mathcal{B}}}, F_{\mathcal{B}})$. We construct a nondeterministic finite automaton with epsilon transitions $\mathcal{C}$ recognizing the language $L(\mathcal{A})L(\mathcal{B})$ in the following way:
+\begin{itemize}
+\item Take $Q_{\mathcal{C}} = Q_{\mathcal{A}} \cup Q_{\mathcal{B}}$.
+\item Take $q_{0_{\mathcal{C}}} = q_{0_{\mathcal{A}}}$.
+\item Take $F_{\mathcal{C}} = F_{\mathcal{B}}$.
+\item Define $\delta_{\mathcal{C}}$ such that, for all $q \in Q_{\mathcal{C}}$ and for all $a \in \Sigma \cup \{\epsilon\}$,
+\begin{equation*}
+\delta_{\mathcal{C}}(q, a) = 
+\begin{cases}
+\delta_{\mathcal{A}}(q, a)							& \text{if } q \in Q_{\mathcal{A}} \text{ and } q \not\in F_{\mathcal{A}}; \\
+\delta_{\mathcal{A}}(q, a)							& \text{if } q \in F_{\mathcal{A}} \text{ and } a \neq \epsilon; \\
+\delta_{\mathcal{A}}(q, a) \cup \{q_{0_{\mathcal{B}}}\}	& \text{if } q \in F_{\mathcal{A}} \text{ and } a = \epsilon; \text{ and} \\
+\delta_{\mathcal{B}}(q, a)							& \text{if } q \in Q_{\mathcal{B}}. \\
+\end{cases}
+\qedhere
+\end{equation*}
+\end{itemize}
+\end{proof}
+\end{theorem}
+
+The ``concatenation" finite automaton $\mathcal{C}$ is depicted in Figure~\ref{subfig:concatenationautomaton}. Again, the fact that we used nondeterministic finite automata with epsilon transitions in this proof does not matter, since any regular language model of computation will work equally well.
+
+\subsubsection*{Kleene Star}
+
+For our next result, pertaining to the Kleene star, we consider just one finite automaton instead of two. However, the construction process is similar to that which we just saw for concatenation. Since the Kleene star is essentially repeated concatenation, upon reaching a final state of the finite automaton $\mathcal{A}$, we will jump backward to allow us to cycle through the computation again if we desire.
+
+There is one technicality, though: we can't jump backward directly to the original initial state of $\mathcal{A}$, since if that initial state has a looping transition, we might be able to mistakenly accept words not in the original language. Thus, we will jump backward to a new state, and from there we can transition to the original initial state of $\mathcal{A}$.
+
+\begin{theorem}\label{thm:FAclosurestar}
+The class of regular languages is closed under the operation of Kleene star.
+
+\begin{proof}
+Suppose we are given a finite automaton, denoted $\mathcal{A} = (Q_{\mathcal{A}}, \Sigma, \delta_{\mathcal{A}}, \allowbreak q_{0_{\mathcal{A}}}, F_{\mathcal{A}})$. We construct a nondeterministic finite automaton with epsilon transitions $\mathcal{A}'$ recognizing the language $L(\mathcal{A})^{*}$ in the following way:
+\begin{itemize}
+\item Take $Q_{\mathcal{A}'} = Q_{\mathcal{A}} \cup \{q_{0}\}$.
+\item Take $q_{0_{\mathcal{A}'}} = q_{0}$.
+\item Take $F_{\mathcal{A}'} = \{q_{0}\}$.
+\item Define $\delta_{\mathcal{A}'}$ such that, for all $q \in Q_{\mathcal{A}'}$ and for all $a \in \Sigma \cup \{\epsilon\}$,
+\begin{equation*}
+\delta_{\mathcal{A}'}(q, a) = 
+\begin{cases}
+\delta_{\mathcal{A}}(q, a)				& \text{if } q \in Q_{\mathcal{A}} \text{ and } q \not\in F_{\mathcal{A}}; \\
+\delta_{\mathcal{A}}(q, a)				& \text{if } q \in F_{\mathcal{A}} \text{ and } a \neq \epsilon; \\
+\delta_{\mathcal{A}}(q, a) \cup \{q_{0}\}	& \text{if } q \in F_{\mathcal{A}} \text{ and } a = \epsilon; \text{ and } \\
+\{q_{0_{\mathcal{A}}}\}				& \text{if } q = q_{0} \text{ and } a = \epsilon.
+\end{cases}
+\qedhere
+\end{equation*}
+\end{itemize}
+\end{proof}
+\end{theorem}
+
+The ``Kleene star" finite automaton $\mathcal{A}'$ is depicted in Figure~\ref{subfig:kleenestarautomaton} and, again, the usual disclaimer about nondeterministic finite automata with epsilon transitions applies to this proof.
+
+\begin{figure}[p!]
+\centering
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\draw[dashed, draw=\maincolour, fill=\fifthcolour] (1.25,0.3) rectangle (7.25,1.95);
+\draw[dashed, draw=\maincolour, fill=\fifthcolour] (1.25,-0.3) rectangle (7.25,-1.95);
+
+\draw[color=\maincolour] (6.9,1.6) node (a) {$\mathcal{A}$};
+\draw[color=\maincolour] (6.9,-1.6) node (a) {$\mathcal{B}$};
+
+\node[state, initial] (q0) {$q_{0}$};
+\node[state, above right=0.5cm and 1.5cm of q0] (q0a) {$q_{0_{\mathcal{A}}}$};
+\node[state, below right=0.5cm and 1.5cm of q0] (q0b) {$q_{0_{\mathcal{B}}}$};
+\node[state, right of=q0a, draw=none, fill=none] (qa) {\color{\maincolour}$\dots$};
+\node[state, right of=q0b, draw=none, fill=none] (qb) {\color{\maincolour}$\dots$};
+\node[state, accepting, right of=qa] (qfa) {};
+\node[state, accepting, right of=qb] (qfb) {};
+
+\path[-latex] (q0) edge [bend left, above left] node {$\epsilon$} (q0a);
+\path[-latex] (q0) edge [bend right, below left] node {$\epsilon$} (q0b);
+\path[-latex] (q0a) edge [above] node {} (qa);
+\path[-latex] (q0b) edge [above] node {} (qb);
+\path[-latex] (qa) edge [above] node {} (qfa);
+\path[-latex] (qb) edge [above] node {} (qfb);
+\end{tikzpicture}
+\caption{Finite automaton recognizing the union of two languages}
+\label{subfig:unionautomaton}
+\end{subfigure}
+
+\bigskip
+\medskip
+
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\draw[dashed, draw=\maincolour, fill=\fifthcolour] (-2,-0.85) rectangle (5.25,0.85);
+\draw[dashed, rounded corners, draw=\maincolour, fill=\fourthcolour] (3.35,-0.65) rectangle (4.65,0.65);
+\draw[color=\maincolour] (4.95,0.5) node (a) {$\mathcal{A}$};
+\draw[color=\thirdcolour] (4.95,-0.5) node (a) {$F_{\mathcal{A}}$};
+
+\node[state, initial] (q0a) {$q_{0_{\mathcal{A}}}$};
+\node[state, right of=q0a, draw=none, fill=none] (qa) {\color{\maincolour}$\dots$};
+\node[state, right of=qa] (qfa) {};
+
+\path[-latex] (q0a) edge [above] node {} (qa);
+\path[-latex] (qa) edge [above] node {} (qfa);
+
+\draw[dashed, draw=\maincolour, fill=\fifthcolour] (1.25,-2.75) rectangle (7.25,-1.05);
+\draw[color=\maincolour] (6.9,-2.4) node (b) {$\mathcal{B}$};
+
+\node[state, below=1cm of qa] (q0b) {$q_{0_{\mathcal{B}}}$};
+\node[state, right of=q0b, draw=none, fill=none] (qb) {\color{\maincolour}$\dots$};
+\node[state, accepting, right of=qb] (qfb) {};
+
+\path[-latex] (q0b) edge [above] node {} (qb);
+\path[-latex] (qb) edge [above] node {} (qfb);
+
+\path[-latex] (qfa) edge [above left, pos=0.35] node {$\epsilon$} (q0b);
+\end{tikzpicture}
+\caption{Finite automaton recognizing the concatenation of two languages}
+\label{subfig:concatenationautomaton}
+\end{subfigure}
+
+\bigskip
+
+\begin{subfigure}{\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\draw[dashed, draw=\maincolour, fill=\fifthcolour] (1.25,-0.85) rectangle (7.25,0.85);
+\draw[dashed, rounded corners, draw=\maincolour, fill=\fourthcolour] (5.35,-0.65) rectangle (6.65,0.65);
+\draw[color=\maincolour] (6.95,0.5) node (a) {$\mathcal{A}$};
+\draw[color=\thirdcolour] (6.95,-0.5) node (a) {$F_{\mathcal{A}}$};
+
+\node[state, initial, accepting] (q0) {$q_{0}$};
+\node[state, right of=q0] (q0a) {$q_{0_{\mathcal{A}}}$};
+\node[state, right of=q0a, draw=none, fill=none] (qa) {\color{\maincolour}$\dots$};
+\node[state, right of=qa] (qfa) {};
+
+\path[-latex] (q0) edge [above, pos=0.35] node {$\epsilon$} (q0a);
+\path[-latex] (q0a) edge [above] node {} (qa);
+\path[-latex] (qa) edge [above] node {} (qfa);
+
+\path[-latex] (qfa) edge [bend right=40, above] node {$\epsilon$} (q0);
+\end{tikzpicture}
+\caption{Finite automaton recognizing the Kleene star of a language}
+\label{subfig:kleenestarautomaton}
+\end{subfigure}
+\caption{Finite automaton constructions for each of the three regular operations}
+\label{fig:regularoperationautomata}
+\end{figure}
+
+\subsubsection*{Complement}
+
+Having established closure for each of the regular operations, we can now shift our focus toward other common language operations, and we will begin by considering the operation of \emph{complement}. Much like with sets, the complement of a language $L$ is a language containing all words that do \emph{not} belong to $L$; that is,
+\begin{equation*}
+\overline{L} = \{w \mid w \not\in L\}.
+\end{equation*}
+Thus, to say that regular languages are closed under complement means that, if we were to take a regular language $L$ and consider all words that do \emph{not} belong to $L$, the resultant language would also be regular: perhaps a surprising result at first, but one with a rather easy proof!
+
+\begin{theorem}\label{thm:FAclosurecomplement}
+The class of regular languages is closed under the operation of complement.
+
+\begin{proof}
+Suppose we are given a deterministic finite automaton $\mathcal{A} = (Q, \Sigma, \delta, q_{0}, F)$. The language of this automaton, $L(\mathcal{A})$, consists of all words that take us from the initial state $q_{0}$ to a final state in the subset $F$. Therefore, the complement of $L(\mathcal{A})$ consists of all words that \emph{do not} take us to a final state.
+
+We construct a finite automaton $\mathcal{A}' = (Q, \Sigma, \delta, q_{0}, F')$ recognizing the language $\overline{L(\mathcal{A})}$ by taking $F' = Q \setminus F$; that is, all non-final states in $\mathcal{A}$ are final states in $\mathcal{A}'$, and vice versa.
+\end{proof}
+\end{theorem}
+
+Take careful note that, unlike in the previous three closure proofs for union, concatenation, and Kleene star, the closure proof for complement requires that we start with a \emph{deterministic} finite automaton. We cannot simply swap the final and non-final states in a nondeterministic finite automaton and expect the construction to go through with no issues. To see why this is the case, consider the following nondeterministic finite automaton:
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state, accepting, above right of=q0] (q1) {$q_{1}$};
+\node[state, below right of=q0] (q2) {$q_{2}$};
+
+\path[-latex] (q0) edge [above left] node {\texttt{a}} (q1);
+\path[-latex] (q0) edge [below left] node {\texttt{a}} (q2);
+\end{tikzpicture}
+\end{center}
+Observe that this finite automaton recognizes the singleton language $L = \{\texttt{a}\}$, and so the complement of this finite automaton must \emph{not} include the word \texttt{a} in its language. However, applying our complement construction directly to the nondeterministic finite automaton produces the following result:
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial, accepting] (q0) {$q_{0}$};
+\node[state, above right of=q0] (q1) {$q_{1}$};
+\node[state, accepting, below right of=q0] (q2) {$q_{2}$};
+
+\path[-latex] (q0) edge [above left] node {\texttt{a}} (q1);
+\path[-latex] (q0) edge [below left] node {\texttt{a}} (q2);
+\end{tikzpicture}
+\end{center}
+Clearly, this ``complement" finite automaton still accepts the word \texttt{a}! Thus, in order for us to correctly complement a nondeterministic finite automaton, we must first convert it into its equivalent deterministic form.
+
+\subsubsection*{Intersection}
+
+For our last closure result, we will look at the operation of intersection. Recall that, with the union operation, we had to check whether some input word belonged to \emph{either} of the languages $L(\mathcal{A})$ or $L(\mathcal{B})$. With the intersection operation, on the other hand, we must check whether the input word belongs to \emph{both} languages.
+
+We could establish closure via a nice construction known as a \emph{product automaton}, but this isn't strictly necessary. In fact, we can get this new intersection closure result using a couple of the closure results we have already established! This is all thanks to \emph{De Morgan's laws}, one of which allows us to reformulate intersection in terms of both union and complement:
+\begin{equation*}
+L(\mathcal{A}) \cap L(\mathcal{B}) = \overline{\overline{L(\mathcal{A})} \cup \overline{L(\mathcal{B})}}.
+\end{equation*}
+Since we already know that the regular languages are closed under union and complement, we get the proof of closure under intersection for free.
+
+\begin{theorem}\label{thm:FAclosureintersection}
+The class of regular languages is closed under the operation of intersection.
+
+\begin{proof}
+Suppose we are given two deterministic finite automata $\mathcal{A}$ and $\mathcal{B}$ recognizing languages $L(\mathcal{A})$ and $L(\mathcal{B})$, respectively. Since $L(\mathcal{A})$ and $L(\mathcal{B})$ are regular, we know that $\overline{L(\mathcal{A})}$ and $\overline{L(\mathcal{B})}$ are regular by closure under complement. We also know that $\overline{L(\mathcal{A})} \cup \overline{L(\mathcal{B})}$ is regular by closure under union. Therefore, $\overline{\overline{L(\mathcal{A})} \cup \overline{L(\mathcal{B})}}$ is regular again by closure under complement, and so $L(\mathcal{A}) \cap L(\mathcal{B})$ is regular.
+\end{proof}
+\end{theorem}
+
+\begin{construction}
+Eventually, I will detail an alternative approach using the so-called product automaton.
+\end{construction}

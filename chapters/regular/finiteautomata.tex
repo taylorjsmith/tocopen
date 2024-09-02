@@ -1,0 +1,557 @@
+\section{Finite Automata}\label{sec:finiteautomata}
+
+\firstwords{Some might argue} that the entire point of studying computer science is to determine exactly what computers are capable of. After all, humans created computers so that we could pass off boring or repetitive work onto a machine and give our brains a break! However, considering a full computer at the very beginning of our studies is kind of like learning to swim by jumping into the deep end of a pool. In order to learn without getting overwhelmed, we will begin by considering a very simple model of computation that gives us just enough power to actually perform an elementary computation.
+
+If you've ever purchased something from a vending machine or waited in your car at a traffic light, then you've interacted with a \emph{finite automaton}. Even the computer you use every day relies on a finite automaton to complete its tasks. Consider the conceptual diagram of how a computer schedules processes, depicted in Figure~\ref{fig:processscheduler}.
+\begin{figure}[b]
+\centering
+\begin{tikzpicture}[node distance=1.75cm, >=latex, every state/.style={fill=white}]
+\node[state, initial, font={\footnotesize}, align=center, minimum size=1.25cm] (new) {new};
+\node[state, font={\footnotesize}, align=center, minimum size=1.25cm] (ready) [right=1.25cm of new] {ready};
+\node[state, font={\footnotesize}, align=center, minimum size=1.25cm, yshift=-1.25cm] (wait) [right of=ready] {waiting};
+\node[state, font={\footnotesize}, align=center, minimum size=1.25cm, yshift=1.25cm] (run) [right of=wait] {running};
+\node[state, accepting, font={\footnotesize}, align=center, minimum size=1.25cm] (finish) [right=1.25cm of run] {finished};
+
+\path[-latex] (new) edge [above] node[font={\footnotesize}, align=center] {admit} (ready);
+\path[-latex] (ready) edge [above] node[font={\footnotesize}, align=center] {dispatch} (run);
+\path[-latex] (run) edge [above, bend right] node[font={\footnotesize}, align=center] {interrupt} (ready);
+\path[-latex] (run) edge [bend left, below right] node[font={\footnotesize}, align=center] {wait for \\ event} (wait);
+\path[-latex] (wait) edge [bend left, below left] node[font={\footnotesize}, align=center] {event \\ occurs} (ready);
+\path[-latex] (run) edge [above] node[font={\footnotesize}, align=center] {exit} (finish);
+\end{tikzpicture}
+\caption{How a computer schedules processes}
+\label{fig:processscheduler}
+\end{figure}
+When the computer needs a new process, it creates one and enters the circle labelled ``new". The arrow labelled ``start" indicates that this is where the life of the process begins. When sufficient memory is available, the computer admits the process by following the arrow to the circle labelled ``ready". Then, the computer's scheduler dispatches the process and moves to the circle labelled ``running". At any time, the computer can interrupt the process or wait for an event to occur; these arrows take us to other circles in the diagram. Finally, when the process is done, it exits to the circle labelled ``finished". This circle being doubled indicates that this is where the life of the process ends.
+
+We can use finite automata to model simple computations that can only be in a single discrete mode at once and that don't require us to remember or store any information. The circles, or \emph{states}, of the finite automaton correspond to the current mode of computation we're in. For example, did we just begin the computation, or are we midway through, or have we almost wrapped up? The arrows, or \emph{transitions}, of the finite automaton take us between modes, depending on the arrow's label. Thus, if we have a running process, then interrupting that process will put us in a different mode than telling the process to wait for some event to occur.
+
+Formally speaking, a finite automaton is just a 5-tuple.
+
+\begin{definition}[Finite automaton]
+A finite automaton is a tuple $(Q, \Sigma, \delta, q_{0}, F)$, where
+\begin{itemize}
+\item $Q$ is a finite set of \emph{states};
+\item $\Sigma$ is an \emph{alphabet};
+\item $\delta \from Q \times \Sigma \to Q$ is the \emph{transition function};
+\item $q_{0} \in Q$ is the \emph{initial} or \emph{start state}; and
+\item $F \subseteq Q$ is the set of \emph{final} or \emph{accepting states}.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+There are occasions in these notes where some grammatical pedantry is warranted, and here is one such occasion. One should always use ``finite automat\underline{on}" to refer to a single instance of such a model; writing ``\underline{a} finite automat\underline{a}" is never correct.
+\end{remark}
+
+We're already familiar with alphabets, and we know a little bit about states and transitions from our process scheduling example. The transition function $\delta$ is the mathematical formalization of the arrows in our diagram. Given an ordered pair of state and symbol being read, the transition function tells us which state to go to next. For example, if we had a very simple finite automaton like
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state, accepting] (q1) [right of=q0] {$q_{1}$};
+\path[-latex] (q0) edge [above] node {\texttt{a}} (q1);
+\end{tikzpicture}
+\end{center}
+then the single transition would be represented by the function $\delta(q_{0}, \texttt{a}) = q_{1}$. If a finite automaton has a large number of transitions, then we can represent each transition concisely in a table format rather than writing each transition out individually.
+
+Note that, since we're dealing with a transition \emph{function}, any pair of state and symbol can map to \emph{at most} one state. This condition ensures that we always make the same transition on the same state/symbol pair.
+
+\begin{remark}
+Note that transition functions don't always have to behave in this way---just those that map to the state set $Q$. We'll soon see what happens if we don't enforce such a strict condition on our transition function, but for now, our finite automata will operate in this way.
+\end{remark}
+
+As was the case in our process scheduling example, some states in our very simple finite automaton have some special flair added to them. The state $q_{0}$ has an arrow labelled ``start" pointing to it, and the state $q_{1}$ has doubled circles. This is how we denote initial and final states in a finite automaton. Initial states have an incoming transition arrow pointing at the state, while final states are double-circled. We typically have just one initial state in a finite automaton, but it's possible to have more than one. On the other hand, we can have as many or as few final states as we want.
+
+\begin{example}
+Consider the finite automaton $\mathcal{M}_{1} = (Q, \Sigma, \delta, q_{0}, F)$ where $Q = \{q_{0}, q_{1}\}$, $\Sigma = \{\texttt{0}, \texttt{1}\}$, $q_{0}$ is the initial state, $F = \{q_{1}\}$, and $\delta$ is defined as follows:
+\begin{center}
+\small
+\begin{tabular}{c | c c}
+		& \texttt{0}		& \texttt{1} \\
+\hline
+$q_{0}$	& $q_{0}$		& $q_{1}$ \\
+$q_{1}$	& $q_{1}$		& $q_{0}$
+\end{tabular}
+\end{center}
+We can draw this finite automaton diagrammatically:
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state, accepting] (q1) [right of=q0] {$q_{1}$};
+\path[-latex] (q0) edge [loop above] node {\texttt{0}} (q0);
+\path[-latex] (q0) edge [bend left, above] node {\texttt{1}} (q1);
+\path[-latex] (q1) edge [loop above] node {\texttt{0}} (q1);
+\path[-latex] (q1) edge [bend left, below] node {\texttt{1}} (q0);
+\end{tikzpicture}
+\end{center}
+This finite automaton checks whether a binary word has odd parity; that is, whether it contains an odd number of \texttt{1}s.
+\end{example}
+
+\begin{example}
+Consider the following diagram of a finite automaton:
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial, accepting] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\path[-latex] (q0) edge [loop above] node {\texttt{c}} (q0);
+\path[-latex] (q0) edge [bend left, above] node {\texttt{b}} (q1);
+\path[-latex] (q1) edge [bend left, below] node {\texttt{c}} (q0);
+\path[-latex] (q1) edge [above] node {\texttt{b}} (q2);
+\path[-latex] (q2) edge [loop above] node {\texttt{b,c}} (q2);
+\end{tikzpicture}
+\end{center}
+This finite automaton checks whether every occurrence of \texttt{b} in an input word is immediately followed by an occurrence of \texttt{c}.
+
+Based on this diagram, we can establish that $Q = \{q_{0}, q_{1}, q_{2}\}$, $\Sigma = \{\texttt{b}, \texttt{c}\}$, $q_{0}$ is the initial state, $F = \{q_{0}\}$, and $\delta$ is defined as follows:
+\begin{center}
+\small
+\begin{tabular}{c | c c}
+		& \texttt{b}		& \texttt{c} \\
+\hline
+$q_{0}$	& $q_{1}$		& $q_{0}$ \\
+$q_{1}$	& $q_{2}$		& $q_{0}$ \\
+$q_{2}$	& $q_{2}$		& $q_{2}$
+\end{tabular}
+\end{center}
+\end{example}
+
+\subsection{Computations and Accepting Computations}
+
+Now that we know how to define a finite automaton, what can we do with it? Observe that, in our definition, we took care to specify the alphabet $\Sigma$. This alphabet specifies the kinds of \emph{input words} a finite automaton is expecting to receive. Giving an input word to a finite automaton is much like typing \texttt{input()} in a Python program or \texttt{scanf()} in a C program; it gives the computer something to read and work with.
+
+We can imagine an input word is written on a reel of film, much like in Figure~\ref{fig:filmreel}, where each symbol in the word occupies its own frame.
+\begin{figure}
+\begin{center}
+\filmbox{a}\filmbox{b}\filmbox{a}
+\end{center}
+\caption{A film reel}
+\label{fig:filmreel}
+\end{figure}
+Now, imagine the finite automaton is a film projector, but the rewind button is broken. When we feed the film reel into the projector, the projector can only show one frame at a time. Moreover, since the rewind button is broken, once the projector pulls in the next frame, it can never return to the previous one. This is essentially how a finite automaton processes its input: starting with the first symbol of the input word, the finite automaton reads the symbol, transitions to a state, and then moves to the next symbol.
+
+Once the finite automaton reaches the end of its input word and has no more symbols left to read, it must make a decision. Its decision depends entirely on the state it finds itself in at the moment it reaches the end of the word. If the finite automaton is in a final state when it runs out of symbols, then it \emph{accepts} the word. Otherwise, the finite automaton must be in a non-final state, and it therefore \emph{rejects} the word.
+
+Going one step further, we can precisely define what it means for a finite automaton to accept an input word by introducing the notion of an \emph{accepting computation}. An accepting computation is akin to a set of steps showing us every state a finite automaton enters from the moment it starts reading its input word to the moment it accepts its input. We don't need anything new to define this; we already have all the machinery we need.
+
+\begin{definition}[Accepting computation of a finite automaton]\label{def:computationdeterministic}
+Let $\mathcal{M} = (Q, \Sigma, \delta, q_{0}, F)$ be a finite automaton, and let $w = w_{0}w_{1} \dots w_{n-1}$ be an input word of length $n$ where $w_{0}, w_{1}, \dots w_{n-1} \in \Sigma$. The finite automaton $\mathcal{M}$ accepts the input word $w$ if there exists a sequence of states $r_{0}, r_{1}, \dots, r_{n} \in Q$ satisfying the following conditions:
+\begin{enumerate}
+\item $r_{0} = q_{0}$;
+\item $\delta(r_{i}, w_{i}) = r_{i+1}$ for all $0 \leq i \leq (n-1)$; and
+\item $r_{n} \in F$.
+\end{enumerate}
+\end{definition}
+
+In other words, the computation of a finite automaton must satisfy three conditions in order to be considered an accepting computation: it must start in the initial state, every subsequent state must be reachable by the transition function in one computation step after reading one symbol, and it must end in the final state.
+
+\subsection{Language of a Finite Automaton}
+
+The set of all input words that a finite automaton $\mathcal{M}$ accepts is called the \emph{language} of the finite automaton, denoted $L(\mathcal{M})$, and it's just like any other language: it consists of words over some alphabet $\Sigma$. If a finite automaton $\mathcal{M}$ accepts (or \emph{recognizes}) a language $A$, then $L(\mathcal{M}) = A$. Note that, although a finite automaton can accept possibly many input words, it can only recognize \emph{one} language.
+
+\begin{remark}
+For clarity's sake, here the word ``accept" will be reserved for input words given to a finite automaton, while the word ``recognize" will be used to refer to the language of a finite automaton. Both words essentially mean the same thing: the finite automaton has given us a positive answer. Unfortunately, many authors and textbooks use these words interchangeably.
+\end{remark}
+
+\begin{example}
+Let $\Sigma = \{\texttt{a}, \texttt{b}\}$, and consider the language
+\begin{equation*}
+L_{|w|_{\texttt{b}}\leq1} = \{w \mid w \text{ contains at most one occurrence of the symbol \texttt{b}}\}.
+\end{equation*}
+This language is recognized by the following automaton:
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial, accepting] (q0) {$q_{0}$};
+\node[state, accepting] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\path[-latex] (q0) edge [loop above] node {\texttt{a}} (q0);
+\path[-latex] (q0) edge [above] node {\texttt{b}} (q1);
+\path[-latex] (q1) edge [loop above] node {\texttt{a}} (q1);
+\path[-latex] (q1) edge [above] node {\texttt{b}} (q2);
+\path[-latex] (q2) edge [loop right] node {\texttt{a}, \texttt{b}} (q2);
+\end{tikzpicture}
+\end{center}
+If the input word $w$ contains zero \texttt{b}s, then the finite automaton will remain in the final state $q_{0}$. Likewise, if $w$ contains one \texttt{b}, then the finite automaton will enter and remain in the final state $q_{1}$. Only if $w$ contains two or more \texttt{b}s does the finite automaton enter the state $q_{2}$, where it becomes ``stuck" and can no longer accept the input word.
+\end{example}
+
+\begin{example}
+A finite automaton with no final states cannot accept any words, but it is still able to recognize one language: the empty language $\emptyset$. This is because the language of input words accepted by the finite automaton is empty!
+\end{example}
+
+As a matter of notation, we will refer to the class of languages recognized by \emph{some} finite automaton by the abbreviation \DFA. (What does the \textsf{D} mean? We'll find out in the next section\dots)
+
+%\subsection{Constructing Finite Automata}
+
+%\begin{construction}
+% I would like to write a short section about how one can design a finite automaton for a given language/application/etc.
+%\end{construction}
+
+\subsection{Nondeterminism}
+
+Remember how, when we were discussing the transition function earlier, we mandated a condition that any pair of state and symbol must map to \emph{at most} one state? This condition ensured that if we gave the same input word to the same finite automaton, we would end up with the same result. This is known as \emph{deterministic} computation. (And now you know what the \textsf{D} in \DFA\ stands for!)
+
+While determinism isn't inherently a bad thing, it can unfortunately make our job harder if we're trying to construct a finite automaton that recognizes certain ``difficult" languages. For example, suppose we wanted to construct a deterministic finite automaton that recognizes the language of words over the alphabet $\Sigma = \{\texttt{0}, \texttt{1}\}$ where the third-from-last symbol is \texttt{0}. This finite automaton should accept input words like \texttt{011}, \texttt{10010}, and \texttt{1010001010011000}, but it should reject input words like \texttt{110} or \texttt{01}. Sounds easy to do, right? After all, we really just need to check one symbol: the symbol in the third-from-last position. As it turns out, however, the deterministic finite automaton in question ends up being rather complicated---just take a look at Figure~\ref{fig:deterministicthirdfromlast}.
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state, accepting] (q3) [right of=q2] {$q_{3}$};
+\node[state, accepting] (q4) [below of=q0] {$q_{4}$};
+\node[state] (q5) [below of=q1] {$q_{5}$};
+\node[state, accepting] (q6) [below of=q2] {$q_{6}$};
+\node[state, accepting] (q7) [below of=q3] {$q_{7}$};
+
+\path[-latex] (q0) edge [loop above] node {\texttt{1}} (q0);
+\path[-latex] (q0) edge [above] node {\texttt{0}} (q1);
+
+\path[-latex] (q1) edge [above] node {\texttt{0}} (q2);
+\path[-latex] (q1) edge [left] node {\texttt{1}} (q5);
+
+\path[-latex] (q2) edge [above] node {\texttt{0}} (q3);
+\path[-latex] (q2) edge [above right] node {\texttt{1}} (q7);
+
+\path[-latex] (q3) edge [loop above] node {\texttt{0}} (q3);
+\path[-latex] (q3) edge [right] node {\texttt{1}} (q7);
+
+\path[-latex] (q4) edge [left] node {\texttt{1}} (q0);
+\path[-latex] (q4) edge [above left] node {\texttt{0}} (q1);
+
+\path[-latex] (q5) edge [below] node {\texttt{1}} (q4);
+\path[-latex] (q5) edge [bend left, above] node {\texttt{0}} (q6);
+
+\path[-latex] (q6) edge [bend left, below] node {\texttt{1}} (q5);
+\path[-latex] (q6) edge [right] node {\texttt{0}} (q2);
+
+\path[-latex] (q7) edge [below] node {\texttt{0}} (q6);
+\path[-latex] (q7) edge [bend left, below] node {\texttt{1}} (q4);
+\end{tikzpicture}
+\caption{A deterministic finite automaton accepting words whose third-from-last symbol is \texttt{0}}
+\label{fig:deterministicthirdfromlast}
+\end{figure}
+Keep in mind also that this deterministic finite automaton \emph{only} works for input words where the third-from-last symbol is \texttt{0}. If we wanted to, say, check the fourth-from-last symbol, we would need to construct a whole new finite automaton---and as Figure~\ref{fig:deterministicfourthfromlast} illustrates, this finite automaton would have \emph{twice as many} states as our previous one!
+
+\begin{figure}[p!]
+\centering
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [right of=q2] {$q_{3}$};
+\node[state] (q4) [below=3cm of q0] {$q_{4}$};
+\node[state] (q5) [right of=q4] {$q_{5}$};
+\node[state] (q6) [right of=q5] {$q_{6}$};
+\node[state] (q7) [right of=q6] {$q_{7}$};
+\node[state, accepting] (q8) [below=3cm of q4] {$q_{8}$};
+\node[state, accepting] (q9) [right of=q8] {$q_{9}$};
+\node[state, accepting] (q10) [right of=q9] {$q_{10}$};
+\node[state, accepting] (q11) [right of=q10] {$q_{11}$};
+\node[state, accepting] (q12) [below=3cm of q8] {$q_{12}$};
+\node[state, accepting] (q13) [right of=q12] {$q_{13}$};
+\node[state, accepting] (q14) [right of=q13] {$q_{14}$};
+\node[state, accepting] (q15) [right of=q14] {$q_{15}$};
+
+\path[-latex] (q0) edge [loop above] node {\texttt{1}} (q0);
+\path[-latex] (q0) edge [above] node {\texttt{0}} (q1);
+
+\path[-latex] (q1) edge [above] node {\texttt{1}} (q2);
+\path[-latex] (q1) edge [above, bend left] node {\texttt{0}} (q3);
+
+\path[-latex] (q2) edge [above left, pos=0.3] node {\texttt{1}} (q4);
+\path[-latex] (q2) edge [below right] node {\texttt{0}} (q5);
+
+\path[-latex] (q3) edge [below right] node {\texttt{1}} (q6);
+\path[-latex] (q3) edge [right] node {\texttt{0}} (q7);
+
+\path[-latex] (q4) edge [left] node {\texttt{1}} (q8);
+\path[-latex] (q4) edge [below left, bend right, pos=0.8] node {\texttt{0}} (q9);
+
+\path[-latex] (q5) edge [below left, bend left, pos=0.1] node {\texttt{1}} (q10);
+\path[-latex] (q5) edge [above right, bend left, pos=0.05] node {\texttt{0}} (q11);
+
+\path[-latex] (q6) edge [below right, pos=0.75, out=240, in=30] node {\texttt{1}} (q12);
+\path[-latex] (q6) edge [below right, pos=0.075, out=250, in=75] node {\texttt{0}} (q13);
+
+\path[-latex] (q7) edge [above left] node {\texttt{1}} (q14);
+\path[-latex] (q7) edge [right, bend left] node {\texttt{0}} (q15);
+
+\path[-latex] (q8) edge [left, bend left] node {\texttt{1}} (q0);
+\path[-latex] (q8) edge [below right] node {\texttt{0}} (q1);
+
+\path[-latex] (q9) edge [above left, pos=0.075, out=70, in=255] node {\texttt{1}} (q2);
+\path[-latex] (q9) edge [above left, pos=0.75, out=60, in=210] node {\texttt{0}} (q3);
+
+\path[-latex] (q10) edge [below left, bend left, pos=0.05] node {\texttt{1}} (q4);
+\path[-latex] (q10) edge [above right, bend left, pos=0.1] node {\texttt{0}} (q5);
+
+\path[-latex] (q11) edge [above right, bend right, pos=0.8] node {\texttt{1}} (q6);
+\path[-latex] (q11) edge [right] node {\texttt{0}} (q7);
+
+\path[-latex] (q12) edge [left] node {\texttt{1}} (q8);
+\path[-latex] (q12) edge [above left] node {\texttt{0}} (q9);
+
+\path[-latex] (q13) edge [above left] node {\texttt{1}} (q10);
+\path[-latex] (q13) edge [below right, pos=0.3] node {\texttt{0}} (q11);
+
+\path[-latex] (q14) edge [bend left, below] node {\texttt{1}} (q12);
+\path[-latex] (q14) edge [below] node {\texttt{0}} (q13);
+
+\path[-latex] (q15) edge [below] node {\texttt{1}} (q14);
+\path[-latex] (q15) edge [loop below] node {\texttt{0}} (q15);
+\end{tikzpicture}
+\caption{A deterministic finite automaton accepting words whose fourth-from-last symbol is \texttt{0}}
+\label{fig:deterministicfourthfromlast}
+\end{figure}
+
+So, how do we make our job easier and our finite automata smaller? We get rid of the determinism condition. Specifically, we allow for state/symbol pairs to map to one \emph{or more} states. We can preserve the ``function" part of our transition function by mapping each state/symbol pair not to multiple different states individually, but rather to a subset of the state set $Q$.
+
+If we get rid of the determinism condition, then the finite automaton can, in a sense, ``guess" which step to take at certain points in the computation. If, in a given state, there is more than one transition out of that state on the same symbol, then the finite automaton has multiple options for which transition it can take. As you might have figured, this property is called \emph{nondeterminism}, and the definition of a nondeterministic finite automaton is nearly identical to our earlier definition of a deterministic finite automaton.
+
+\begin{definition}[Nondeterministic finite automaton]\label{def:NFA}
+A nondeterministic finite automaton is a tuple $(Q, \Sigma, \delta, q_{0}, F)$, where
+\begin{itemize}
+\item $Q$ is a finite set of states;
+\item $\Sigma$ is an alphabet;
+\item $\delta \from Q \times \Sigma \to \mathcal{P}(Q)$ is the transition function;
+\item $q_{0} \in Q$ is the initial or start state; and
+\item $F \subseteq Q$ is the set of final or accepting states.
+\end{itemize}
+\end{definition}
+
+Following our earlier comment, the only change we had to make is in the transition function: we now map to the power set $\mathcal{P}(Q)$ instead of the state set $Q$. The element of the power set being mapped to is exactly the subset of states that the nondeterministic finite automaton can transition to from its current state and on its current symbol.
+
+As an illustration of how nondeterminism can simplify the finite automata we construct, let's bring back our example of the language of words whose third-from-last symbol is \texttt{0}. The nondeterministic version of the finite automaton recognizing this language is illustrated in Figure~\ref{fig:nondeterministicthirdfromlast}.
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state, accepting] (q3) [right of=q2] {$q_{3}$};
+
+\path[-latex, thick, color=\thirdcolour] (q0) edge [loop above] node {\texttt{0}{\color{black}, \texttt{1}}} (q0);
+\path[-latex, thick, color=\thirdcolour] (q0) edge [above] node {\texttt{0}} (q1);
+
+\path[-latex] (q1) edge [bend left, above] node {\texttt{0}} (q2);
+\path[-latex] (q1) edge [bend right, below] node {\texttt{1}} (q2);
+
+\path[-latex] (q2) edge [bend left, above] node {\texttt{0}} (q3);
+\path[-latex] (q2) edge [bend right, below] node {\texttt{1}} (q3);
+\end{tikzpicture}
+\caption{A nondeterministic finite automaton accepting words whose third-from-last symbol is \texttt{0}. Observe the two transitions leaving state $q_{0}$, both labelled by the symbol \texttt{0}}
+\label{fig:nondeterministicthirdfromlast}
+\end{figure}
+Here, the state $q_{0}$ is doing double duty: not only is it reading all of the symbols in the input word up to the third-from-last symbol, but it's also checking that the third-from-last symbol is in fact \texttt{0}. If it is, then we transition from state $q_{0}$ to state $q_{1}$, and the remaining states simply read the last two symbols, whatever they may be. Likewise, Figure~\ref{fig:nondeterministicfourthfromlast} depicts a similar construction for the ``fourth-from-last" language.
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [right of=q2] {$q_{3}$};
+\node[state, accepting] (q4) [right of=q3] {$q_{4}$};
+
+\path[-latex, thick, color=\thirdcolour] (q0) edge [loop above] node {\texttt{0}{\color{black}, \texttt{1}}} (q0);
+\path[-latex, thick, color=\thirdcolour] (q0) edge [above] node {\texttt{0}} (q1);
+
+\path[-latex] (q1) edge [bend left, above] node {\texttt{0}} (q2);
+\path[-latex] (q1) edge [bend right, below] node {\texttt{1}} (q2);
+
+\path[-latex] (q2) edge [bend left, above] node {\texttt{0}} (q3);
+\path[-latex] (q2) edge [bend right, below] node {\texttt{1}} (q3);
+
+\path[-latex] (q3) edge [bend left, above] node {\texttt{0}} (q4);
+\path[-latex] (q3) edge [bend right, below] node {\texttt{1}} (q4);
+\end{tikzpicture}
+\caption{A nondeterministic finite automaton accepting words whose fourth-from-last symbol is \texttt{0}. Contrast the size of this finite automaton to the one depicted in Figure~\ref{fig:deterministicfourthfromlast}}
+\label{fig:nondeterministicfourthfromlast}
+\end{figure}
+
+The nondeterminism in these machines is limited to state $q_{0}$, where we have two outgoing transitions on the same symbol \texttt{0}: one transition loops back to the same state $q_{0}$, while the other transition takes us to state $q_{1}$. We can represent this with the transition function by writing $\delta(q_{0}, \texttt{0}) = \{q_{0}, q_{1}\}$, and this abides by our definition since $\{q_{0}, q_{1}\} \in \mathcal{P}(Q)$.
+
+\begin{example}\label{ex:nondeterministic}
+The following finite automaton is nondeterministic, because states $q_{0}$ and $q_{1}$ each have more than one outgoing transition on the same symbol:
+\begin{center}
+\begin{tikzpicture}[node distance=3cm, >=latex, every state/.style={fill=white}]
+\node[state, initial, accepting] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [below of=q0] {$q_{2}$};
+\node[state, accepting] (q3) [right of=q2] {$q_{3}$};
+
+\path[-latex] (q0) edge [loop above] node {\texttt{0}} (q0);
+\path[-latex, thick, color=\thirdcolour] (q0) edge [above] node {\texttt{1}} (q1);
+\path[-latex, thick, color=\thirdcolour] (q0) edge [left] node {\texttt{1}} (q2);
+
+\path[-latex, thick, color=\thirdcolour] (q1) edge [loop above] node {\texttt{0}} (q1);
+\path[-latex] (q1) edge [bend left, below right] node {\texttt{1}} (q2);
+\path[-latex, thick, color=\thirdcolour] (q1) edge [right] node {\texttt{0}} (q3);
+
+\path[-latex] (q2) edge [bend left, above left] node {\texttt{1}} (q1);
+\path[-latex] (q2) edge [loop below] node {\texttt{0}} (q3);
+
+\path[-latex] (q3) edge [below] node {\texttt{1}} (q2);
+\end{tikzpicture}
+\end{center}
+\end{example}
+
+A nondeterministic finite automaton accepts an input word in exactly the same way as a deterministic finite automaton: if the finite automaton is in a final state and there are no more symbols of the input word left to read, then the input word is accepted. If not, then the input word is rejected. We will refer to the class of languages recognized by \emph{some} nondeterministic finite automaton by the abbreviation \NFA.
+
+The computation of a nondeterministic finite automaton, however, is slightly different than in the deterministic case. Since the finite automaton can take potentially many transitions from one state/symbol pair, at such a point in the computation, the finite automaton ``splits up" and runs multiple copies of itself in parallel. If we were to visualize such a computation, we would obtain a diagram that resembles a tree. In fact, such a visualization is called a \emph{computation tree}!
+
+In each branch of the computation tree, the corresponding copy of the finite automaton continues its computation until it either reaches the end of the input word or finds itself with no more transitions to follow, which could happen if the finite automaton reads a symbol in a state with no outgoing transition on that symbol. If there are no transitions to follow, that branch dies while the remaining branches continue with their computations. Similarly, if there are no symbols left to read in the input word and that copy of the finite automaton isn't in a final state, that branch dies.
+
+A computation of a nondeterministic finite automaton is therefore accepting only if there exists at least one branch of the computation where the finite automaton is in a final state after reading every symbol of the input word. Just as we did before, we can formalize the notion of an accepting computation for nondeterministic finite automata; the only change we need to make is in the second condition, to account for the change we made to render the transition function nondeterministic.
+
+\begin{definition}[Accepting computation of a nondeterministic finite automaton]\label{def:computationnondeterministic}
+Let $\mathcal{M} = (Q, \Sigma, \delta, q_{0}, F)$ be a nondeterministic finite automaton, and let $w = w_{0}w_{1} \dots w_{n-1}$ be an input word of length $n$ where $w_{0}, w_{1}, \dots w_{n-1} \in \Sigma$. The finite automaton $\mathcal{M}$ accepts the input word $w$ if there exists a sequence of states $r_{0}, r_{1}, \dots, r_{n} \in Q$ satisfying the following conditions:
+\begin{enumerate}
+\item $r_{0} = q_{0}$;
+\item $r_{i+1} \in \delta(r_{i}, w_{i})$ for all $0 \leq i \leq (n-1)$; and
+\item $r_{n} \in F$.
+\end{enumerate}
+\end{definition}
+
+Observe that, compared to Definition~\ref{def:computationdeterministic}, we substituted inclusion for strict equality in the second condition---this is because the transition function no longer needs to take us \emph{exactly} to state $r_{i+1}$. Rather, state $r_{i+1}$ needs only to be in the subset mapped to by the transition function.
+
+\begin{example}
+Recall the nondeterministic finite automaton from Example~\ref{ex:nondeterministic}. Does this automaton accept the input word \texttt{10010}? Let's check by drawing the computation tree.
+
+Each vertex indicates the current state of the finite automaton at a given point in the computation, and the symbols remaining in the input word at that point are listed on the right. A crossed-out vertex denotes a rejecting computation, while the starred vertex denotes an accepting computation.
+\begin{center}
+\begin{tikzpicture}[level distance=0.75cm,
+level 1/.style={sibling distance=3cm},
+level 2/.style={sibling distance=1cm}]
+\tikzstyle{every node}=[circle, draw, fill=white, inner sep=1pt, minimum size=1.5em]
+	\node (Root) {$q_{0}$}
+		child {
+		node {$q_{1}$}
+			child { 
+			node {$q_{1}$} 
+				child { 
+				node {$q_{1}$} 
+					child { 
+					node {$q_{2}$} 
+						child { 
+						node [forbidden sign, text=black, fill=\fourthcolour] {$q_{2}$} 
+						}
+					}
+				}
+				child { 
+				node {$q_{3}$} 
+					child { 
+					node {$q_{2}$} 
+						child { 
+						node [forbidden sign, text=black, fill=\fourthcolour] {$q_{2}$} 
+						}
+					}
+				}
+			}
+			child { 
+			node [forbidden sign, text=black, fill=\fourthcolour] {$q_{3}$} 
+			}
+		}
+		child {
+		node {$q_{2}$}
+			child { 
+			node {$q_{2}$} 
+				child { 
+				node {$q_{2}$} 
+					child { 
+					node {$q_{1}$} 
+						child { 
+						node [forbidden sign, text=black, fill=\fourthcolour] {$q_{1}$} 
+						}
+						child { 
+						node [star, star points=5, star point height=3mm, inner sep=0.1ex, text=white, fill=\thirdcolour] {$q_{3}$} 
+						}
+					}
+				}
+			}
+		};
+	
+	\begin{scope}[every node/.style={right}]
+	\path (Root -| Root-2-1) ++(12mm,0) node {\texttt{10010}};
+	\path (Root-1 -| Root-2-1) ++(12mm,0.5mm) node {{\color{\neutralcolour}\cancel{\texttt{1}}}\texttt{0010}};
+	\path (Root-1-1 -| Root-2-1) ++(12mm,0.5mm) node {{\color{\neutralcolour}\cancel{\texttt{1}}\cancel{\texttt{0}}}\texttt{010}};
+	\path (Root-1-1-1 -| Root-2-1) ++(12mm,0.5mm) node {{\color{\neutralcolour}\cancel{\texttt{1}}\cancel{\texttt{0}}\cancel{\texttt{0}}}\texttt{10}};
+	\path (Root-1-1-1-1 -| Root-2-1) ++(12mm,0.5mm) node {{\color{\neutralcolour}\cancel{\texttt{1}}\cancel{\texttt{0}}\cancel{\texttt{0}}\cancel{\texttt{1}}}\texttt{0}};
+	\path (Root-1-1-1-1-1 -| Root-2-1) ++(12mm,0.5mm) node {{\color{\neutralcolour}\cancel{\texttt{1}}\cancel{\texttt{0}}\cancel{\texttt{0}}\cancel{\texttt{1}}\cancel{\texttt{0}}}};
+	\end{scope}
+\end{tikzpicture}
+\end{center}
+Since there exists at least one branch of the computation tree where the finite automaton is in a final state after reading the entire input word, the finite automaton accepts the word \texttt{10010}.
+\end{example}
+
+\subsection{Epsilon Transitions}
+
+Going one step further, we can take a nondeterministic finite automaton and modify it so that it can transition not just after reading a symbol, but \emph{whenever it wants}. If a certain special transition called an \emph{epsilon transition} exists between two states $q_{i}$ and $q_{j}$, a finite automaton in state $q_{i}$ can immediately transition to state $q_{j}$ without reading the next symbol of the input word. We call such a model a nondeterministic finite automaton \emph{with epsilon transitions}, and the class of languages recognized by this model is denoted by \ENFA.
+
+\begin{example}
+The following nondeterministic finite automaton uses epsilon transitions:
+\begin{center}
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state, accepting] (q3) [right of=q2] {$q_{3}$};
+
+\path[-latex] (q0) edge [above] node {\texttt{a}} (q1);
+\path[-latex, thick, color=\thirdcolour] (q0) edge [bend right, below] node {$\epsilon$} (q2);
+\path[-latex] (q1) edge [above] node {\texttt{a}} (q2);
+\path[-latex, thick, color=\thirdcolour] (q1) edge [bend left, above] node {$\epsilon$} (q2);
+\path[-latex] (q2) edge [above] node {\texttt{b}} (q3);
+\path[-latex] (q3) edge [loop above] node {\texttt{b}} (q3);
+\end{tikzpicture}
+\end{center}
+This finite automaton accepts all input words starting with zero, one, or two \texttt{a}s followed by at least one \texttt{b}.
+\end{example}
+
+\begin{example}
+The nondeterministic finite automaton in Figure~\ref{fig:floatingpointautomaton} recognizes the language of signed and unsigned floating-point numbers. Some words in this language include \texttt{365.25E+2}, \texttt{-10E40}, \texttt{+2.5}, and \texttt{42E-1}. The epsilon transitions in this finite automaton allow for words to omit the decimal portion of the number, the sign in the exponent, or both.
+\end{example}
+
+\begin{sidewaysfigure}[p!]
+\centering
+\begin{tikzpicture}[node distance=2cm, >=latex, every state/.style={fill=white}]
+\fill[color=\fourthcolour] (-0.45,-2) rectangle (4.45,1.5);
+\fill[color=\fifthcolour] (4.45,-2) rectangle (8.45,1.5);
+\fill[color=\fourthcolour] (8.45,-2) rectangle (10.45,1.5);
+\fill[color=\fifthcolour] (10.45,-2) rectangle (12.45,1.5);
+\fill[color=\fourthcolour] (12.45,-2) rectangle (14.45,1.5);
+
+\node[color=\maincolour] at (2,-1.6) {Sign and digits};
+\node[color=\maincolour] at (6.45,-1.6) {Decimal digits};
+\node[color=\maincolour] at (9.45,-1.6) {Exponent};
+\node[color=\maincolour] at (11.45,-1.6) {E sign};
+\node[color=\maincolour] at (13.45,-1.6) {E digits};
+
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state, accepting] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [right of=q2] {$q_{3}$};
+\node[state, accepting] (q4) [right of=q3] {$q_{4}$};
+\node[state] (q5) [right of=q4] {$q_{5}$};
+\node[state] (q6) [right of=q5] {$q_{6}$};
+\node[state, accepting] (q7) [right of=q6] {$q_{7}$};
+
+\path[-latex] (q0) edge [above] node {\texttt{+}, \texttt{-}} (q1);
+\path[-latex] (q1) edge [above] node {digit} (q2);
+\path[-latex] (q0) edge [bend right, below] node {digit} (q2);
+\path[-latex] (q2) edge [loop above] node {digit} (q2);
+\path[-latex] (q2) edge [above] node {\texttt{.}} (q3);
+\path[-latex] (q3) edge [above] node {digit} (q4);
+\path[-latex] (q4) edge [loop above] node {digit} (q4);
+\path[-latex, color=\thirdcolour] (q2) edge [bend right, below] node {$\epsilon$} (q4);
+\path[-latex] (q4) edge [above] node {\texttt{E}} (q5);
+\path[-latex] (q5) edge [bend left, above] node {\texttt{+}, \texttt{-}} (q6);
+\path[-latex, color=\thirdcolour] (q5) edge [bend right, above] node {$\epsilon$} (q6);
+\path[-latex] (q6) edge [above] node {digit} (q7);
+\path[-latex] (q7) edge [loop above] node {digit} (q7);
+\end{tikzpicture}
+\caption{A nondeterministic finite automaton with epsilon transitions that recognizes the language of floating-point numbers}
+\label{fig:floatingpointautomaton}
+\end{sidewaysfigure}
+
+Note that adding an epsilon transition to a deterministic finite automaton inherently makes it nondeterministic. This is because we've given the finite automaton the option to transition between two states with or without reading a symbol. There cannot exist a ``deterministic finite automaton with epsilon transitions".
+
+We won't spend too much time discussing further details of nondeterministic finite automata with epsilon transitions, since the model is almost identical to the usual nondeterministic finite automaton model. However, we mention it here because, as we will later see, epsilon transitions can make certain constructions and proofs much easier for us.

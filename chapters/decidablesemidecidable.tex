@@ -1,0 +1,212 @@
+\chapter{Decidable and Semidecidable Languages}\label{chap:decidablesemidecidable}
+
+\firstwords{When we introduced} pushdown automata, we saw that augmenting our machine with a stack gave it a rudimentary form of memory, and it could use this memory to recognize a larger set of languages. However, despite the fact that the stack has an unbounded capacity (and is therefore able to store as many symbols as it wants), we are still limited by the fact that it's a stack, meaning it can only access the top symbol at any given time.
+
+So, how do we overcome this limitation? Let's try adding not one but \emph{two} stacks to our machine! It may not sound like a huge or meaningful change---after all, what can we get with another stack that we didn't already have with the first stack?---but, just like with heads, it turns out that two stacks are better than one.
+
+Suppose we now have two stacks available for us to use. For the purposes of this example, the stacks have been initialized with some symbols already in them.
+\begin{center}
+\begin{tikzpicture}[%
+	stackL/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,white,white,\fourthcolour,white,white}, anchor=center},%
+	stackR/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,white,\fourthcolour,white,white,white}, anchor=center}]
+\node[stackL=6] (SL) {
+\nodepart{four}\color{\maincolour}\texttt{o}
+\nodepart{five}\texttt{w}
+\nodepart{six}\texttt{t}
+};
+\draw[thick, color=white] (SL.north west) -- (SL.north east);
+%
+\node[stackR=6, right of=SL] (SR) {
+\nodepart{three}\color{\maincolour}\texttt{s}
+\nodepart{four}\texttt{t}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{x}
+};
+\draw[thick, color=white] (SR.north west) -- (SR.north east);
+\end{tikzpicture}
+\end{center}
+Even with two stacks, we can still only access the top symbol of each stack: in the first stack, we can access the symbol \texttt{o}, and in the second stack, we can access the symbol \texttt{s}.
+
+But what happens if we use the two stacks in tandem? Suppose we pop one symbol from the second stack, say \texttt{s}, and push it to the first stack.
+\begin{center}
+\begin{tikzpicture}[%
+	stackL/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,white,\fourthcolour,white,white,white}, anchor=center},%
+	stackR/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,white,white,\fourthcolour,white,white}, anchor=center}]
+\node[stackL=6] (SL) {
+\nodepart{three}\color{\maincolour}\texttt{s}
+\nodepart{four}\texttt{o}
+\nodepart{five}\texttt{w}
+\nodepart{six}\texttt{t}
+};
+\draw[thick, color=white] (SL.north west) -- (SL.north east);
+%
+\node[stackR=6, right of=SL] (SR) {
+\nodepart{four}\color{\maincolour}\texttt{t}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{x}
+};
+\draw[thick, color=white] (SR.north west) -- (SR.north east);
+%
+\node[yshift=0.5cm] (symb) at ($(SL.north east)!0.5!(SR.north west)$) {\color{\maincolour}\texttt{s}};
+\path[-Latex, color=\maincolour] (symb.west) edge[bend right] (SL.north);
+\path[-Latex, color=\maincolour] (SR.north) edge[bend right] (symb.east);
+\end{tikzpicture}
+\end{center}
+Now, we have access to the symbol \texttt{t} that was previously beneath \texttt{s} in the second stack, and we haven't lost the symbol \texttt{s} since it's safely stored in the first stack! Similarly, if we pop that symbol \texttt{t} from the second stack and push it to the first stack, we can get access to the symbol \texttt{a} in the second stack.
+\begin{center}
+\begin{tikzpicture}[%
+	stackL/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,\fourthcolour,white,white,white,white}, anchor=center},%
+	stackR/.style={draw, rectangle split, rectangle split parts=#1, rectangle split part fill={white,white,white,white,\fourthcolour,white}, anchor=center}]
+\node[stackL=6] (SL) {
+\nodepart{two}\color{\maincolour}\texttt{t}
+\nodepart{three}\texttt{s}
+\nodepart{four}\texttt{o}
+\nodepart{five}\texttt{w}
+\nodepart{six}\texttt{t}
+};
+\draw[thick, color=white] (SL.north west) -- (SL.north east);
+%
+\node[stackR=6, right of=SL] (SR) {
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\texttt{x}
+};
+\draw[thick, color=white] (SR.north west) -- (SR.north east);
+%
+\node[yshift=0.5cm] (symb) at ($(SL.north east)!0.5!(SR.north west)$) {\color{\maincolour}\texttt{t}};
+\path[-Latex, color=\maincolour] (symb.west) edge[bend right] (SL.north);
+\path[-Latex, color=\maincolour] (SR.north) edge[bend right] (symb.east);
+\end{tikzpicture}
+\end{center}
+It's looking like having two stacks is far more meaningful than we might've initially thought. We can push and pop symbols between the two stacks in order to get access to \emph{any} symbol we've stored in the machine's memory, instead of only the most recent symbol at the top.
+
+Indeed, if we took our two stacks and we aligned them horizontally in such a way that the ``bottoms" of each stack were on the left and right edges\dots
+\begin{center}
+\begin{tikzpicture}[tape/.style={draw, fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, anchor=center}]
+\node[tape=6] (TL) {
+\nodepart{one}\texttt{t}
+\nodepart{two}\texttt{w}
+\nodepart{three}\texttt{o}
+\nodepart{four}\texttt{s}
+\nodepart{five}\texttt{t}
+};
+\draw[thick, color=white] (TL.north east) -- (TL.south east);
+%
+\node[tape=6, right=2em of TL] (TR) {
+\nodepart{four}\phantom{\texttt{t}}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{x}
+};
+\draw[thick, color=white] (TR.north west) -- (TR.south west);
+\end{tikzpicture}
+\end{center}
+\dots we would get a new form of storage: a \emph{tape}.
+
+With a tape, we can move left and right through each cell and access each symbol stored on the tape whenever we want. Indeed, this is exactly what we were doing when we pushed and popped symbols between our two stacks: whatever symbol we're reading on our tape is the symbol found at the top of our second stack.
+
+Just like our stacks have unbounded capacity, our tape has infinite length. We can write as many symbols to the tape as we want, and we can write them to either the left side or the right side of the tape.
+\begin{center}
+\begin{tikzpicture}[tape/.style={draw, fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, anchor=center}]
+\node[tape=20] {
+\nodepart{one}$\cdots$
+\nodepart{two}\phantom{$\blankspace$}
+\nodepart{three}\phantom{$\blankspace$}
+\nodepart{four}\texttt{t}
+\nodepart{five}\texttt{w}
+\nodepart{six}\texttt{o}
+\nodepart{seven}\texttt{s}
+\nodepart{eight}\texttt{t}
+\nodepart{nine}\texttt{a}
+\nodepart{ten}\texttt{x}
+\nodepart{eleven}\texttt{i}
+\nodepart{twelve}\texttt{s}
+\nodepart{thirteen}\texttt{a}
+\nodepart{fourteen}\texttt{t}
+\nodepart{fifteen}\texttt{a}
+\nodepart{sixteen}\texttt{p}
+\nodepart{seventeen}\texttt{e}
+\nodepart{eighteen}\phantom{$\blankspace$}
+\nodepart{nineteen}\phantom{$\blankspace$}
+\nodepart{twenty}$\cdots$
+};
+\end{tikzpicture}
+\end{center}
+
+Since we can now access any symbol of the tape that we want, tape cells that do not contain a symbol become an important consideration. With stacks, we need not worry about blank spaces: since we can only push to or pop from the top of a stack, we have no opportunity to leave gaps and so we never encounter a situation where two symbols are separated by a blank space. If we remove a symbol from a tape, however, the symbols to the left and to the right of the removed symbol do not adjust their positions to compensate. Thus, we notate blank spaces on a tape using the symbol $\blankspace$ .
+\begin{center}
+\begin{tikzpicture}[tape/.style={draw, fill=white, rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, anchor=center}]
+\node[tape=20] {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}$\blankspace$
+\nodepart{four}\texttt{t}
+\nodepart{five}\texttt{w}
+\nodepart{six}\texttt{o}
+\nodepart{seven}\texttt{s}
+\nodepart{eight}\texttt{t}
+\nodepart{nine}\texttt{a}
+\nodepart{ten}\texttt{x}
+\nodepart{eleven}$\blankspace$
+\nodepart{twelve}\texttt{=}
+\nodepart{thirteen}$\blankspace$
+\nodepart{fourteen}\texttt{t}
+\nodepart{fifteen}\texttt{a}
+\nodepart{sixteen}\texttt{p}
+\nodepart{seventeen}\texttt{e}
+\nodepart{eighteen}$\blankspace$
+\nodepart{nineteen}$\blankspace$
+\nodepart{twenty}$\cdots$
+};
+\end{tikzpicture}
+\end{center}
+
+Now that we know the basics of working with tapes, we're ready to replace the stack on our machine with a tape. In doing so, we will obtain one of the most powerful abstract models of computation possible: even more powerful than any real-world computer!
+
+\input{./chapters/decidablesemidecidable/turingmachines}
+\input{./chapters/decidablesemidecidable/variantsofturingmachines}
+\input{./chapters/decidablesemidecidable/closureproperties}
+\input{./chapters/decidablesemidecidable/encodingturingmachines}
+\input{./chapters/decidablesemidecidable/universalturingmachines}
+\input{./chapters/decidablesemidecidable/churchturingthesis}
+\input{./chapters/decidablesemidecidable/chomskyhierarchy}
+
+\unnumberedsection{Chapter Notes}
+
+\begin{enumerate}
+\item[\ref{sec:turingmachines}.] The model of computation that bears Alan Turing's name was first presented in his groundbreaking \citeyear{Turing1936OnComputableNumbers} paper, although in this paper Turing  referred to his model as an \emph{a-machine} (or \emph{automatic machine}). It wasn't until the following year that the name ``Turing machine" was bestowed on the model by~\citet{Church1937ReviewTuring}.
+
+The book by \citet{Petzold2008AnnotatedTuring} breaks down Turing's \citeyear{Turing1936OnComputableNumbers} paper sentence by sentence, providing a remarkably clear and detailed explanation of the techniques Turing used along with a wealth of background information and pointers to further readings, while another book edited by \citet{Copeland2004EssentialTuring} collects a number of Turing's influential writings from across his career.
+
+For those seeking a biography of Alan Turing, the standard reference is the book by~\citet{Hodges1983AlanTuringTheEnigma}, which also formed the basis for the 2014 film \textit{The Imitation Game}. Other biographies have been written by Turing's mother, Sara~\citeyearpar{Turing1959AlanMTuring}, and his nephew, Dermot~\citeyearpar{Turing2015ProfAlanTuringDecoded}.
+
+We indicated that the class of decidable languages was once known as the class of ``recursive languages". While this terminology was commonplace in the early days of computer science, the word ``recursive" is now strongly associated with the idea of recursion in algorithm design. \citet{Soare1996ComputabilityAndRecursion} gives a historical accounting of the development of this terminology and makes an argument for why the word ``recursive" should no longer be used to mean ``decidable". Despite this, some authors continue to refer to the class of ``recursive languages" to this day!
+
+\item[\ref{sec:variantsofturingmachines}.] Nondeterministic Turing machines were introduced alongside the deterministic model in Turing's \citeyear{Turing1936OnComputableNumbers} paper, though Turing called his nondeterministic model a \emph{c-machine} (or \emph{choice machine}) and only referred to the machine in an offhand remark.
+
+The study of multitape Turing machines seems to have originated with the work of \citet{Minsky1961UnsolvabilityPost}, who used a special kind of $2$-tape Turing machine to show that Post's decision problem for tag systems \citeyearpar{Post1943FormalReductionsCombinatorial} is undecidable. Minsky's work was inspired by that of \citet{RabinScott1959FiniteAutomata}, who studied problems relating to finite automata receiving two tapes as input. Supposing that we have a $k$-tape Turing machine that halts on its input word in $T$ computation steps, \citet{HartmanisStearns1965ComputationalComplexityAlgorithms} showed that we may construct a $1$-tape Turing machine that can simulate the original computation in at most $T^{2}$ computation steps, while \citet{HennieStearns1966TwoTapeSimulationTM} showed that a $2$-tape Turing machine can simulate the computation in at most $T\log(T)$ computation steps.
+
+One-way infinite tape Turing machines, believe it or not, also first appeared in Turing's \citeyear{Turing1936OnComputableNumbers} paper; Turing described an example computation in which the first three symbols on the tape are fixed to be ``\textschwa\textschwa\texttt{0}", and where the input head does not move leftward past the two \textschwa\ symbols.
+
+\item[\ref{sec:closurepropertiesdecidable}.] \textsl{Chapter notes will be added when this section is written.}
+
+\item[\ref{sec:encodingturingmachines}.] \textsl{Chapter notes will be added when this section is written.}
+
+\item[\ref{sec:universalturingmachines}.] As we noted, the idea of the universal Turing machine was put forth in Turing's \citeyear{Turing1936OnComputableNumbers} paper. Although our construction here uses three tapes, we could instead use two tapes by the result of \citet{HennieStearns1966TwoTapeSimulationTM} or one tape by the result of \citet{HartmanisStearns1965ComputationalComplexityAlgorithms}, each with a commensurate impact on the time required to complete our computation.
+
+Many researchers have considered the question of how small a universal Turing machine can be while still retaining its universality property. (Note that, in measuring size, we just count the number of states plainly and assume the universal Turing machine does not require distinguished accepting or rejecting states.) Given a universal Turing machine with $n$ states and $m$ alphabet symbols, \citet{Shannon1956UniversalTuringTwoStates} proved that it is possible to construct an equivalent universal Turing machine having only two states and at most $4mn + m$ alphabet symbols, or alternatively one having only two alphabet symbols and $(2^{\ell} - 1)n$ states, where $\ell$ is the smallest integer such that $m \leq 2^{\ell}$. Shannon also established in the same paper that it is impossible to construct a one-state universal Turing machine. Using the notation $(n,m)$ to denote an $n$-state, $m$-symbol universal Turing machine, \citet{Minsky1962UTMsTagSystems} constructed a $(7,4)$ machine while \citet{Rogozhin1996SmallUTMs} constructed seven small universal Turing machines, all the way down to a $(2,18)$ machine. \citet[chapter 11, section 12]{Wolfram2002NewKindOfScience} described a $(2,5)$ machine that is similar but, strictly speaking, not directly comparable to our universal Turing machine model, and he further conjectured the universality of a $(2,3)$ machine. Five years later, Wolfram's conjecture was verified by Alex Smith, who was at the time an undergraduate student; Smith received a \$25\,000 prize and, after protracted discussions about the correctness of his proof, published his results \citeyearpar{Smith2020UniversalityWolframs23Machine}. \citet{Woods2009SmallUTMsSurvey} give a far more detailed account of the history of small universal Turing machines in their survey article.
+
+\item[\ref{sec:churchturingthesis}.] Much has been written about Leibniz and his work in mathematics and logic; see, for example, the papers of \citet{Jourdain1916LogicalWorkOfLeibniz} and \citet{Lenzen2018LeibnizCalculusRatiocinator} as well as the book by \citet[chapter 1]{Davis2000UniversalComputer}.
+
+More information about Hilbert's dream and the quest to solve his second problem---more properly called \emph{Hilbert's program}---is available in the survey by \citet{Zach2007HilbertsProgram}, who gives both historical and philosophical perspectives on Hilbert's early work in the 1890s, through to the consequences of G\"{o}del's incompleteness theorems in the 1930s and 1940s, and leading up to modern results.
+
+For an incredibly detailed discussion of the origins of computability theory and the development of the Church--Turing thesis, see the article by~\citet{Soare1996ComputabilityAndRecursion}.
+
+Although our focus in this section was on the work of Church and Turing, other contributions from this era should not be overlooked. \citet{Post1936FiniteCombinatoryProcesses} proposed a model of computation that he called ``Formulation 1", and his model behaves in a manner basically equivalent to that of a Turing machine. Remarkably, Post completed his work without having any knowledge of Turing's paper, which appeared in the same year. However, Post was aware of the work of both G\"{o}del and Church, indicating that he expected his model to be logically equivalent to their formulation of effective calculability via general recursive functions.
+
+Many unconventional models of computation have been shown to be Turing-complete. Microsoft Excel was studied by \citet{Gordon2021Lambda} and Microsoft PowerPoint was studied by \citet{Wildenhain2017TuringCompletenessPowerPoint}. \citeauthor*{Berlekamp2004WinningWays} investigated the Game of Life in their well-known book~\citeyearpar[][chapter 25]{Berlekamp2004WinningWays}. \citet{Cook2004UniversalityCellularAutomata} established the computational universality of elementary cellular automata. \citet{Shapiro2012MechanicalTuringMachine} and \citet{Scarle2009TuringCompletenessReactionDiffusion} put a biological spin on computation with their studies on enzyme-based DNA computers and human heart cells, respectively. The Turing-completeness of the Dwarf Fortress video game was established via a game map constructed by a player known as \citet{Jong2009DFMapArchive}; Minecraft was suggested to be Turing-complete in a \citeauthor{Bytejacker2010NotchInterview} interview with the game's creator, Markus ``Notch" Persson~\citeyearpar{Bytejacker2010NotchInterview}; and \citet{Kaye2000InfiniteMinesweeper} showed that an infinite variant of Minesweeper possessed the property of Turing-completeness. \citet*{Churchill2021MagicTuringComplete} concluded a nearly decade-long study of the Magic: The Gathering card game. Lastly, \citet{Dolan2013MovTuringComplete} showed that the \texttt{mov} instruction on its own is sufficient to compute anything a Turing machine can compute.
+
+\item[\ref{sec:chomskyhierarchy}.] Noam Chomsky is perhaps best known for his work in linguistics, and his hierarchy was originally intended to act as a mathematical model for natural language. Although Chomsky's first work on formalizing natural language using mathematics appeared in~\citeyear{Chomsky1956ThreeModels}, the hierarchy proposed in his first paper does not correspond to the Chomsky hierarchy as we know it today and instead had more of a linguistic focus. Chomsky would later fix mathematical definitions in a technical report~\citeyearpar{Chomsky1958PropertiesPhraseStructure} before publishing his full paper~\citeyearpar{Chomsky1959FormalPropertiesGrammars}, which proposes a hierarchy that more closely resembles the one we have seen.
+
+In the intervening decades, criticisms have been levelled against the Chomsky hierarchy, for example, from those claiming that the language classes are too coarse. In fact, this is something Chomsky himself recognized, remarking that the class of regular languages is too restrictive to contain a grammar for English~\citeyearpar{Chomsky1956ThreeModels} while the class of recursively enumerable languages is so broad that it is of no interest~\citeyearpar{Chomsky1959FormalPropertiesGrammars}. For further discussion of criticisms from a linguistic perspective, see the book chapter by~\citet{Seuren2013ChomskyHierarchyInPerspective}.
+
+Some researchers have proposed refinements of the Chomsky hierarchy that include ``in-between" classes such as the subregular languages or the mildly context-sensitive languages; see, for instance, the work of \citet{Jager2012RefiningChomsky}.
+\end{enumerate}

@@ -1,0 +1,184 @@
+\section{An Undecidable Problem for Turing Machines}\label{sec:undecidableTM}
+
+\firstwords{After studying so many} decision problems with positive decidability results, one might become convinced that our models of computation are capable of deciding anything we throw at it. Unfortunately, this is not the case: our regular and context-free models happen to be just simple enough to allow us to obtain the positive decidability results we saw in the previous sections, but turning to our strongest model of computation---the Turing machine---things begin to come apart.
+
+But wait, since Turing machines are so powerful, doesn't that mean they can solve all kinds of problems? Indeed, that's true, but they can't \emph{decide} many problems. Remember, in order to decide a problem, the Turing machine must always halt and either accept or reject the input word it was given. As we observed earlier, the most common issue the Turing machine may encounter comes in the ``halt" step, since there's no guarantee that the machine will halt on every input word.
+
+Indeed, even the most basic of decision problems is rendered undecidable on a Turing machine, simply because of that fundamental limitation that the machine may get caught in an infinite loop during its computation. We've proved that the membership problems for regular languages and for context-free languages are both decidable by virtue of the fact that the models recognizing such classes of languages always halt and either accept and reject their input words. For Turing machines, though, we lose this valuable decidability property.
+
+Before we continue, let's review the notions of decidability and semidecidability from the previous chapter. Suppose that $\mathcal{M}$ is a Turing machine recognizing a language $L(\mathcal{M})$. Recall that:
+\begin{colouredbox}
+\begin{itemize}
+\item $L(\mathcal{M})$ is \emph{decidable} if
+	\begin{itemize}
+	\item whenever $w \in L(\mathcal{M})$, $\mathcal{M}$ accepts $w$, while
+	\item whenever $w \not\in L(\mathcal{M})$, $\mathcal{M}$ rejects $w$; and
+	\end{itemize}
+\item $L(\mathcal{M})$ is \emph{semidecidable} if
+	\begin{itemize}
+	\item whenever $w \in L(\mathcal{M})$, $\mathcal{M}$ accepts $w$, while
+	\item whenever $w \not\in L(\mathcal{M})$, $\mathcal{M}$ either rejects $w$ or enters an infinite loop.
+	\end{itemize}
+\end{itemize}
+\end{colouredbox}
+
+It's quite straightforward to show that the membership problem for Turing machines, $\mathit{A}_{\TM}$, is at least semidecidable. All we need to do is simulate the computation of $\mathcal{M}$ on $w$! No matter what $\mathcal{M}$ does---accept, reject, or loop forever---its behaviour matches our definition of semidecidability.
+
+\begin{theorem}\label{thm:ATMsemidecidable}
+$\mathit{A}_{\TM}$ is semidecidable.
+
+\begin{proof}
+Construct a Turing machine $\mathcal{M}_{\mathrm{ATM}}$ that takes as input $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is a Turing machine and $w$ is a word, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\mathrm{ATM}}$}{
+\begin{enumerate}
+\item Simulate $\mathcal{M}$ on input $w$.
+\item If $\mathcal{M}$ ever enters its accepting state $q_{\text{accept}}$, then accept. If $\mathcal{M}$ ever enters its rejecting state $q_{\text{reject}}$, then reject.
+\end{enumerate}
+}
+This Turing machine accepts its input $\langle \mathcal{M}, w \rangle$ if and only if the Turing machine $\mathcal{M}$ accepts its input $w$, and the Turing machine rejects if and only if $\mathcal{M}$ rejects. If $\mathcal{M}$ enters an infinite loop on the input $w$, then $\mathcal{M}_{\mathrm{ATM}}$ will likewise loop forever. Thus, $\mathcal{M}_{\mathrm{ATM}}$ semidecides the membership problem for Turing machines.
+\end{proof}
+\end{theorem}
+
+The machine $\mathcal{M}_{\mathrm{ATM}}$ that we constructed in the proof of Theorem~\ref{thm:ATMsemidecidable} looks quite similar to the machine $\mathcal{M}_{\mathrm{ADFA}}$ we constructed in the proof of Theorem~\ref{thm:ADFAdecidable} to decide $\mathit{A}_{\DFA}$. However, unlike the machine $\mathcal{M}_{\mathrm{ADFA}}$, this machine $\mathcal{M}_{\mathrm{ATM}}$ only semidecides $\mathit{A}_{\TM}$, since it has no way of explicitly rejecting its input word if it gets caught in an infinite loop. The machine $\mathcal{M}_{\mathrm{ATM}}$ can't even guess that it's looping infinitely and ``short circuit" its computation to automatically reject, for the plain reason that if the machine has performed $1\,000\,000$ steps, say, then there's no general way of determining whether it will reach the accepting or rejecting state on step $1\,000\,001$.
+
+Note also that $\mathcal{M}_{\mathrm{ATM}}$ is the canonical example of a universal Turing machine, since we can give it an encoding of any Turing machine $\mathcal{M}$ and any input word $w$ and it will simulate the computation of that Turing machine on that input word.
+
+Now, getting back to our main point, we must prove that $\mathit{A}_{\TM}$ is undecidable; that is to say, $\mathit{A}_{\TM}$ is \emph{not decidable}. The technique we will use is essentially a proof by contradiction: we will assume that we have some machine capable of deciding $\mathit{A}_{\TM}$, and then show that the existence of such a machine leads to a logical absurdity when we give a nefariously crafted input word to that machine.
+
+\begin{theorem}\label{thm:ATMundecidable}
+$\mathit{A}_{\TM}$ is undecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{A}_{\TM}$ is decidable, and suppose that $\mathcal{M}_{\mathrm{A}}$ is a Turing machine that decides $\mathit{A}_{\TM}$. Given an encoding of a Turing machine $\mathcal{M}$ and an input word $w$, $\mathcal{M}_{\mathrm{A}}$ produces the same answer that $\mathcal{M}$ would produce:
+\begin{itemize}
+\item $\mathcal{M}_{\mathrm{A}}$ accepts $\langle \mathcal{M}, w \rangle$ if $\mathcal{M}$ accepts $w$; and
+\item $\mathcal{M}_{\mathrm{A}}$ rejects $\langle \mathcal{M}, w \rangle$ if $\mathcal{M}$ rejects $w$.
+\end{itemize}
+Note that we don't know exactly how $\mathcal{M}_{\mathrm{A}}$ decides the membership problem: we only assume that it is capable of doing it.
+
+We now construct a new Turing machine $\mathcal{X}$ that relies on using $\mathcal{M}_{\mathrm{A}}$ as an intermediate step of its computation. The machine $\mathcal{X}$ takes as input $\langle \mathcal{M} \rangle$, where $\mathcal{M}$ is a Turing machine, and performs the following steps:
+\tmalgorithm{$\mathcal{X}$}{
+\begin{enumerate}
+\item Run $\mathcal{M}_{\mathrm{A}}$ on input $\langle \mathcal{M}, \langle \mathcal{M} \rangle \rangle$.
+\item If $\mathcal{M}_{\mathrm{A}}$ accepts, then \emph{reject}. If $\mathcal{M}_{\mathrm{A}}$ rejects, then \emph{accept}.
+\end{enumerate}
+}
+\noindent
+Here, we see that $\mathcal{X}$ gives as input to $\mathcal{M}_{\mathrm{A}}$ exactly what $\mathcal{M}_{\mathrm{A}}$ expects to receive as input: an encoding of a Turing machine $\mathcal{M}$, together with an input word to $\mathcal{M}$ that happens to be the encoded description of the Turing machine $\mathcal{M}$ itself. This is allowed, since an encoded description of a Turing machine is nothing more than a sequence of symbols just like any other input word. After $\mathcal{M}_{\mathrm{A}}$ halts and produces its answer, $\mathcal{X}$ produces the opposite answer to whatever $\mathcal{M}_{\mathrm{A}}$ gave:
+\begin{itemize}
+\item $\mathcal{X}$ accepts $\langle \mathcal{M} \rangle$ if $\mathcal{M}$ rejects $\langle \mathcal{M} \rangle$; and
+\item $\mathcal{X}$ rejects $\langle \mathcal{M} \rangle$ if $\mathcal{M}$ accepts $\langle \mathcal{M} \rangle$.
+\end{itemize}
+Figure~\ref{fig:ATMproofD} depicts the behaviour of $\mathcal{X}$ visually. Observe in this figure that $\mathcal{M}_{\mathrm{A}}$ is a ``black box", because as we remarked earlier, we don't know exactly how $\mathcal{M}_{\mathrm{A}}$ decides $\mathit{A}_{\TM}$.
+
+Now, consider what happens when we give $\mathcal{X}$ an encoding of \emph{itself} as input. Suppose we give $\mathcal{X}$ the input $\langle \mathcal{X} \rangle$, so that $\mathcal{X}$ runs $\mathcal{M}_{\mathrm{A}}$ on the input $\langle \mathcal{X}, \langle \mathcal{X} \rangle \rangle$. Tracing through the behaviour of $\mathcal{M}_{\mathrm{A}}$ followed by $\mathcal{X}$, we can see that:
+\begin{itemize}
+\item $\mathcal{X}$ accepts $\langle \mathcal{X} \rangle$ if $\mathcal{X}$ rejects $\langle \mathcal{X} \rangle$; and
+\item $\mathcal{X}$ rejects $\langle \mathcal{X} \rangle$ if $\mathcal{X}$ accepts $\langle \mathcal{X} \rangle$.
+\end{itemize}
+In either case, the actual computation of $\mathcal{X}$ on the input $\langle \mathcal{X} \rangle$ must return the opposite answer as the simulated computation of $\mathcal{X}$ on the input $\langle \mathcal{X} \rangle$, which is of course impossible! As a result, we obtain a contradiction. Since the only assumption in our proof is about the existence of $\mathcal{M}_{\mathrm{A}}$, we conclude that no such machine $\mathcal{M}_{\mathrm{A}}$ can exist to decide $\mathit{A}_{\TM}$.
+\end{proof}
+\end{theorem}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, thick, fill=\fourthcolour, rounded corners] (1.5,-0.55) rectangle (9,4);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (2,1) rectangle (3.5,2.5);
+\draw[draw=black, thick, fill=black] (5,1) rectangle (6.5,2.5);
+
+\node[draw=none, color=\maincolour] at (2.75,3.25) {\huge$\mathcal{X}$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center] at (2.75,1.75) {Convert \\ input};
+\node[draw=none, color=white, text width=2cm, align=center] at (5.75,1.75) {\huge$\mathcal{M}_{\mathrm{A}}$};
+
+\coordinate (A) at (2,1.75);
+\coordinate (B) at (0.5,1.75);
+\draw[-latex, color=\maincolour, thick] (B) -- (A);
+\node[draw=none, color=\maincolour] at (0.95,2.15) {\footnotesize$\langle \mathcal{M} \rangle$};
+
+\coordinate (C) at (5,1.75);
+\coordinate (D) at (3.5,1.75);
+\draw[-latex, color=\maincolour, thick] (D) -- (C);
+\node[draw=none, color=\maincolour] at (4.25,2.15) {\footnotesize$\langle \mathcal{M}, \langle \mathcal{M} \rangle \rangle$};
+
+\coordinate (E) at (11.3,3);
+\coordinate (EE) at (11.3,0.5);
+\coordinate (EF) at (6.5, 3);
+\coordinate (F) at (5.75,2.5);
+\coordinate (FE) at (6.5, 0.5);
+\coordinate (FF) at (5.75,1);
+\draw[-latex, color=\maincolour, thick] (F) -- (EF) -- (E);
+\draw[-latex, color=\maincolour, thick] (FF) -- (FE) -- (EE);
+\node[draw=none, color=\maincolour] at (7.25,3.3) {\footnotesize$\mathcal{M}_{\mathrm{A}}$ accepts $\langle \mathcal{M}, \langle \mathcal{M} \rangle \rangle$};
+\node[draw=none, color=\maincolour] at (7.25,3.65) {\footnotesize$\mathcal{M}$ accepts $\langle \mathcal{M} \rangle$};
+\node[draw=none, color=\maincolour] at (7.25,-0.2) {\footnotesize$\mathcal{M}_{\mathrm{A}}$ rejects $\langle \mathcal{M}, \langle \mathcal{M} \rangle \rangle$};
+\node[draw=none, color=\maincolour] at (7.25,0.15) {\footnotesize$\mathcal{M}$ rejects $\langle \mathcal{M} \rangle$};
+\node[draw=none, color=\maincolour] at (10.25,3.45) {\footnotesize$\mathcal{X}$ rejects $\langle \mathcal{M} \rangle$};
+\node[draw=none, color=\maincolour] at (10.25,0) {\footnotesize$\mathcal{X}$ accepts $\langle \mathcal{M} \rangle$};
+\end{tikzpicture}
+\caption{The Turing machine $\mathcal{X}$ from the proof of Theorem~\ref{thm:ATMundecidable}}
+\label{fig:ATMproofD}
+\end{figure}
+
+\subsubsection*{Diagonalization}
+
+The underlying concept that makes the proof of Theorem~\ref{thm:ATMundecidable} work is \emph{Cantor's diagonal argument}, named for the mathematician Georg Cantor, who used the argument to demonstrate the existence of uncountably infinite sets~\citeyearpar{Cantor1891Mannigfaltigkeitslehre}. An \emph{uncountably infinite} set is one whose elements cannot be placed into a bijection with the \emph{countably infinite} set of natural numbers $\mathbb{N}$.
+
+The crux of the diagonal argument is as follows: if we take a set $T$ of all infinite-length binary words and assume that this set is countably infinite, then we can enumerate (that is, \emph{count}) all of the elements of $T$, and we can denote this by writing something like $T = \{t_{0}, t_{1}, t_{2}, \dots\}$. However, using the set $T$ itself, we can construct a new word $s$ that doesn't belong to $T$ by taking the $i$th symbol of $s$ to be the complement of the $i$th symbol in the word $t_{i}$. This means that if the $i$th symbol in the word $t_{i}$ is \texttt{0}, then we set the $i$th symbol of $s$ to be \texttt{1}, and vice versa. This construction process is illustrated in Figure~\ref{fig:cantorsdiagonalargument}.
+
+In the process of constructing this new word $s$, we can see that it differs from every other word in $T$ in at least one position; namely, $s$ differs from $t_{i}$ at least in position $i$. (For example, compare $s$ to $t_{9}$ in Figure~\ref{fig:cantorsdiagonalargument}.) Therefore, it's impossible for $s$ to have already been included in $T$. Since $s$ is not an element of $T$, we could not have accounted for $s$ in our enumeration of $T$. Moreover, since we can create an infinite number of new words in this way, and none of these new words is accounted for in our enumeration, $T$ must not be countably infinite.
+
+\begin{figure}
+\centering
+\begin{tabular}{r c p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} p{0.05em} c}
+$t_{0}$	& $=$	& {\leavevmode\color{\secondcolour}\ul{0}}	& 0	& 0	& 0	& 0	& 0	& 0	& 0	& 0	& 0	& $\cdots$ \\
+$t_{1}$	& $=$	& 1	& {\leavevmode\color{\secondcolour}\ul{1}}	& 1	& 1	& 1	& 1	& 1	& 1	& 1	& 1	& $\cdots$ \\
+$t_{2}$	& $=$	& 0	& 0	& {\leavevmode\color{\secondcolour}\ul{1}}	& 0	& 1	& 1	& 0	& 1	& 1	& 1	& $\cdots$ \\
+$t_{3}$	& $=$	& 0	& 1	& 1	& {\leavevmode\color{\secondcolour}\ul{0}}	& 1	& 0	& 0	& 1	& 1	& 0	& $\cdots$ \\
+$t_{4}$	& $=$	& 1	& 0	& 1	& 0	& {\leavevmode\color{\secondcolour}\ul{1}}	& 0	& 1	& 0	& 1	& 0	& $\cdots$ \\
+$t_{5}$	& $=$	& 1	& 1	& 0	& 0	& 1	& {\leavevmode\color{\secondcolour}\ul{1}}	& 0	& 0	& 1	& 1	& $\cdots$ \\
+$t_{6}$	& $=$	& 0	& 0	& 0	& 1	& 1	& 1	& {\leavevmode\color{\secondcolour}\ul{0}}	& 0	& 0	& 1	& $\cdots$ \\
+$t_{7}$	& $=$	& 1	& 0	& 0	& 1	& 0	& 1	& 1	& {\leavevmode\color{\secondcolour}\ul{0}}	& 0	& 1	& $\cdots$ \\
+$t_{8}$	& $=$	& 0	& 1	& 0	& 1	& 0	& 1	& 0	& 1	& {\leavevmode\color{\secondcolour}\ul{0}}	& 1	& $\cdots$ \\
+$t_{9}$	& $=$	& 1	& 0	& 0	& 1	& 0	& 0	& 1	& 1	& 1	& {\leavevmode\color{\secondcolour}\ul{0}}	& $\cdots$ \\
+		& $\vdots$	&	&	&	&	&	&	&	&	&	&	& \\
+\midrule
+$s$		& $=$	& {\leavevmode\color{\secondcolour}\ul{1}}	& {\leavevmode\color{\secondcolour}\ul{0}}	& {\leavevmode\color{\secondcolour}\ul{0}}	& {\leavevmode\color{\secondcolour}\ul{1}}	& {\leavevmode\color{\secondcolour}\ul{0}}	& {\leavevmode\color{\secondcolour}\ul{0}}	& {\leavevmode\color{\secondcolour}\ul{1}}	& {\leavevmode\color{\secondcolour}\ul{1}}	& {\leavevmode\color{\secondcolour}\ul{1}}	& {\leavevmode\color{\secondcolour}\ul{1}}	& $\cdots$
+\end{tabular}
+\caption{Constructing a new word $s$ that doesn't belong to the set $T$ using Cantor's diagonal argument}
+\label{fig:cantorsdiagonalargument}
+\end{figure}
+
+Cantor's diagonal argument is popularly used to prove that the set of real numbers $\mathbb{R}$ is uncountably infinite, but the same argument can be applied to Turing machines in order to prove that $\mathit{A}_{\TM}$ is undecidable. If we could enumerate all Turing machines, then we could construct a table where each row corresponds to a Turing machine $\mathcal{M}_{i}$ and each column corresponds to an encoding of a Turing machine $\langle \mathcal{M}_{j} \rangle$. Then, the entries of the table could be taken to be the result of running our supposed machine $\mathcal{M}_{\mathrm{A}}$ on the input $\langle \mathcal{M}_{i}, \langle \mathcal{M}_{j} \rangle \rangle$, where each entry is either ``accept" or ``reject" depending on the answer that $\mathcal{M}_{\mathrm{A}}$ produced.
+
+\begin{center}
+\small
+\begin{tabular}{c | c c c c c}
+				& $\langle \mathcal{M}_{0} \rangle$	& $\langle \mathcal{M}_{1} \rangle$	& $\langle \mathcal{M}_{2} \rangle$	& $\langle \mathcal{M}_{3} \rangle$	& $\cdots$ \\
+\hline
+$\mathcal{M}_{0}$	& accept						& accept						& reject						& reject						& \\
+$\mathcal{M}_{1}$	& accept						& reject						& reject						& accept						& \\
+$\mathcal{M}_{2}$	& reject						& reject						& accept						& accept						& \\
+$\mathcal{M}_{3}$	& accept						& accept						& accept						& reject						& \\
+$\vdots$			&							&							&							&							& $\ddots$
+\end{tabular}
+\end{center}
+
+By the fact that $\mathcal{X}$ itself is a Turing machine, we know that $\mathcal{X}$ must appear somewhere in our enumerated list, and thus in our table. We also know each entry in the row corresponding to $\mathcal{X}$: since $\mathcal{X}$ produces the opposite answer to whatever $\mathcal{M}_{\mathrm{A}}$ produces on the input $\langle \mathcal{M}_{i}, \langle \mathcal{M}_{i} \rangle \rangle$, the entry in column $i$ must be the opposite of the entry at position $(i,i)$ of the table. But again, therein lies the problem: what is the table entry at the position corresponding to $\langle \mathcal{X}, \langle \mathcal{X} \rangle \rangle$?
+
+\begin{center}
+\small
+\begin{tabular}{c | c c c c c c c}
+				& $\langle \mathcal{M}_{0} \rangle$	& $\langle \mathcal{M}_{1} \rangle$	& $\langle \mathcal{M}_{2} \rangle$	& $\langle \mathcal{M}_{3} \rangle$	& $\cdots$	& $\langle \mathcal{X} \rangle$	& $\cdots$ \\
+\hline
+$\mathcal{M}_{0}$	& {\leavevmode\color{\secondcolour}\ul{accept}}					& accept						& reject						& reject			& 					& accept	& \\
+$\mathcal{M}_{1}$	& accept						& {\leavevmode\color{\secondcolour}\ul{reject}}						& reject						& accept			& 					& reject	& \\
+$\mathcal{M}_{2}$	& reject						& reject						& {\leavevmode\color{\secondcolour}\ul{accept}}					& accept			& 					& reject	& \\
+$\mathcal{M}_{3}$	& accept						& accept						& accept						& {\leavevmode\color{\secondcolour}\ul{reject}}			& 					& accept	& \\
+$\vdots$			&							&							&							&							& $\ddots$		&					& \\
+$\mathcal{X}$		& {\leavevmode\color{\secondcolour}\ul{reject}}		& {\leavevmode\color{\secondcolour}\ul{accept}}	& {\leavevmode\color{\secondcolour}\ul{reject}}		& {\leavevmode\color{\secondcolour}\ul{accept}}	&		& \textbf{?}	& \\
+$\vdots$			&							&							&							&							&				&					& $\ddots$
+\end{tabular}
+\end{center}
+
+The entry at this position of the table somehow needs to be the opposite of itself, and so we arrive at the same contradiction as before. The Turing machine $\mathcal{X}$ cannot exist, which means that the Turing machine $\mathcal{M}_{\mathrm{A}}$ cannot exist, which means that $\mathit{A}_{\TM}$ is undecidable.

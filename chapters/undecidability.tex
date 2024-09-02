@@ -1,0 +1,56 @@
+\chapter{Proving Undecidability}
+
+\firstwords{Thus far, we only have} a couple of examples of decision problems that are undecidable, but these examples are big ones: the membership and non-membership problems for Turing machines. These particular problems being undecidable presents a huge issue for us, since the simple matter of testing membership of an input word in a Turing machine's language is fundamental to answering nearly any other question about the capabilities of a Turing machine.
+
+We know that other undecidable languages exist---in fact, as we observed earlier, there are uncountably many such languages! And, as we might expect, many decision problems for Turing machines fall into this category. So how do we prove such problems truly are undecidable?
+
+In the previous chapter, we combined the techniques of \emph{arithmetization} and \emph{diagonalization} to obtain our first undecidability result. Arithmetization is a fancy word that describes the process of encoding the behaviour of a Turing machine as a string of symbols; say, taking a \texttt{1} as the $i$th symbol if some Turing machine accepts the description of another Turing machine $\langle \mathcal{M}_{i} \rangle$ and \texttt{0} if it rejects the description. We then know from our discussion of diagonalization how these strings of symbols can be manipulated to produce a new string that leads to some absurd and undefined behaviour. But admittedly, undecidability proofs via diagonalization are lengthy and tedious. Is there some other (hopefully easier) way to prove that a decision problem is undecidable?
+
+Enter the notion of \emph{reducibility}. A reduction is a way for us to relate the difficulty of one decision problem to the difficulty of another. If we know how to turn one problem into another, then we can use an existing Turing machine or algorithm for the second problem also to decide the first problem. On the other hand, if we know how to turn one problem into another and we know that the first problem cannot be decided by any Turing machine or algorithm, then we can conclude that it's hopeless for us to decide the second problem. Therein lies the other (easier) way for us to prove undecidability: if we can turn either of our known-undecidable problems $\mathit{A}_{\TM}$ or $\overline{\mathit{A}_{\TM}}$ into some new problem, then we have our proof!
+
+If a reduction seems a bit abstract based on what you've read so far, consider that you encounter examples of reductions in your daily life without even realizing it. For example, if you've recently gone to the library to sign out a book you want to read, the problem of locating that book in the stacks is no more difficult than the problem of searching for that book in the library's catalog. If you know how to use the library's catalog, then you know how to acquire the classification number of the book and where to find it on the shelf.
+
+In this chapter, we will use reductions to prove that many decision problems for Turing machines are undecidable, including one of the most famous problems in all of computer science. Each of our proofs of undecidability will have a very similar structure, highlighting the versatility of this approach over our more tedious and ad hoc diagonalization approach. We will then put a spin on the idea of reducibility in order to go one step further and prove that certain decision problems pertaining to context-free languages are likewise undecidable.
+
+\input{./chapters/undecidability/manyonereductions}
+\input{./chapters/undecidability/haltingproblem}
+\input{./chapters/undecidability/undecidableproblemsturingmachines}
+\input{./chapters/undecidability/reductionsTMcomputations}
+\input{./chapters/undecidability/undecidableproblemscontextfree}
+\input{./chapters/undecidability/postcorrespondenceproblem}
+\input{./chapters/undecidability/ricestheorem}
+
+\unnumberedsection{Chapter Notes}
+
+\firstwords{The body of work} pertaining to undecidability is vast, and the papers therein are often dense with mathematical and logical notation. \citet{Davis1965TheUndecidable} collects many of the major papers in his anthology and provides brief commentaries for each paper.
+
+\begin{enumerate}
+\item[\ref{sec:manyonereductions}.] Many-one reductions were first studied by~\citet{Post1944RecursivelyEnumerableSets}. As we noted, the name ``many-one" reflects the fact that a reduction is a function, but Post chose this particular name to set this notion of reducibility apart from his more restrictive notion of \emph{one-one reducibility}, where the function is constrained to be injective. \citet{Shapiro1956DegreesOfComputability} later studied ideas similar to those of Post, but referred to many-one reducibility as \emph{strong reducibility}.
+
+Other authors refer to many-one reductions under a different name; for instance, \cite{Sipser2013TheoryOfComputation3rdEd} calls them \emph{mapping reductions}.
+
+The result stated in Lemma~\ref{lem:manyonereductionreflexivetransitive} follows more or less directly from the definition of a many-one reduction, but \citet{Shapiro1956DegreesOfComputability} explicitly lists these same properties in his paper.
+
+\item[\ref{sec:haltingproblem}.] The Goldbach conjecture was first formulated in a letter from Christian Goldbach to Leonhard Euler written in 1742. In our discussion, we noted that the conjecture was verified for all even numbers up to $4 \times 10^{18}$. This verification was performed by~\citet*{OliveiraESilva2014EmpricalVerificationGoldbach}.
+
+The earliest mention of a decision problem that asks about ``a machine which \textup{[\,\dots]} eventually stops" appears in Kleene's book~\citeyearpar[chapter XIII, section 71]{Kleene1952IntroductionToMetamathematics}; there, Kleene further asserts that the problem is undecidable. The term ``halting problem" was introduced by~\citet[chapter 5, section 2]{Davis1958ComputabilityUnsolvability}, who again proved that the problem is undecidable. For more information, \citet{Lucas2021OriginsHaltingProblem} has written a detailed survey on the history of the halting problem.
+
+Although a number of authors claim that Alan Turing originally studied the halting problem in his \citeyear{Turing1936OnComputableNumbers} paper, this is not the case! While Turing did prove the undecidability of a \emph{satisfactoriness problem} in his paper, and while this problem does ask whether a given machine $\mathcal{M}$ is ``circular" or ``circle-free", this problem is not equivalent to the halting problem. Indeed, using the notion of \emph{degrees of unsolvability} \citep{Post1944RecursivelyEnumerableSets}, we note that while the halting problem belongs to the class of recursively enumerable sets of numbers (i.e., $\mathit{H}_{\TM}$ is of degree $\mathbf{0}'$), the satisfactoriness problem belongs to a strictly larger class (i.e., satisfactoriness is of degree $\mathbf{0}''$). See the aforementioned survey by \citet{Lucas2021OriginsHaltingProblem} for a proof of this fact.
+
+An alternative, more Seussical proof of the undecidability of the halting problem was published by \citet{Pullum2000LoopSnooper}. \par
+\epigraph{No program can say what another will do.\par
+Now, I won't just assert that, I'll prove it to you:\par
+I will prove that although you might work till you drop,\par
+you can't predict whether a program will stop.}{Geoffrey Pullum}{Scooping the Loop Snooper}{}
+\vspace{1em}
+
+\item[\ref{sec:moreundecidableTM}.] There are many (many) more undecidable problems than those we have discussed in this section. The book chapter by \citet{Davis1977UnsolvableProblems} provides a nice overview of a number of undecidable problems in computer science and fields beyond, including group theory, combinatorics, and number theory. \citet{Harkleroad1996WhatComputersCantDo} gives a gentler introduction to some of the same undecidability results.
+
+\item[\ref{sec:reductionsTMcomputations}.] As we noted, \citet{Hartmanis1967CFLsAndTMComputations} was the first to draw a connection between context-free languages and the computations of Turing machines. In tandem with the result that all invalid computation histories of a Turing machine are context-free, Hartmanis further showed that all valid computation histories of a Turing machine can be represented as the intersection of two context-free languages.
+
+\item[\ref{sec:undecidableproblemscontextfree}.] Both the equivalence problem and the inclusion problem were shown to be undecidable by \citet*{BarHillel1961FormalPropertiesPhraseStructureGrammars}, whose proofs relied on a reduction from the Post correspondence problem. The undecidability of the universality problem follows from its relationship to the equivalence problem. \citet{Hartmanis1967CFLsAndTMComputations} gave alternative proofs of these same facts by reducing from the halting problem rather than the Post correspondence problem.
+
+\item[\ref{sec:postcorrespondenceproblem}.] \textsl{Chapter notes will be added when this section is written.}
+
+\item[\ref{sec:ricestheorem}.] \textsl{Chapter notes will be added when this section is written.}
+\end{enumerate}

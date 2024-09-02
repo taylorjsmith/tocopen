@@ -1,0 +1,121 @@
+\chapter{Context-Free Languages}\label{chap:contextfree}
+
+\firstwords{Recall that}, in our discussion on regular languages, we introduced the notion of a regular expression. This expression essentially performed a kind of pattern matching to accept text in a certain form and reject all other text not of that form.
+
+We can take this idea of matching patterns in text and modify it to work not just for individual words, but for the structure and composition of the entire text. This ability comes in the form of \emph{grammars}, which provide us with a set of \emph{rules} that we can follow to produce words that belong to a certain language. If a grammar produces all and only those words belonging to a certain language, then we say the grammar \emph{generates} that language.
+
+The idea of creating grammars for languages is nothing new; linguists have been using grammars to study natural languages for centuries, dating all the way back to the work of the ancient grammarian \citet{Panini500BCEAstadhyayi}, who created an early grammar for Sanskrit. Mathematicians developed \emph{rewriting rules} in the early 1900s to transform strings of symbols, and with the mid-century advent of computer science, grammars began to be applied to formal languages and programming languages.
+
+If you look at the specification manual for any programming language, you will likely find tucked away somewhere in the documentation a grammar for that language. This grammar, which could number into the tens of pages, describes precisely what the structure of a program written in that language should look like. In fact, this grammar is exactly what the compiler relies on to check for syntax errors in your program!
+
+\begin{figure}
+\centering
+\begin{minipage}{0.8\linewidth}
+\textit{Statement:} \\
+\hspace*{1.5em}	\textit{Block} \\
+\hspace*{1.5em}	\texttt{assert} \textit{Expression [} \texttt{:} \textit{Expression]} \texttt{;} \\
+\hspace*{1.5em}	\texttt{if} \textit{ParExpression Statement [}\texttt{else} \textit{Statement]} \\
+\hspace*{1.5em}	\texttt{for (} \textit{ForControl} \texttt{)} \textit{Statement} \\
+\hspace*{1.5em}	\texttt{while} \textit{ParExpression Statement} \\
+\hspace*{1.5em}	\texttt{do} \textit{Statement} \texttt{while} \textit{ParExpression} \texttt{;} \\
+\hspace*{1.5em}	\texttt{try} \textit{Block ( Catches \textpipe\ [Catches]} \texttt{finally} \textit{Block )} \\
+\hspace*{1.5em}	\texttt{switch} \textit{ParExpression} \texttt{\{} \textit{SwitchBlockStatementGroups} \texttt{\}} \\
+\hspace*{1.5em}	\texttt{synchronized} \textit{ParExpression Block} \\
+\hspace*{1.5em}	\texttt{return} \textit{[Expression]} \texttt{;} \\
+\hspace*{1.5em}	\texttt{throw} \textit{Expression} \texttt{;} \\
+\hspace*{1.5em}	\texttt{break} \textit{[Identifier]} \\
+\hspace*{1.5em}	\texttt{continue} \textit{[Identifier]} \\
+\hspace*{1.5em}	\texttt{;} \\
+\hspace*{1.5em}	\textit{StatementExpression} \texttt{;} \\
+\hspace*{1.5em}	\textit{Identifier } \texttt{:} \textit{ Statement}
+\end{minipage}
+\caption{An excerpt from the grammar in the \textit{Java Language Specification}}
+\label{fig:javalanguage}
+\end{figure}
+
+As an example, let's consider the excerpt depicted in Figure~\ref{fig:javalanguage}, taken from the grammar found in the \textit{Java Language Specification}~\citep*[chapter 18]{Gosling2005JavaLanguageSpecification}. This part of the grammar checks code blocks such as if-else statements, for and while loops, and so on. Every \textit{italicized} word corresponds to another rule in the grammar, while \texttt{monospaced} words are language keywords. For instance, the \texttt{if} rule checks that every if-else block in a program follows the syntax that the compiler expects: it begins with the keyword \texttt{if} together with a \textit{parenthesized expression}, followed by a \textit{statement}, and ending with an optional \texttt{else} block.
+
+\input{./chapters/contextfree/contextfreegrammars}
+\input{./chapters/contextfree/pushdownautomata}
+\input{./chapters/contextfree/equivalenceofmodels}
+\input{./chapters/contextfree/closureproperties}
+\input{./chapters/contextfree/noncontextfree}
+%\input{./chapters/contextfree/subfamilies}
+
+\subsubsection*{Summary}
+
+At this point, let's now revisit the diagram we introduced in Figure~\ref{fig:chomskyregular} and add to it the class of context-free languages. On the one hand, we know that all of the languages we previously showed to be nonregular belong to our new context-free class, but on the other hand, we also now know that there exist languages that aren't context-free. Therefore, sadly, our diagram is still incomplete, but the end is in sight: we will take care of the final classes in the next chapter.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\draw[draw=\thirdcolour, fill=\thirdcolour, thick, rounded corners, shift={(2,1)}] (-4.25,-2.6) rectangle (4.25,3.4);
+\draw[draw=\fourthcolour, fill=\fourthcolour, thick, rounded corners, shift={(2,1)}] (-3,-2) rectangle (3,2);
+\draw[draw=\fifthcolour, fill=\fifthcolour, thick, rounded corners, shift={(2,1)}] (-1.75,-1.4) rectangle (1.75,0.6);
+
+\node[color=\maincolour] at (2,1.15) {Finite Languages};
+\node[color=\maincolour] at (2,0) {\textit{Acyclic DFAs}};
+\node[color=black] at (1,0.6) {$\{\epsilon\}$};
+\node[color=black] at (2,0.6) {$\{a\}$};
+\node[color=black] at (3,0.6) {$\emptyset$};
+
+\node[color=\maincolour] at (2,2.6) {Regular Languages};
+\node[color=\maincolour] at (2,-0.667) {\textit{Finite Automata}};
+\node[color=black] at (-0.35,1.25) {$\Sigma^{*}$};
+\node[color=black] at (0.25,2) {$\texttt{a} \cup \texttt{ba}$};
+\node[color=black] at (2,2) {$\{\texttt{a}, \texttt{b}\}^{*}\texttt{c}$};
+\node[color=black] at (3.75,2) {$\texttt{01}^{*} \cup \texttt{1}$};
+\node[color=black] at (4.35,1.25) {$\texttt{a}^{n}$};
+
+\node[color=\maincolour] at (2,4) {Context-Free Languages};
+\node[color=\maincolour] at (2,-1.3) {\textit{Pushdown Automata}};
+\node at (-1.6,1.5) {$w\overline{w}$};
+\node at (-1.6,2.5) {$L_{\texttt{()}}$};
+\node at (-0.75,3.5) {$L_{a>b}$};
+\node at (1.1,3.5) {$\texttt{a}^{n}\texttt{b}^{n}$};
+\node at (2.9,3.5) {$\texttt{a}^{i}\texttt{\#}\texttt{b}^{i}$};
+\node at (4.75,3.5) {$ww^{\text{R}}$};
+\node at (5.65,2.5) {$\texttt{a}^{i}\texttt{b}^{j}\texttt{c}^{k}$};
+\node at (5.62,2) {{\footnotesize$(i=j \text{ or}$}};
+\node at (5.65,1.65) {{\footnotesize$j=k)$}};
+
+\node[color=\maincolour] at (-0.75,4.85) {$ww$};
+\node[color=\maincolour] at (2,4.85) {$\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n}$};
+\node[color=\maincolour] at (4.75,4.85) {$\texttt{a}^{n}\texttt{b}^{m}\texttt{c}^{n}\texttt{d}^{m}$};
+\end{tikzpicture}
+\caption{The hierarchy of language classes and models of computation, as we know it currently}
+\label{fig:chomskycontextfree}
+\end{figure}
+
+\unnumberedsection{Chapter Notes}
+
+\firstwords{A comprehensive early survey} of the theory of context-free languages can be found in the book by \citet{Ginsburg1966MathematicalTheoryCFLs}.
+
+\begin{enumerate}
+\item[\ref{sec:contextfreegrammars}.] The study of context-free grammars has its origins in the more general study of \emph{phrase structure grammars}, which are a means of performing \emph{immediate constituent analysis}; that is, dividing up a sentence into constituent parts, much like we did with the parse tree in Figure~\ref{fig:parsetree}. In linguistics, immediate constituent analysis dates back to the work of \citet{Bloomfield1933Language}, and attempts to formalize the notion were made by \citet{Harris1946MorphemeUtterance} and \citet{Wells1947ImmediateConstituents}. One can argue that the point at which linguistics and mathematics merged began with the work of \citet{Chomsky1956ThreeModels}, which was inspired by the earlier \emph{canonical systems} of \citet{Post1943FormalReductionsCombinatorial} and the \emph{string rewriting systems} of \citet{Thue1914Veranderungen}.
+
+The name ``context-free" seems to be due to \citet{Chomsky1959NotePhraseStructure}, although this terminology took some time to catch on: Chomsky previously referred to context-free grammars as ``type 2 grammars" \citeyearpar{Chomsky1959FormalPropertiesGrammars}, while \citet*{BarHillel1961FormalPropertiesPhraseStructureGrammars} called them ``simple phrase structure grammars" and \citet{GinsburgRice1962LanguagesRelatedALGOL} referred to the languages generated by such grammars as ``definable sets".
+
+\citet{Parikh1961LanguageGeneratingDevices} was the first to demonstrate the existence of inherently ambiguous context-free grammars; specifically, he showed that no unambiguous grammar exists for the context-free language
+\begin{equation*}
+\{\texttt{a}^{n}\texttt{b}^{m}\texttt{a}^{n'}\texttt{b}^{m} \mid m, n, n' \geq 1\} \cup \{\texttt{a}^{n}\texttt{b}^{m}\texttt{a}^{n}\texttt{b}^{m'} \mid m, m', n \geq 1\}.
+\end{equation*}
+
+As we noted, Chomsky normal form was introduced by \citet{Chomsky1959FormalPropertiesGrammars}. In fact, Chomsky proved an even stronger result in his paper: every context-free language has a context-free grammar where not only do all rules take the form $A \rightarrow a$ or $A \rightarrow BC$, where $A, B, C \in V$, $a \in \Sigma$, and $B \neq C$, but also if the grammar has rules of the form $A \rightarrow \alpha_{1}B\alpha_{2}$ and $A \rightarrow \gamma_{1}B\gamma_{2}$, then either $\alpha_{1} = \gamma_{1} = \epsilon$ or $\alpha_{2} = \gamma_{2} = \epsilon$.
+
+\citet{LangeLeiss2009EfficientCNF} observed a connection between the order in which steps are applied to convert a grammar to Chomsky normal form and the size of the resultant grammar, where size is measured in terms of the number of symbols needed to write the grammar. If we denote the size of the original grammar by $|G|$, a suboptimal ordering of steps (specifically, where \textbf{DEL} comes before \textbf{BIN}) produces a resultant grammar having a size of $2^{2|G|}$ in the worst case, while the order in which we apply the steps here produces a grammar of size $|G|^{2}$ in the worst case. It turns out we cannot do better than this quadratic factor, which is incurred via the \textbf{UNIT} step.
+
+\item[\ref{sec:pushdownautomata}.] The earliest mention of a machine that uses pushdown storage to perform a computation seems to be in an article by \citet*{Burks1954AnalysisLogicalMachine}, where the authors give an algorithm to check the well-formedness of a parenthesis-free Boolean formula; that is, a formula written in the Polish notation of \citet{Lukasiewicz1929MathematicalLogic}. A more explicit construction of a machine using pushdown storage was given by \citet{NewellShaw1957ProgrammingLogicTheoryMachine}, who described a machine that manages memory usage by keeping addresses of free memory locations on an ``available-space list". The addresses of recently freed memory locations are pushed to the front of this list, and memory needs are handled by popping addresses, again, from the front of the list. (On an unrelated note, this so-called ``Logic Theorist" machine described by Newell, Shaw, and Herbert A.\ Simon was the first description of a computer that makes use of automated reasoning, and is considered by some to be the first-ever implementation of artificial intelligence.)
+
+The term ``pushdown store" itself is due to \citet{Oettinger1961AutomaticSyntacticAnalysis}. The first use of pushdown storage pertaining to the class of context-free languages seems to be due to \citet{Chomsky1962CFGsPushdownStorage}.
+
+We observed that nondeterministic pushdown automata are more powerful than deterministic pushdown automata in that the nondeterministic model recognizes more languages. The study of deterministic context-free languages was initiated by \citet{Ginsburg1966DCFLs}.
+
+\item[\ref{sec:equivalenceofmodelscontextfree}.] The equivalence in recognition power between context-free grammars and pushdown automata was established by \citet{Chomsky1962CFGsPushdownStorage} and \citet{ChomskySchutzenberger1963ContextFree}, and independently by \citet{Evey1963ApplicationsPushdownStore, Evey1963PhDThesis}. However, each of their approaches to showing equivalence is rather more complex than the one presented here.
+
+\item[\ref{sec:closurepropertiescontextfree}.] Closure of the class of context-free languages under union, as well as non-closure under intersection and complement, was established by~\citet{Scheinberg1960BooleanPropertiesCFLs}.
+
+\item[\ref{sec:noncontextfree}.] The pumping lemma for context-free languages is due to~\citet*{BarHillel1961FormalPropertiesPhraseStructureGrammars}.
+
+We know from the previous chapter that the language of binary representations of prime numbers, $L_{\text{primes}2}$, is nonregular. \citet{HartmanisShank1968RecognitionPrimesAutomata} further established that this language cannot be accepted by any pushdown automaton, and therefore it is also non-context-free. The same result, proved via a different approach, was published independently by \citet{Schutzenberger1968RemarkAcceptableSets}.
+\end{enumerate}

@@ -1,0 +1,92 @@
+\section{The Church--Turing Thesis}\label{sec:churchturingthesis}
+
+\firstwords{Long ago}, before digital computers as we know them existed and even before the phrase ``computer science" entered the lexicon of humanity, mathematicians and logicians wanted to know whether it was possible to use mechanical procedures to solve mathematical problems. The desire for such procedures dates back to the 17th century and the time of Gottfried Wilhelm Leibniz, who dreamt of constructing a machine he called a \emph{calculus ratiocinator} to automate the task of performing general mathematical calculations. (Although Leibniz is well-known for his work on \emph{the} calculus of infinitesimals that one often learns in school, the word ``calculus" in this sense refers more generally to a system for performing calculations.)
+
+Leibniz's ratiocinator was to use a formal language he called \emph{characteristica universalis}---Latin for ``universal character"---which he intended to be a general framework for expressing mathematical concepts in symbols. Indeed, the characteristica universalis might be considered the first programming language! Although Leibniz never succeeded in constructing his ratiocinator, his dream formed the precursor for much of the work done in the formalization of mathematics throughout the 19th and 20th centuries.
+
+At the turn between these two centuries, David Hilbert delivered a presentation to the International Congress of Mathematicians~\citeyearpar{Hilbert1900MathematischeProbleme, Hilbert1901MathematischeProbleme} wherein he outlined 10 (and later, an additional 13) unsolved problems that would come to guide the new century's study of mathematics. Of Hilbert's 23 problems, three remain unsolved to this day, while two are considered too vague to ever have a proper solution. But one problem in particular is relevant to our current topic: the \emph{second problem}, which asks to prove that the axioms of arithmetic over the real numbers are consistent; that is, incapable of producing logical contradictions.
+
+Much like Leibniz dreamt of a machine to solve any mathematical problem, Hilbert dreamt of a purely logical formal system where, starting from a given set of axioms, one would be able to prove any mathematical statement. Indeed, this dream motivated his second problem: if the axioms of arithmetic are consistent, then we can use pure logical rules to solve any mathematical problem we come across.\par
+\epigraph{We hear within us the perpetual call:\par
+There is the problem. Seek its solution.\par
+You can find it by pure reason, for\par
+in mathematics there is no ignorabimus.}{David Hilbert}{Mathematical Problems}{}
+\vspace{1em}
+\noindent
+In the following decades, Hilbert devoted considerable time to trying to establish a positive answer for his second problem. Unfortunately for him, Kurt G\"{o}del would show via his \emph{incompleteness theorems}~\citeyearpar{Godel1931UberFormalUnentscheidbare} not just that a proof of consistency for even a simpler system like the Peano arithmetic over the natural numbers is impossible to attain within the system itself, but also that such arithmetic systems \emph{must} contain statements that can be neither proved nor disproved. In resolving the second problem in the negative, G\"{o}del dealt a crushing blow to Hilbert's dream: in mathematics, it turns out there \emph{is} some ignorabimus. Despite this substantial setback, Hilbert and others persisted in looking forward, and researchers continued pursuing modified and constrained forms of Hilbert's dream---even if we can't formalize all of mathematics, we can at least formalize some of mathematics.
+
+A few years before G\"{o}del announced his groundbreaking results, Hilbert---together with his doctoral student Wilhelm Ackermann---posed a more concrete question in their book, \textit{Grundz\"{u}ge der theoretischen Logik}~\citeyearpar{HilbertAckermann1928Grundzuge}. Their question, closer in spirit to Leibniz's dream, asked for\par
+\epigraph{\textup{[\,\dots]} a method which permits us to decide for any given formula\par
+in which domains of individuals it is universally valid (or satisfiable)\par
+and in which it is not.}{David Hilbert and Wilhelm Ackermann}{Grundz\"{u}ge der theoretischen Logik (translated edition, 1950)}{}
+\vspace{1em}
+\noindent
+In other words, Hilbert and Ackermann wanted to know whether there exists a general procedure that takes a predicate logic formula and gives a ``yes" or ``no" answer as to whether that formula is true, no matter which predicates are used or which values are assigned to variables within the formula. Their question would come to be known as the \emph{Entscheidungsproblem}, which is German for ``decision problem". Although G\"{o}del's work had brought down Hilbert's second problem, researchers at the time noted that, strictly speaking, the Entscheidungsproblem had not suffered the same fate. There remained, at least for the time being, a glimmer of hope.
+
+The issue, however, was that there was not yet a universally agreed-upon definition of a ``procedure" that could decide such a thing as the Entscheidungsproblem. The most appropriate definition was eventually taken to be that of an \emph{effective method}. If we're given a class of problems, then a method for that class of problems is called effective if
+\begin{colouredbox}
+\begin{enumerate}
+\item the method consists of a finite number of exact instructions; and
+\item the method always terminates and produces a correct answer when it is applied to a problem from its class.
+\end{enumerate}
+\end{colouredbox}
+In principle, an effective method is one that a human can perform on paper in a purely mechanical manner; it requires no creative thought or insight to arrive at an answer. It is computation in its purest form. If we view the class of problems in a way that allows us to map individual inputs to ``yes" and ``no" outputs, then we obtain a function for that class, and we say that such a function is \emph{effectively calculable}.
+
+\begin{remark}
+Compare our characterization of an effectively calculable function to the properties of a computable function given by~\citet{Enderton1977ElementsRecursionTheory} in Section~\ref{subsec:computingfunctions}. Criteria 1 and 2 match almost exactly!
+\end{remark}
+
+But what specific properties does an effectively calculable function possess? In a lecture given in 1934, whose notes were published decades later by Davis~\citeyearpar{Godel1934UndecidablePropositions}, G\"{o}del proposed that the notion of effective calculability could be captured by the so-called \emph{general recursive} functions. In doing so, he provided at least an initial characterization of what it means for a function to be effectively calculable. However, this was to be only the first step in a series of consequential results pertaining to the Entscheidungsproblem.
+
+The first major breakthrough for the Entscheidungsproblem came in a series of papers by Alonzo Church, who framed the idea of effective calculability in terms of his \emph{lambda calculus}. The lambda calculus is a logical system that allows us to express computations in terms of functions and their applications. As it turns out, the class of effectively calculable functions corresponds to the class of functions that are expressible in the lambda calculus; this was formally established by both \citet{Church1936UnsolvableProblemNumberTheory} and \citet{Kleene1936GeneralRecursiveFunctions, Kleene1936LambdaDefinability}. Church ultimately proved that there does not exist any procedure to decide whether a given formula has an equivalent particular normal form in the lambda calculus~\citeyearpar{Church1936NoteEntscheidungsproblem, Church1936UnsolvableProblemNumberTheory}. From this observation, Church struck at Hilbert's dream once again and concluded the following:\par
+\epigraph{The general case of the Entscheidungsproblem\par
+of the engere Funktionenkalk\"{u}l is unsolvable.}{Alonzo Church}{A Note on the Entscheidungsproblem}{}
+\vspace{1em}
+
+The second breakthrough came with a presentation by Alan Turing to the London Mathematical Society~\citeyearpar{Turing1936OnComputableNumbers}. Like Church, Turing showed:\par
+\epigraph{\textup{[\,\dots]} the Hilbertian Entscheidungsproblem can have no solution.}{Alan Turing}{On Computable Numbers, with an Application to the Entscheidungsproblem}{}
+\vspace{1em}
+\noindent
+However, Turing relied on a different formalization: a machine model, which later came to be known as our familiar \emph{Turing machine}. The crux of Turing's argument was that the Entscheidungsproblem could be reformulated, or \emph{reduced}, to a problem pertaining to a property of his machine, and one could then show that this problem is also unsolvable. Turing was aware of Church's work---indeed, he raced to deliver his presentation shortly after learning about Church's work in that same year---and Turing added as an appendix to his published paper a proof sketch showing that his machine formalization was equivalent to Church's lambda calculus, and therefore to the class of effectively calculable functions. Turing would go on to earn his doctorate under the supervision of Church just a couple of years later.
+
+Despite this flurry of results and the fall of the Entscheidungsproblem, there remained a question: G\"{o}del had the general recursive functions, Church had the lambda calculus, and Turing had his machines, but which of these formulations is best to use when we refer to effective calculability? This question was not truly settled until the following decade, when Stephen Kleene made the claim that \emph{any} of these formulations is suitable. Kleene~\citeyearpar{Kleene1943RecursivePredicates} began by introducing what he calls \emph{Church's thesis}:\par
+\epigraph{Every effectively calculable function \par
+(effectively decidable predicate) \par
+is general recursive.}{Stephen Kleene}{Recursive Predicates and Quantifiers}{}
+\vspace{1em}
+\noindent
+Church's thesis connects the class of general recursive functions to the lambda calculus by stating, in our terminology, that any problem for which there exists a procedure that returns an answer on each input belonging to the problem's language is semidecidable.
+
+Kleene later introduced in his book \textit{Introduction to Metamathematics}~\citeyearpar{Kleene1952IntroductionToMetamathematics} a companion statement, which he calls \emph{Turing's thesis}:\par
+\epigraph{\textup{[\,\dots]} that every function which would naturally be regarded \par
+as computable under [Turing's] definition, i.e. by one of \par
+his machines, is equivalent to Church's thesis \textup{[\,\dots]}}{Stephen Kleene}{Introduction to Metamathematics}{}
+\vspace{1em}
+\noindent
+Turing's thesis is Kleene's encapsulation of what Turing himself expressed in the appendix of his paper: that his machine formalization is equivalent to the lambda calculus formalization given by Church. Consequently, anything that a Turing machine can do is effectively calculable, and therefore it is semidecidable.
+
+Taken together, these two statements give us the \emph{Church--Turing thesis}: the unifier between effective methods and Turing machines. In modern language, we can express the thesis as follows.
+\begin{customtitlebox}[Church--Turing thesis]
+Any function that can be computed by an algorithm can also be computed on a Turing machine.
+\end{customtitlebox}
+\noindent
+Note that we refer to this result as a ``thesis" and not as a ``theorem", since it is more definitional rather than a statement that we can formally prove.
+
+\subsubsection*{Turing-Completeness}
+
+In recent times, the Church--Turing thesis has allowed researchers to prove that all sorts of formal models are capable of behaving like a machine running an algorithm. If some model of computation or some system of rules can be used in a way that allows it to simulate the computation of any Turing machine, then we say that model or system is \emph{Turing-complete}.
+
+We've already seen one example of something that is Turing-complete---the universal Turing machine. But since that is itself a kind of Turing machine, we shouldn't be too surprised. Instead, there are many more (and much weirder) examples of Turing-complete things in our daily lives:
+\begin{colouredbox}
+\begin{itemize}
+\item Most general-purpose programming languages, and some specialized languages (like \LaTeX, the typesetting system used to create this book!)
+\item Microsoft Excel and Microsoft PowerPoint
+\item Conway's Game of Life and other cellular automata
+\item Enzyme-based DNA computers
+\item The cells of the human heart
+\item The Dwarf Fortress, Minecraft, and Minesweeper video games
+\item The Magic: The Gathering card game
+\item The x86 assembler instruction \texttt{mov}, by itself
+\end{itemize}
+\end{colouredbox}
+You might now reasonably wonder whether the computers we use every day are Turing-complete. Well, the answer---strictly speaking---is no! This comes down to one simple reason: nobody has figured out how to equip a real-world computer with an infinite amount of memory. Thus, when we speak about something being Turing-complete, we often set aside the limitation of finite memory and focus on the computational power of the thing itself.

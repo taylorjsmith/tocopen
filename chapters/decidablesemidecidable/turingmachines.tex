@@ -1,0 +1,832 @@
+\section{Turing Machines}\label{sec:turingmachines}
+
+\firstwords{The focus of this section}, the \emph{Turing machine}, is a model of computation that consists of three main components: a finite automaton and an infinite-length tape, connected to one another by an input head. The finite automaton keeps track of where we are in the computation, while the tape serves as the machine's memory throughout the computation.
+
+At the beginning of a computation, the tape holds the input word given to the Turing machine, and all other cells of the tape are blank. Since the input word is initially stored on the tape, we can assume that the input alphabet $\Sigma$ is a subset of the tape alphabet $\Gamma$. The input head of the Turing machine starts on the leftmost symbol of the input word. It can move along the tape, and it can both read from and write to cells of the tape. In this way, we can use the tape to store and modify not only the input word, but also any auxiliary information we need to use during the computation.
+
+To model the movement of the Turing machine's input head along the tape, we must account for the direction of movement in the transition function. To figure out the next step of the computation, our transition function will take as input our current state and the tape symbol the input head reads in the current cell, and it will produce as output the state we will transition to, the tape symbol the input head will write to the current cell, and the direction in which the input head will move: one cell leftward ($L$) or one cell rightward ($R$).
+
+Another key difference that sets Turing machines apart from finite automata and pushdown automata is in how they accept or reject input words. Unlike finite automata or pushdown automata, which eventually run out of symbols by reaching the end of the input word, a Turing machine could possibly read the symbols on its tape as many times as it wants. Therefore, we must fix two special ``accept" and ``reject" states where, if the computation of the Turing machine ever enters one of those states, it immediately halts the computation and accepts or rejects the input word accordingly. Note that if the Turing machine doesn't enter either of these states during its computation, then it will continue to compute indefinitely.
+
+Apart from these changes, the formal definition of a Turing machine is quite similar to our definitions for finite automata and pushdown automata.
+
+\begin{definition}[Turing machine]\label{def:TM}
+A Turing machine is a tuple $(Q, \Sigma, \Gamma, \delta, q_{0}, q_{\text{accept}}, q_{\text{reject}})$, where
+\begin{itemize}
+\item $Q$ is a finite set of \emph{states};
+\item $\Sigma$ is the \emph{input alphabet} (where $\blankspace \not\in \Sigma$);
+\item $\Gamma$ is the \emph{tape alphabet} (where $\blankspace \in \Gamma$ and $\Sigma \subseteq \Gamma$);
+\item $\delta: (Q \setminus \{q_{\text{accept}}, q_{\text{reject}}\}) \times \Gamma \to Q \times \Gamma \times \{L, R\}$ is the \emph{transition function};
+\item $q_{0} \in Q$ is the \emph{initial} or \emph{start state};
+\item $q_{\text{accept}} \in Q$ is the \emph{final} or \emph{accepting state}; and
+\item $q_{\text{reject}} \in Q$ is the \emph{rejecting state}, where $q_{\text{reject}} \neq q_{\text{accept}}$.
+\end{itemize}
+\end{definition}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white}}]
+\node[draw=none, color=black, align=center, font={\small}] at (1,2.5) {Finite \\ automaton};
+\draw[draw=black, fill=\fourthcolour] (0,0) rectangle (2,2);
+\draw[draw=\secondcolour, fill=\secondcolour] (0.5,1.5) circle (0.2);
+\draw[draw=\secondcolour, fill=\secondcolour] (1.4,1) circle (0.2);
+\draw[draw=\secondcolour, fill=\secondcolour] (0.6,0.5) circle (0.2);
+\draw[-Latex, thick, draw=\secondcolour] (0.52,1.3) -- (0.575,0.7);
+\draw[-Latex, thick, draw=\secondcolour] (0.675,1.4) -- (1.225,1.1);
+\draw [-Latex, thick, draw=\secondcolour, looseness=4] (1.275,0.85) .. controls (0.9,0.3) and (1.8,0.3) .. (1.525,0.875);
+
+\node[draw=none, color=black, align=center, font={\small}] at (4.55,2.275) {Input head};
+\draw[draw=black, fill=\fourthcolour] (2,0.8) rectangle (2.2,1.2);
+\draw[-Latex, thick, draw=\secondcolour] (2.2,1) -- (2.9,1) -- (2.9,1.75) -- (6.2,1.75) -- (6.2,1.25);
+
+\node[draw=none, color=black, align=center, font={\small}] at (6, 0.225) {Tape};
+\node[tape=10] at (6,1) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{0}
+\nodepart{four}\texttt{1}
+\nodepart{five}\texttt{0}
+\nodepart{six}\color{\maincolour}\texttt{1}
+\nodepart{seven}\texttt{1}
+\nodepart{eight}\texttt{0}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\end{tikzpicture}
+\caption{An illustration of a Turing machine}
+\label{fig:turingmachine}
+\end{figure}
+
+\noindent
+Figure~\ref{fig:turingmachine} depicts a typical visualization of a Turing machine.
+
+\begin{remark}
+Now is a good point for one more moment of grammatical pedantry. The present model of computation is called a ``Turing machine", as it was named after the famed mathematician and father of computer science, Alan Turing. Unfortunately, for whatever reason, a nonzero percentage of the computer science community refers to this model as a ``Tur\underline{n}ing machine". This is, of course, incorrect, and offenders should be given a biography of Turing to read immediately.
+\end{remark}
+
+\begin{example}\label{ex:TMaequalsb}
+Consider the language $L_{\text{a}=\text{b}} = \{\texttt{a}^{n}\texttt{b}^{n} \mid n \geq 1\}$. Even though we know this language is context-free, and is therefore recognized by a pushdown automaton, let's construct a Turing machine recognizing the language.
+
+The idea behind our Turing machine is as follows. Given an input word of the form $\texttt{a}^{n}\texttt{b}^{n}$ on the tape, the input head will move back and forth, replacing all \texttt{a}s with \texttt{X}s and all \texttt{b}s with \texttt{Y}s. In a sense, the input head is ``marking" \texttt{a}s and \texttt{b}s as it sees them. Each time the input head replaces an \texttt{a} with an \texttt{X}, it will move rightward in an attempt to find a matching \texttt{b} that it can replace with a \texttt{Y}. The input head will then move leftward and repeat the process until no more \texttt{a}s remain.
+
+We formally define the Turing machine as follows:
+\begin{itemize}
+\item $Q = \{q_{0}, q_{1}, q_{2}, q_{3}, q_{4}, q_{R}\}$;
+\item $\Sigma = \{\texttt{a}, \texttt{b}\}$;
+\item $\Gamma = \{\texttt{a}, \texttt{b}, \texttt{X}, \texttt{Y}, \blankspace\}$;
+\item $q_{0} = q_{0}$;
+\item $q_{\text{accept}} = q_{4}$;
+\item $q_{\text{reject}} = q_{R}$; and
+\item $\delta$ is specified by the following table:
+\begin{center}
+\small
+\begin{tabular}{c | c c c c c}
+$\Gamma$	& \texttt{a}				& \texttt{b}				& \texttt{X}			& \texttt{Y}			& \blankspace \\
+\hline
+$q_{0}$		& $(q_{1}, \texttt{X}, R)$	& ---					& ---					& $(q_{3}, \texttt{Y}, R)$	& --- \\
+$q_{1}$		& $(q_{1}, \texttt{a}, R)$	& $(q_{2}, \texttt{Y}, L)$	& ---					& $(q_{1}, \texttt{Y}, R)$	& --- \\
+$q_{2}$		& $(q_{2}, \texttt{a}, L)$	& ---					& $(q_{0}, \texttt{X}, R)$	& $(q_{2}, \texttt{Y}, L)$	& --- \\
+$q_{3}$		& ---					& ---					& ---					& $(q_{3}, \texttt{Y}, R)$	& $(q_{4}, \blankspace, R)$ \\
+$q_{4}$		& $\times$			& $\times$			& $\times$			& $\times$			& $\times$ \\
+$q_{R}$		& $\times$			& $\times$			& $\times$			& $\times$			& $\times$ \\
+\end{tabular}
+\end{center}
+\end{itemize}
+
+Note that we can't have any transitions from either state $q_{4}$ or $q_{R}$, since those are the accepting and rejecting states, respectively. Thus, we fill those rows with the symbol $\times$. Also, instead of indicating all undefined transitions explicitly, we just assume that any undefined transition in the table (---) automatically leads to state $q_{R}$.
+
+We can draw this Turing machine graphically, just like a finite automaton or a pushdown automaton. To reduce the number of transitions we need to draw, we will omit the state $q_{R}$ and all transitions leading to it, and we will just assume (again) that all transitions not included automatically lead to state $q_{R}$. The Turing machine looks like the following:
+\begin{center}
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [below of=q0] {$q_{3}$};
+\node[state, accepting] (q4) [right of=q3] {$q_{4}$};
+
+\path[-latex] (q0) edge [below] node {$\texttt{a} \mapsto \texttt{X}, R$} (q1);
+\path[-latex] (q1) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, R$\\$\texttt{Y} \mapsto \texttt{Y}, R$} (q1);
+\path[-latex] (q1) edge [below] node {$\texttt{b} \mapsto \texttt{Y}, L$} (q2);
+\path[-latex] (q2) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, L$\\$\texttt{Y} \mapsto \texttt{Y}, L$} (q2);
+\path[-latex] (q2) edge [bend right] node[above] {$\texttt{X} \mapsto \texttt{X}, R$} (q0);
+\path[-latex] (q0) edge [left] node {$\texttt{Y} \mapsto \texttt{Y}, R$} (q3);
+\path[-latex] (q3) edge [loop left] node[left] {$\texttt{Y} \mapsto \texttt{Y}, R$} (q3);
+\path[-latex] (q3) edge [below] node {$\blankspace \mapsto \blankspace, R$} (q4);
+\end{tikzpicture}
+\end{center}
+
+Now, suppose we give the input word \texttt{aaabbb} to this Turing machine. The actions of the Turing machine are depicted in Figure~\ref{fig:TMaequalsbtrace}. The input head starts its computation in state $q_{0}$ on the leftmost symbol of the input word and, moving from the top to the bottom of each column, we highlight the state of the machine and the input head's current tape cell at each step. Since the computation halts in the accepting state $q_{4}$, we know that the machine accepts the word \texttt{aaabbb}.
+\end{example}
+
+\begin{figure}[p!]
+\centering
+\begin{multicols}{2}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,\fourthcolour,white,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\color{\maincolour}\texttt{a}
+\nodepart{four}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{b}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.three south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.three south] {$q_{0}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,\fourthcolour,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\color{\thirdcolour}\texttt{X}
+\nodepart{four}\color{\maincolour}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{b}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.four south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.four south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{a}
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\texttt{b}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\color{\maincolour}\texttt{b}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{a}
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\color{\thirdcolour}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,\fourthcolour,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\color{\maincolour}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.four south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.four south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,\fourthcolour,white,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\color{\maincolour}\texttt{X}
+\nodepart{four}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.three south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.three south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,\fourthcolour,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\color{\maincolour}\texttt{a}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.four south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.four south] {$q_{0}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\color{\thirdcolour}\texttt{X}
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{a}
+\nodepart{six}\color{\maincolour}\texttt{Y}
+\nodepart{seven}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,\fourthcolour,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\color{\maincolour}\texttt{b}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.seven south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.seven south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{a}
+\nodepart{six}\color{\maincolour}\texttt{Y}
+\nodepart{seven}\color{\thirdcolour}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,\fourthcolour,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\color{\maincolour}\texttt{X}
+\nodepart{five}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.four south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.four south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\color{\maincolour}\texttt{a}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{0}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\color{\thirdcolour}\texttt{X}
+\nodepart{six}\color{\maincolour}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,\fourthcolour,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\color{\maincolour}\texttt{Y}
+\nodepart{eight}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.seven south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.seven south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,white,\fourthcolour,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\color{\maincolour}\texttt{b}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.eight south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.eight south] {$q_{1}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,\fourthcolour,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\color{\maincolour}\texttt{Y}
+\nodepart{eight}\color{\thirdcolour}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.seven south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.seven south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\color{\maincolour}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,\fourthcolour,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\color{\maincolour}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.five south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.five south] {$q_{2}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,\fourthcolour,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\color{\maincolour}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.six south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.six south] {$q_{0}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,\fourthcolour,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\color{\maincolour}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.seven south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.seven south] {$q_{3}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,white,\fourthcolour,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\color{\maincolour}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.eight south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.eight south] {$q_{3}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,white,white,\fourthcolour,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}\color{\maincolour}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.nine south] {$\uparrow$};
+\node[draw, fill=white, circle, inner sep=1pt, below=3mm of tp.nine south] {$q_{3}$};
+\end{tikzpicture}
+
+%%%
+
+\begin{tikzpicture}[tape/.style={rectangle split, rectangle split horizontal, rectangle split parts=#1, rectangle split part align=base, draw, anchor=center, rectangle split part fill={white,white,white,white,white,white,white,white,white,white}}]
+\node[tape=10] (tp) {
+\nodepart{one}$\cdots$
+\nodepart{two}$\blankspace$
+\nodepart{three}\texttt{X}
+\nodepart{four}\texttt{X}
+\nodepart{five}\texttt{X}
+\nodepart{six}\texttt{Y}
+\nodepart{seven}\texttt{Y}
+\nodepart{eight}\texttt{Y}
+\nodepart{nine}$\blankspace$
+\nodepart{ten}$\cdots$
+};
+\node[below=-1mm of tp.ten south] {$\uparrow$};
+\node[draw, fill=\maincolour, star, star points=5, star point height=3mm, inner sep=0.1ex, inner sep=-0.5pt, below=3mm of tp.ten south] {\color{white}$q_{4}$};
+\end{tikzpicture}
+
+%%%
+
+\end{multicols}
+\caption{A trace of the behaviour of the Turing machine recognizing the language $L_{\text{a}=\text{b}}$ from Example~\ref{ex:TMaequalsb}}
+\label{fig:TMaequalsbtrace}
+\end{figure}
+
+\subsection{Configurations and Accepting Configurations}\label{subsec:TMconfigurations}
+
+You may have noticed in Figure~\ref{fig:TMaequalsbtrace} that the computation of the Turing machine on the given input word took up a \emph{lot} of space on the page. This is because we had to draw the current state, the entire tape, and the position of the input head on the tape, all at each step. Fortunately, however, there is a more concise way to present this information.
+
+All we need to specify a particular stage of the computation is the current state, the current tape contents, and the current input head position, and we can represent all of this using a single sequence of symbols. This sequence is called a \emph{configuration} of the Turing machine. If the Turing machine is currently in a state $q$, its tape contains the symbols $X_{1}X_{2} \cdots X_{i-1}X_{i} \cdots X_{n-1}X_{n}$, and its input head is at cell $i$ of the tape, then the configuration of the Turing machine at this moment is written
+\begin{equation*}
+X_{1}X_{2} \cdots X_{i-1}qX_{i} \cdots X_{n-1}X_{n}.
+\end{equation*}
+If we can get from a configuration $C_{i}$ to a configuration $C_{i+1}$ in a single computation step, then we say that $C_{i}$ \emph{yields} $C_{i+1}$ and we write $C_{i} \vdash C_{i+1}$. Formally, given $a, b, c \in \Gamma$, $u, v \in \Gamma^{*}$, and $q_{i}, q_{j} \in Q$, we say that $uaq_{i}bv$ yields $uacq_{j}v$ if $\delta(q_{i}, b) = (q_{j}, c, R)$. We can define the notion of ``yields" for leftward moves similarly.
+
+\begin{example}
+Recalling the Turing machine's computation from Example~\ref{ex:TMaequalsb}, the first five configurations of the machine are
+\begin{equation*}
+q_{0}\texttt{aaabbb} \vdash \texttt{X}q_{1}\texttt{aabbb} \vdash \texttt{Xa}q_{1}\texttt{abbb} \vdash \texttt{Xaa}q_{1}\texttt{bbb} \vdash \texttt{Xa}q_{2}\texttt{aYbb} \vdash \cdots
+\end{equation*}
+\end{example}
+
+By our earlier definition, we know that a Turing machine includes dedicated accept and reject states, and we know that the machine's computation either accepts or rejects once it enters the appropriate state. With the notion of configurations, we can specify exactly what it means for a Turing machine to accept or reject its input word.
+
+If we have a Turing machine $\mathcal{M}$ and an input word $w$, then we say that the \emph{start configuration} of $\mathcal{M}$ on $w$ is $q_{0}w$. In this configuration, $\mathcal{M}$ is in its initial state $q_{0}$, and the input head of $\mathcal{M}$ is on the leftmost symbol of the input word.
+
+Likewise, an \emph{accepting configuration} is one where the current state of $\mathcal{M}$ is $q_{\text{accept}}$, and a \emph{rejecting configuration} is one where the current state of $\mathcal{M}$ is $q_{\text{reject}}$. Note that, in either configuration, we only care about the state and not the tape contents. This is because once we enter the accepting or rejecting state, the computation immediately halts, and so the tape contents don't have any effect on the accepting or rejecting configuration.
+
+We can now formally define what it means for the Turing machine $\mathcal{M}$ to accept its input word $w$.
+
+\begin{definition}[Accepting computation of a Turing machine]
+Let $\mathcal{M} = (Q, \Sigma, \Gamma, \delta, q_{0}, q_{\text{accept}}, q_{\text{reject}})$ be a Turing machine, and let $w$ be an input word. The Turing machine $\mathcal{M}$ accepts the input word $w$ if there exists a sequence of configurations $C_{1}, C_{2}, \dots, C_{n}$ satisfying the following conditions:
+\begin{enumerate}
+\item $C_{1}$ is the start configuration of $\mathcal{M}$ on $w$;
+\item $C_{i} \vdash C_{i+1}$ for all $1 \leq i \leq (n-1)$; and
+\item $C_{n}$ is an accepting configuration.
+\end{enumerate}
+\end{definition}
+
+We can write a similar definition for a rejecting computation of a Turing machine by considering rejecting configurations in the third condition.
+
+\subsection{Language of a Turing Machine}
+
+Just as with other types of automata, every Turing machine recognizes some language. The set of all input words accepted by a Turing machine $\mathcal{M}$ is referred to as the language of the machine $\mathcal{M}$, written $L(\mathcal{M})$. However, the class to which some Turing machine's language belongs is determined by the machine's behaviour on each input word.
+
+We noted earlier on that, unlike with finite automata and pushdown automata, a Turing machine cannot run out of input symbols. Indeed, it can read the symbols on its tape as many times as it wants. The machine's computation immediately halts once the machine enters either the accepting or the rejecting state, but there's no guarantee that it will ever enter either of these states during its computation. We must account for the possibility that the machine simply never ends its computation; that is, the machine enters a \emph{loop}.
+
+Taking this outcome into account, we see that Turing machines can recognize two ``types" of languages: languages where the Turing machine always gives us an accept/reject answer for each input word, and languages where the Turing machine might enter a loop and give no answer for certain input words.
+
+\subsubsection*{Decidable Languages}
+
+Let's first focus on the scenario where the machine always either accepts or rejects every input word its given. If the Turing machine accepts all words that belong to its language and rejects all words that don't belong to its language, then we say that the machine \emph{decides} its language.
+
+\begin{definition}[Decidable language]\label{def:decidablelanguage}
+Given a Turing machine $\mathcal{M}$, we say that the language $L(\mathcal{M})$ is decidable if,
+\begin{itemize}
+\item whenever $w \in L(\mathcal{M})$, then $\mathcal{M}$ accepts $w$; and
+\item whenever $w \not\in L(\mathcal{M})$, then $\mathcal{M}$ rejects $w$.
+\end{itemize}
+\end{definition}
+
+We denote the class of decidable languages by \D. In the literature, the class of decidable languages is sometimes called the class of \emph{recursive languages}, where the term ``recursive" comes from the origins of computer science and its connections to recursive functions and sets.
+
+\begin{example}
+Consider the language $L_{\text{a}=\text{b}=\text{c}} = \{\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n} \mid n \geq 1\}$. We know that this language is non-context-free, so we can't construct a pushdown automaton recognizing the language. Let's instead construct a Turing machine recognizing the language.
+
+Our Turing machine will function in much the same way as the machine we constructed to recognize words of the form $\texttt{a}^{n}\texttt{b}^{n}$; moving from left to right, we will match symbols up to one another by replacing the symbols on the tape.
+
+Suppose our alphabets are $\Sigma = \{\texttt{a}, \texttt{b}, \texttt{c}\}$ and $\Gamma = \{\texttt{a}, \texttt{b}, \texttt{c}, \texttt{X}, \texttt{Y}, \texttt{Z}, \blankspace\}$. The Turing machine, then, will look like the following:
+\begin{center}
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [right of=q2] {$q_{3}$};
+\node[state] (q4) [below of=q0] {$q_{4}$};
+\node[state, accepting] (q5) [right of=q4] {$q_{5}$};
+
+\path[-latex] (q0) edge [below] node {$\texttt{a} \mapsto \texttt{X}, R$} (q1);
+\path[-latex] (q1) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, R$\\$\texttt{Y} \mapsto \texttt{Y}, R$} (q1);
+\path[-latex] (q1) edge [below] node {$\texttt{b} \mapsto \texttt{Y}, R$} (q2);
+\path[-latex] (q2) edge [loop below] node[align=left] {$\texttt{b} \mapsto \texttt{b}, R$\\$\texttt{Z} \mapsto \texttt{Z}, R$} (q2);
+\path[-latex] (q2) edge [below] node {$\texttt{c} \mapsto \texttt{Z}, L$} (q3);
+\path[-latex] (q3) edge [bend right] node[above] {$\texttt{X} \mapsto \texttt{X}, R$} (q0);
+\path[-latex] (q3) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, L$\\$\texttt{Y} \mapsto \texttt{Y}, L$\\$\texttt{b} \mapsto \texttt{b}, L$\\$\texttt{Z} \mapsto \texttt{Z}, L$} (q3);
+\path[-latex] (q0) edge [left] node {$\texttt{Y} \mapsto \texttt{Y}, R$} (q4);
+\path[-latex] (q4) edge [loop left] node[left, align=left] {$\texttt{Y} \mapsto \texttt{Y}, R$\\$\texttt{Z} \mapsto \texttt{Z}, R$} (q4);
+\path[-latex] (q4) edge [below] node {$\blankspace \mapsto \blankspace, R$} (q5);
+\end{tikzpicture}
+\end{center}
+
+This Turing machine decides the language $L_{\text{a}=\text{b}=\text{c}}$ because (i) if some input word $w$ belongs to this language, then the machine will accept it; and (ii) if some input word $w$ does not belong to this language, then the machine will (implicitly) go to the rejecting state $q_{\text{reject}}$.
+\end{example}
+
+\begin{example}
+Consider the language $L_{\text{double\#}} = \{w\texttt{\#}w \mid w \in \Sigma^{*}\}$. This language is very similar to the language $L_{\text{double}}$, which we previously showed was non-context-free. The key difference with this language, though, is the presence of a separator symbol \texttt{\#} between the two occurrences of $w$.
+
+Let's construct a Turing machine for the language $L_{\text{double\#}}$. The idea behind this Turing machine is to move back and forth between each copy of $w$, marking off each symbol in the first copy and using the states of the machine to ``remember" this symbol as we move to the second copy. If the machine is able to match every symbol in both copies of the word, then it accepts. Otherwise, it (implicitly) rejects.
+
+Suppose our alphabets are $\Sigma = \{\texttt{a}, \texttt{b}\}$ and $\Gamma = \{\texttt{a}, \texttt{b}, \texttt{X}, \blankspace\}$. The Turing machine will look like the following:
+\begin{center}
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q7) [right of=q0] {$q_{7}$};
+\node[state, accepting] (q8) [right of=q7] {$q_{8}$};
+\node[state] (q1) [above=1.25cm of q7] {$q_{1}$};
+\node[state] (q2) [right of=q1] {$q_{2}$};
+\node[state] (q3) [below=1.25cm of q7] {$q_{3}$};
+\node[state] (q4) [right of=q3] {$q_{4}$};
+\node[state] (q5) [right of=q8] {$q_{5}$};
+\node[state] (q6) [below of=q5] {$q_{6}$};
+
+\path[-latex] (q0) edge [above,sloped] node {$\texttt{a} \mapsto \texttt{X}, R$} (q1);
+\path[-latex] (q0) edge [below,sloped] node {$\texttt{b} \mapsto \texttt{X}, R$} (q3);
+\path[-latex] (q0) edge [above,sloped] node {$\texttt{\#} \mapsto \texttt{\#}, R$} (q7);
+\path[-latex] (q1) edge [loop above] node[align=left] {$\texttt{a} \mapsto \texttt{a}, R$\\$\texttt{b} \mapsto \texttt{b}, R$} (q1);
+\path[-latex] (q1) edge [above] node {$\texttt{\#} \mapsto \texttt{\#}, R$} (q2);
+\path[-latex] (q2) edge [loop above] node {$\texttt{X} \mapsto \texttt{X}, R$} (q2);
+\path[-latex] (q2) edge [below, sloped] node {$\texttt{a} \mapsto \texttt{X}, L$} (q5);
+\path[-latex] (q3) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, R$\\$\texttt{b} \mapsto \texttt{b}, R$} (q3);
+\path[-latex] (q3) edge [below] node {$\texttt{\#} \mapsto \texttt{\#}, R$} (q4);
+\path[-latex] (q4) edge [loop below] node {$\texttt{X} \mapsto \texttt{X}, R$} (q4);
+\path[-latex] (q4) edge [above, sloped] node {$\texttt{b} \mapsto \texttt{X}, L$} (q5);
+\path[-latex] (q5) edge [loop above] node[align=left] {$\texttt{a} \mapsto \texttt{a}, L$\\$\texttt{b} \mapsto \texttt{b}, L$\\$\texttt{X} \mapsto \texttt{X}, L$} (q5);
+\path[-latex] (q5) edge [above, sloped] node {$\texttt{\#} \mapsto \texttt{\#}, L$} (q6);
+\draw[-latex, rounded corners=5pt] (q6) -- (5.25,-4.25) -- node[below] {$\texttt{X} \mapsto \texttt{X}, R$} (0,-4.25) -- (q0);
+\path[-latex] (q6) edge [loop below] node[align=left] {$\texttt{a} \mapsto \texttt{a}, L$\\$\texttt{b} \mapsto \texttt{b}, L$} (q6);
+\path[-latex] (q7) edge [loop below] node {$\texttt{X} \mapsto \texttt{X}, R$} (q7);
+\path[-latex] (q7) edge [above,sloped] node {$\blankspace \mapsto \blankspace, R$} (q8);
+\end{tikzpicture}
+\end{center}
+This Turing machine decides the language $L_{\text{double\#}}$ because it accepts all words of the form $w\texttt{\#}w$ and (implicitly) rejects all other words.
+\end{example}
+
+Just like we were able to prove in the previous chapter that every regular language is context-free by showing that each regular language is recognized by some finite automaton, we can similarly prove that every context-free language is decidable by showing that for any context-free language we're given, there exists some Turing machine capable of deciding that language.
+
+\begin{theorem}\label{thm:contextfreeisdecidable}
+Every context-free language is also a decidable language.
+
+\begin{construction}
+I still need to write this proof.
+\end{construction}
+\end{theorem}
+
+\subsubsection*{Semidecidable Languages}
+
+As we mentioned before, unlike with finite automata and pushdown automata where the computation of the machine immediately ends after running out of input symbols to read, there's no requirement specifying that the computation of a Turing machine must come to an end. It's possible that, given certain input words, the machine could find itself in an infinite loop as it never transitions to its accepting or rejecting states. In this case, the Turing machine still has a language---as always, it's the set of input words for which the Turing machine has an accepting computation---but we can't say that the Turing machine decides this language, since it may not explicitly reject all words not belonging to its language. If this is the case, then we instead say that the machine \emph{semidecides} its language.
+
+\begin{definition}[Semidecidable language]\label{def:semidecidablelanguage}
+Given a Turing machine $\mathcal{M}$, we say that the language $L(\mathcal{M})$ is semidecidable if,
+\begin{itemize}
+\item whenever $w \in L(\mathcal{M})$, then $\mathcal{M}$ accepts $w$; and
+\item whenever $w \not\in L(\mathcal{M})$, then either $\mathcal{M}$ rejects $w$ or $\mathcal{M}$ enters an infinite loop.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+The prefix ``semi-" comes from a Latin prefix meaning ``half". Thus, the word ``semidecidable" can be taken to mean ``half decidable", in that a Turing machine that semidecides its language is only capable of properly deciding half of the possible outcomes: acceptance, but not rejection.
+\end{remark}
+
+We denote the class of semidecidable languages by \SD. In the literature, the class of semidecidable languages is sometimes called the class of \emph{recognizable languages} or \emph{recursively enumerable languages}. The term ``recursively enumerable" again comes from a connection to mathematics and the notion of recursively enumerable sets. In a machine-oriented context, a recursively enumerable language is one for which a Turing machine can list (or \emph{enumerate}) every word in the language.
+
+We can come up with any number of artificial examples of semidecidable languages, but few such examples are interesting; in fact, it's often the case that making a small change to the Turing machine recognizing such a language results in that language becoming decidable anyway. Therefore, we'll skip the examples for now. In the next lecture, we'll focus on some more natural examples of semidecidable languages, where ``natural" means that the language models some inherent property or quality of the machine that recognizes it.
+
+For now, though, we can still prove some nice properties about this class of languages. Directly from the definitions, we get a connection between decidable and semidecidable languages.
+
+\begin{theorem}\label{thm:decidableissemidecidable}
+Every decidable language is also a semidecidable language.
+
+\begin{proof}
+Both decidable languages and semidecidable languages are recognized by Turing machines. If some Turing machine $\mathcal{M}$ decides its language, then by Definition~\ref{def:decidablelanguage}, every input word $w \in L(\mathcal{M})$ is accepted by $\mathcal{M}$ and every input word $w \not\in L(\mathcal{M})$ is rejected by $\mathcal{M}$. But this behaviour exactly matches that specified in Definition~\ref{def:semidecidablelanguage}, and so we can say that $\mathcal{M}$ semidecides its language as well.
+\end{proof}
+\end{theorem}
+
+\subsection{Computing Functions}\label{subsec:computingfunctions}
+
+When we think about the definition of a Turing machine, we realize that it has all the components we would expect a standard computer to have: a Turing machine can receive input, it can process this input, it can store data on its tape, and it can produce output by writing something to its tape before finishing its computation. It is evident that Turing machines are a step above our previous models of finite automata and pushdown automata. While these weaker models can receive input, the most they can do with that input is read the symbols and eventually give us one of two answers: ``accept" or ``reject". In essence, finite automata and pushdown automata are more \emph{recognizers} than they are \emph{computers}.
+
+Since a Turing machine can do much more than recognize its input, we might as well use it to its full potential by performing actual computations, and among the simplest of computations is taking a value $n$ and producing a value $f(n)$ for some mathematical function $f$. This gives rise to the notion of \emph{computable functions}, which, as the name suggests, are functions that can be computed on a Turing machine.
+
+\begin{definition}[Computable function]
+A function $f \from \Sigma^{*} \to \Sigma^{*}$ is computable if there exists some Turing machine that, given an input word $w$, finishes its computation with $f(w)$ written to its input tape and nothing else.
+\end{definition}
+
+There are many examples of computable functions. Just to name a few: every constant function, arithmetic functions such as addition and multiplication, number-theoretic functions such as greatest common divisor and least common multiple, and every function with a finite domain are all computable.
+
+Let's now consider some concrete examples of how a Turing machine computes a function.
+
+\begin{example}
+The function $f(n) = 2n$ is a computable function. A Turing machine $\mathcal{M}_{2n}$ can take as input a word consisting of $n$ copies of \texttt{1} and produce as output a word consisting of $2n$ copies of \texttt{1} in the following way:
+\begin{enumerate}
+\item Erase the leftmost \texttt{1} from the tape.
+\item Move rightward past the remaining \texttt{1}s in the input word, plus one blank cell, plus any existing \texttt{1}s in the output word.
+\item Write a \texttt{1} to the rightmost blank cell, then move rightward and write a second \texttt{1}.
+\item Move leftward to the leftmost \texttt{1} in the input word.
+\item Repeat these steps $n$ times.
+\end{enumerate}
+\end{example}
+
+\begin{construction}
+I plan to add a couple more examples of computable functions here; say, computing $f(n) = n!$, or showing how a Turing machine would add two numbers together.
+\end{construction}
+
+Many computer scientists have written about the ``right" kind of characterization, or set of properties, that ensures a function is computable by a Turing machine. For example, \citet{Enderton1977ElementsRecursionTheory} specifies three properties a function must possess in order for it to be computable:
+\begin{colouredbox}
+\begin{enumerate}
+\item The description of how to compute the function must be a finite-length list of exact instructions.
+\item Given an input $w$ in the domain of the function, the computation must produce the output $f(w)$ after a finite number of computation steps.
+\item Given an input $w$ not in the domain of the function, the computation may loop forever or get stuck, but it must not produce an incorrect output.
+\end{enumerate}
+\end{colouredbox}
+Looking back at our examples, we can see that each of the functions we studied obeys these three criteria, and so we can reasonably call these functions computable. The exercise of determining what makes a function computable straddles the border between computer science and philosophy; in Section~\ref{sec:churchturingthesis}, we'll dive into a much deeper discussion of what exactly a Turing machine is capable of computing.

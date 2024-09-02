@@ -1,0 +1,188 @@
+\chapter{Preface}\label{chap:preface}
+
+\firstwords{When you think} about the theory of computation, what comes to mind? In fact, what \emph{is} the ``theory" of computation? Computers are real, tangible machines that humans built, so surely we should know all about how they work. However, all the day-to-day work we do with our computers belies the reality of computation itself and all of its intricacies.
+
+At some point, we've all found ourselves in a position where we wanted to do something with our computer, but the hardware just wasn't up to the task. Imagine, then, if we were to remove all of the physical components of a computer---its finite memory, its finite storage space, its limited processing power. In doing so, we would end up with an ideal computer, a machine with no limitations, one that can solve any problem we throw at it\dots or so it would seem.
+
+In this book, we will build our way up from a simple machine that can answer nothing more than yes/no questions all the way to our ideal computer. In the process, we will learn about the fundamental limits of computation itself. What is a computer truly capable of? What makes some problems harder for a computer to solve than others? What kinds of problems can a computer solve at all? What kind of problems cannot ever be fully solved by a computer, no matter how many resources we throw at it? We will investigate all of these questions, and much more.
+
+\section*{About This Book}
+
+\subsubsection*{For students}
+
+The chances are high that, if you're reading this book, you're enrolled in a course titled ``Theory of Computing" or something similar. And the chances are just as high that you need to take that course as a part of your degree program. (If you're taking the course for fun, then you're truly a student after my own heart.) In my career, I have noticed that the theory of computing has a reputation among students for being dry and difficult, largely because these students are made to take a course with no coding, devoid of flashy tech, and even worse: packed with mathematics. But I believe this reputation is undeserved. Yes, theory isn't flashy, and yes, theory is mathematical. But theory is also beautiful in that it reveals a side of computer science that no other course comes close to touching.
+
+Before we embark on our journey, consider abandoning any preconceived notions you may have gleaned from other students. While it may take a little time to build up our vocabulary and notation, the results we will study in this book are truly deep and enlightening. The theory of computing is a unique subject in that it touches literally every other area of computer science in some way, and you're invited to find and explore the many connections between the material we learn in this book and the material from the other areas of computer science that interest you.
+
+The material in this book does not require any more prerequisite knowledge on your part than a familiarity (and comfort) with discrete mathematics and introductory computer science---namely, fundamental data structures and programming constructs. If you feel you need to brush up on your mathematical knowledge, I have included some review material in Appendix~\ref{app:mathematicalbackground}.
+
+I have tried to write this book in a way that stimulates your curiosity and encourages you to come back to it again and again, even if you only ever end up taking one course in the theory of computing. As a first-timer, you or your class might read the first few chapters to become acquainted with abstract models of computation. Then, later, you might focus on the following chapters where we progress from computation to complexity theory. Further reads may have you adventure into the later chapters that explore specialized topics. No matter how you approach the material, whether it be in the classroom or on your own time, I hope you return to these pages and learn something new on every read.
+
+\begin{dangerous}
+In certain parts of this book, you will encounter paragraphs marked with a ``dangerous bend" sign. Inspired by Nicolas Bourbaki and Donald Knuth, who each used the symbol in their works, I include this warning sign at any place where I feel the material might be more difficult to grasp on one's first reading. Just like driving on a winding road, take it slow and easy, and exercise caution with these paragraphs!
+\end{dangerous}
+
+Additionally, as you progress through the book, you may notice that I have included comprehensive chapter notes with pointers to the literature at the end of each chapter. I have also interspersed citations at appropriate spots throughout the text itself as the need arises. One can argue that computer science is unique in how forward-looking it is as a field: the state of the art changes monthly, if not weekly. But this comes with a downside in that computer scientists rarely stop to evaluate and appreciate the history of our subject. Thus, if any particular topic in this book grabs your interest, I strongly encourage you to track down copies of the papers and books I have cited, either through your library or online. There's no better way to appreciate the ideas in this book than to read the actual words of the people who discovered them.
+
+\subsubsection*{For instructors}
+
+This book emerged from the lecture notes I wrote for my undergraduate and graduate-level courses on the theory of computing. My lecture notes were, in turn, influenced by what I studied as an undergraduate and graduate student. The material I chose to include in this book was guided not only by what students \emph{ought} to learn, but also by what I \emph{wanted} to learn as a student myself. Thus, while you'll find all of the core material within these pages, you'll also find quite a bit of enriched content for those looking to take that extra step into this exciting subject.
+
+The approach that I take to teaching the theory of computing is influenced (perhaps heavily) by my research focus as an automata theorist. I believe the best way to introduce undergraduate students to this material is by building up from a simple and accessible model of computation: the finite automaton. I am aware of other approaches to teaching this material that begin with alternative models such as Boolean circuits, but I don't agree with this pedagogy: although circuits as a model prevail in both the research literature and in hardware, I find them too technical and fiddly to teach as a \emph{first} model. They may be suitable for electrical engineering students, but we're teaching future computer scientists who should be used to abstraction.
+
+By starting with a model that can do nothing more than read input and either accept or reject, students can easily grasp fundamental properties and draw connections between the model and more familiar real-world tools, such as regular expressions. From these foundations, I demonstrate to students how augmenting the finite automaton---first with a stack and then with a tape---produces progressively stronger models of computation. Here, I follow an analogous progression in drawing out the fundamental properties of both the pushdown automaton and the Turing machine.
+
+With the introduction of the Turing machine, the focus of the book shifts from the models of computation themselves to what the models are capable of computing. I introduce students both to decision problems and to the idea of ``programming" a Turing machine in the form of describing the steps performed by a Turing machine in order to decide a problem. My undergraduate course culminates in a discussion on the limits of computation and undecidable problems.
+
+%%%
+
+\textsl{(The material in the present edition of the book stops here. Everything discussed in the following paragraphs will appear in future editions of the book. See the following section, ``About This Edition", for more details.)}
+
+%%%
+
+My graduate course picks up our study more or less where my undergraduate course leaves off; indeed, the only prerequisite knowledge I assume of my graduate students is that they know what Turing machines are and how they perform computations. Here, the book shifts focus once more, from discussing \emph{whether} problems can be solved to discussing \emph{how efficiently} problems can be solved. The majority of the material I cover at the graduate level focuses on complexity theory: we discuss foundational results in complexity before focusing on time and space complexity classes, hardness, completeness, and complements. (I also cover basic complexity theory notions such as \P, \NP, and \NP-completeness in my undergraduate-level algorithm analysis course, but not in my undergraduate-level theory of computing course.)
+
+One aspect of my graduate-level course that I particularly enjoy is that, after covering the major results in complexity theory, I get to veer off into specific areas and special topics. These topics form the final focus of the book, often covering newer results and more obscure material that students might not otherwise learn during their studies. Many of the topics I discuss in my graduate-level course were inspired by presentations given in past offerings of the course, where students independently study some advanced aspect of the theory of computing and deliver a mini-lecture in the final weeks of the term. If you teach a similar course, I encourage you to try the same activity: with any luck, you'll gain as much inspiration as I do.
+
+I have tried, where possible, to align the material in this book with the illustrative learning outcomes presented in the ACM/IEEE-CS/AIII Computer Science Curricula 2023, available online at \url{https://www.acm.org/education/curricula-recommendations}. In particular, this book most closely follows the AL-Models and AL-Complexity knowledge units. The particular sections of this book that satisfy the learning outcomes are outlined in Table~\ref{tab:learningoutcomes}. Note, however, that some learning outcomes---particularly those that are more appropriate for a course on algorithm analysis---do not fall within the scope of this book, and may be better served by other books such as that by \citet{Erickson2019Algorithms}.
+
+\begin{table}[p]
+\centering
+\caption{Alignment between this book and CS Curricula 2023}
+\label{tab:learningoutcomes}
+\begin{tabular}{p{4cm} p{5cm}}
+\toprule
+\textbf{Learning outcome}		& \textbf{Relevant section of book} \\
+\midrule
+\textit{AL-Models}			& \\
+CS Core 1					& Sections~\ref{sec:finiteautomata}, \ref{sec:pushdownautomata}, \ref{sec:turingmachines} \\
+CS Core 2					& Sections~\ref{sec:finiteautomata}, \ref{sec:pushdownautomata}, \ref{sec:turingmachines} \\
+CS Core 3					& Section~\ref{sec:regexregularexpressions} \\
+CS Core 4					& Sections~\ref{sec:regexregularexpressions}, \ref{sec:finiteautomata} \\
+CS Core 5					& Sections~\ref{sec:regexregularexpressions}, \ref{sec:finiteautomata}, \ref{sec:contextfreegrammars}, \ref{sec:pushdownautomata}, \ref{sec:turingmachines} \\
+CS Core 6					& Section~\ref{sec:universalturingmachines} \\
+CS Core 7					& Section~\ref{sec:haltingproblem} \\
+CS Core 8					& Sections~\ref{sec:undecidableTM}, \ref{sec:nonsemidecidableTM}, \ref{sec:haltingproblem}, \ref{sec:moreundecidableTM}, \ref{sec:undecidableproblemscontextfree} \\
+CS Core 9					& Section~\ref{sec:churchturingthesis} \\
+CS Core 10				& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+KA Core 11				& Sections~\ref{sec:finiteautomata}, \ref{sec:equivalenceofmodelsregular}, \ref{sec:closurepropertiesregular}, \ref{sec:pushdownautomata}, \ref{sec:equivalenceofmodelscontextfree}, \ref{sec:closurepropertiescontextfree} \\
+KA Core 12				& Sections~\ref{sec:nonregular}, \ref{sec:noncontextfree} \\
+KA Core 13				& Sections~\ref{sec:undecidableTM}, \ref{sec:haltingproblem}\\
+KA Core 14				& Sections~\ref{sec:manyonereductions}, \ref{sec:reductionsTMcomputations} \\
+KA Core 15				& Sections~\ref{sec:equivalenceofmodelsregular}, \ref{sec:equivalenceofmodelscontextfree}, \ref{sec:variantsofturingmachines} \\
+KA Core 16				& Section~\ref{sec:ricestheorem} \\
+KA Core 17				& Sections~\ref{sec:haltingproblem}, \ref{sec:moreundecidableTM}, \ref{sec:undecidableproblemscontextfree} \\
+KA Core 18				& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+KA Core 19				& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+\midrule
+\textit{AL-Complexity}		& \\
+CS Core 1					& \textit{Forthcoming} \\
+CS Core 2					& \textit{Forthcoming} \\
+CS Core 3					& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+CS Core 4					& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+CS Core 5					& \textit{Forthcoming} \\
+CS Core 6					& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+CS Core 7					& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+CS Core 8					& \textit{Forthcoming} \\
+CS Core 9					& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+CS Core 10				& \textit{Forthcoming} \\
+CS Core 11				& \textit{Forthcoming} \\
+CS Core 12				& \textit{Forthcoming} \\
+CS Core 13				& \textit{Forthcoming} \\
+KA Core 14				& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+KA Core 15				& \textcolor{\neutralcolour}{\textit{Not covered}} \\
+KA Core 16				& \textit{Forthcoming} \\
+KA Core 17				& \textit{Forthcoming} \\
+KA Core 18				& \textit{Forthcoming} \\
+KA Core 19				& \textit{Forthcoming} \\
+KA Core 20				& \textit{Forthcoming} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{About This Edition}
+
+\firstwords{You may have noticed} that I refer to the present book as the ``$\alpha$ pre-publication edition". This is to highlight the fact that this book is still under active development and revision. In time, I will release the $\beta$, $\gamma$, $\delta$, etc.\ $\dots$ pre-publication editions, each of which will contain more and (hopefully) better material, until I feel the book is in a good-enough state to receive the designation of ``first edition".
+
+\begin{construction}
+Occasionally, you will encounter paragraphs marked with an ``under construction" sign. These signs mark areas where I have promised to write future material, but haven't yet done so.
+\end{construction}
+
+I have already started to lay the groundwork for certain future sections, which I have marked in the book with a diamond ($\diamond$) symbol. Beyond individual sections, my long-term plan is to include the following chapters---for which I have material written---into future pre-publication editions of this book:
+\begin{enumerate}
+\item[\textbf{6}] \textbf{Foundations of Complexity} \\
+Discussing basic complexity classes, speedup and compression, the gap theorem, constructible functions, the time and space hierarchy theorems, and Savitch's theorem.
+\item[\textbf{7}] \textbf{Time Complexity} \\
+Discussing basic time complexity classes, including \P, \NP, \E, \NE, \EXP, and \NEXP.
+\item[\textbf{8}] \textbf{Space Complexity} \\
+Discussing basic space complexity classes, including \cL, \NL, \PSPACE, \NPSPACE, \EXPSPACE, and \NEXPSPACE.
+\item[\textbf{9}] \textbf{Hardness, Completeness, and Complements} \\
+Discussing polynomial-time many-one reductions, \NP-completeness, \PSPACE-completeness, logarithmic-space many-one reductions, \NL-completeness, complement complexity classes, and the Immerman--Szelepcs\'{e}nyi theorem.
+\item[\textbf{10}] \textbf{Probabilistic Computation} \\
+Discussing probabilistic Turing machines, Las Vegas and Monte Carlo algorithms, and randomized complexity classes.
+\item[\textbf{11}] \textbf{Provers, Verifiers, and Interactivity} \\
+Discussing proof systems, Arthur and Merlin, interactive protocols, zero-knowledge proofs, and probabilistically checkable proofs.
+\end{enumerate}
+My longer-term (and very optimistic) plan will see the following not-yet-written chapters added to the book at some point in the future:
+\begin{enumerate}
+\item[\phantom{\textbf{12}}] \textbf{Relativization}
+\item[\phantom{\textbf{13}}] \textbf{Circuit Complexity}
+\item[\phantom{\textbf{14}}] \textbf{Quantum Computation}
+\item[\phantom{\textbf{15}}] \textbf{\dots and more?}
+\end{enumerate}
+
+I realize that the present book, unlike most textbooks, does not yet contain exercises, and this is another omission that I intend to rectify in future editions. I have a variety of questions collected from assignments I have given to my students, and in time I will include an appropriate selection of these questions at the ends of each chapter.
+
+Lastly, one feature I will eventually add to this book is an index, though this will likely be added only after I have written up all of the content outlined previously.
+
+\section*{On Being Open Access}
+
+\firstwords{At some point} in the now-far past, possibly after I returned home from the university bookstore with an armful of textbooks and course readings, I came across the following quote that stuck with me:
+
+\epigraph{Information wants to be free.}{Stewart Brand}{The Media Lab: Inventing the Future at MIT}{}
+\vspace{1em}
+
+\noindent
+In the following years as I progressed through my higher education, in spite of the growing influence of the internet, I noticed a trend away from the spirit of this quote: more expensive textbooks, course materials locked away behind learning management systems, the commodification of education. This trend has instilled within me the strong belief that high-quality educational materials should be made available for free, in perpetuity, to everybody. Moreover, and perhaps influenced by the impacts both the free software and open source movements had on me during my upbringing in computer science, I believe that ``free" in this context should mean not just without cost (\textit{gratis}) but also with minimal restriction (\textit{libre}).
+
+Authors are often asked about their motivation for writing a book: my motivation is to make information free. To this end, I have published this book under a Creative Commons BY-SA license to encourage everyone to use this material in the spirit of David Wiley's five Rs of openness:
+\begin{colouredbox}
+\begin{itemize}
+\item \textbf{Retain}: download, print, and own this book for as long as you like.
+\item \textbf{Reuse}: use part or all of the material in this book however you want.
+\item \textbf{Revise}: add to or modify the material for use in your own classroom, create audio and video materials based on the material, translate the book, and make it even better and more accessible.
+\item \textbf{Remix}: take the material from this book and combine it with open educational resources from other courses and institutions.
+\item \textbf{Redistribute}: share this book freely with your friends, colleagues, and strangers.
+\end{itemize}
+\end{colouredbox}
+\noindent
+The terms of this book's particular license are available online at \url{https://creativecommons.org/licenses/by-sa/4.0/}.
+
+Since this book is CC BY-SA licensed, the only stipulations on these five Rs are that anything you create that is based on this book must include an attribution to the original book and must likewise be licensed openly. If you use or adapt the material from this book, please include the following attribution:
+\begin{colouredbox}
+Taylor J.\ Smith. \textit{Theory of Computing: An Open Introduction}. Self-published open educational resource, \editionnumber\ edition, \editionyear. \url{taylorjsmith.xyz/tocopen/}.
+\end{colouredbox}
+\noindent
+Additionally, even though it isn't a part of the license conditions, please feel free to get in touch with me if you use or adapt this material. I would love to hear about what you do with it!
+
+\section*{Further Reading}
+
+\firstwords{As the author} of the present book, I may be slightly biased in believing that you should read this instead of any others. But for readers who are entirely new to this field of study, I can recommend a handful of great alternative undergraduate-level treatments of this subject: \citet{HopcroftUllman1979IntroductionToAutomataTheory} wrote the very first book on theoretical computer science I read, \citet{Rich2008AutomataComputabilityComplexity} wrote the book I learned from as an undergraduate student, and \citet{Sipser2013TheoryOfComputation3rdEd} wrote the book I previously used to teach undergraduate students. There are, of course, dozens of other books on the subject, with one favourite of mine being that by \citet{Kozen1997AutomataAndComputability}.
+
+Note that, although there are newer editions of the Hopcroft and Ullman (and now, also Motwani) book, I have very deliberately cited the first edition here. By the authors' own admission, the newer editions of their book are ``larger on the outside, but smaller on the inside"---not exactly a selling point---and as a result, they pale in comparison to the original. If you can get your hands on a copy of the first edition, grab it!
+
+Try as I might, I cannot include everything in this book, so readers having some more familiarity with the subject may wish to consult various graduate-level texts to gain exposure to advanced topics not mentioned here. In the past, I have used the book by \citet{AroraBarak2009ComputationalComplexity} to teach graduate students. Other fine advanced books include those by \citet{Kozen2006TheoryOfComputation} and by \citet{Papadimitriou1994ComputationalComplexity}.
+
+\section*{Acknowledgements}
+
+\firstwords{There's nothing quite like} writing a book to prompt you to reflect on who drove you to this point to begin with. First and foremost, I must thank my family and friends for their unyielding support and for reminding me that there's more to life than work. When it comes to work, I wouldn't be where I am today were it not for the professors who taught me the very subject I'm writing about: I thank Lucian Ilie and Helmut J\"{u}rgensen of the University of Western Ontario, Gregor Richards and Jeffrey Shallit of the University of Waterloo, and particularly Kai Salomaa of Queen's University, who also served as my indefatigable doctoral supervisor and continues to be my close colleague and confidant. I would also be remiss not to thank Mark Daley of the University of Western Ontario for lending me his copy of Hopcroft and Ullman (first edition, naturally) over the summer between the first and second years of my bachelor's degree, thereby being directly responsible for me becoming a theorist.
+
+I would like to express my gratitude to St.\ Francis Xavier University for providing me with the means to write this book, and to the many students in CSCI 356 and CSCI 541 who have learned (and hopefully continue to learn) from my materials. While writing this book, I benefitted from research funding support through the Natural Sciences and Engineering Research Council of Canada Discovery Grant RGPIN-2024-04799.
+
+\subsubsection*{Your feedback}
+
+Try as I might, I'm sure that there are mistakes lurking in these pages that snuck past me, even after hundreds of read-throughs and revisions. I'm doubly sure that there are sections of the text where I could've explained something in a different, clearer, or just plain better way. In my pursuit to expunge errors, obliterate omissions, take out typos, and polish prose, I welcome comments from you, the reader. I will also happily consider suggestions for topics you would like to see added to future editions. I can be reached via email at \texttt{tjsmith@stfx.ca}. \\
+
+\noindent
+\textit{Antigonish, Canada} \hfill T.\ J.\ S. \\
+\textit{\editionmonth\ \editionyear}

@@ -1,0 +1,279 @@
+\section{More Undecidable Problems for Turing Machines}\label{sec:moreundecidableTM}
+
+\firstwords{At this point,} our collection of undecidable problems is slowly growing: we know now that each of $\mathit{A}_{\TM}$, $\overline{\mathit{A}_{\TM}}$, and $\mathit{H}_{\TM}$ is undecidable. Using these facts together with the power of reducibility, we can prove many other problems for Turing machines are undecidable.
+
+\subsection*{Emptiness Problem}
+
+Let's start by considering the familiar emptiness problem for Turing machines, $\mathit{E}_{\TM}$. In the previous section, we showed that $\mathit{H}_{\TM}$ is undecidable by reducing from $\mathit{A}_{\TM}$, since both of these decision problems rely in some way on halting: $\mathit{H}_{\TM}$ just focuses on a Turing machine halting on some input word, while for $\mathit{A}_{\TM}$, we know that a Turing machine must necessarily halt in the process of accepting some input word.
+
+The decision problem $\mathit{E}_{\TM}$ is different, though: if a Turing machine's language is empty, then it must \emph{not} accept any input words we give to it. Therefore, it doesn't make much sense for us to involve $\mathit{A}_{\TM}$ in our proof of undecidability, since this decision problem relies on accepting! Instead, since we're focused on not accepting, let's go with the complementary decision problem $\overline{\mathit{A}_{\TM}}$.
+
+Recall that $\mathit{E}_{\TM}$ expects to receive a description of a Turing machine as input, while $\overline{\mathit{A}_{\TM}}$ expects to receive as input both a description of a Turing machine and an input word to give to that machine. Our reduction therefore must have the property that, for any Turing machine $\mathcal{M}$ and input word $w$, $\langle \mathcal{M}, w \rangle \in \overline{\mathit{A}_{\TM}}$ if and only if $\langle \mathcal{M}' \rangle \in \mathit{E}_{\TM}$ for some Turing machine $\mathcal{M}'$.
+
+The big question is: what is $\mathcal{M}'$, and how can we ensure $\mathcal{M}'$ doesn't accept any input words if and only if $\mathcal{M}$ doesn't accept $w$? Our approach for this proof will be to construct $\mathcal{M}'$ in such a way that, no matter what input word it receives, it completely ignores that word and only checks the behaviour of $\mathcal{M}$ on the specific input word $w$. Then, whatever answer $\mathcal{M}$ gives for $w$ will become the answer given by $\mathcal{M}'$. (See Figure~\ref{fig:ETMreductionmachine} for an illustration of what $\mathcal{M}'$ is doing.) In essence, $\mathcal{M}'$ generalizes the answer given by $\mathcal{M}$: if $\mathcal{M}$ does not accept $w$, then $\mathcal{M}'$ will accept \emph{nothing}, while if $\mathcal{M}$ accepts $w$, then $\mathcal{M}'$ will accept \emph{everything}.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, thick, fill=\fourthcolour, rounded corners] (1.05,1) rectangle (7.7,4);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (3.95,1.5) rectangle (5.55,3);
+
+\node[draw=none, color=\maincolour, font=\large] at (4.5,3.5) {$\mathcal{M}'$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center, font=\large] at (4.75,2.25) {$\mathcal{M}$};
+
+\node[draw=none, fill=white, cloud, minimum size=1.25cm] at (2.1,2.35) {};
+\node[draw=none, color=\maincolour, font=\footnotesize, rotate=-36] at (2.2, 2.5) {\textit{poof}};
+
+\coordinate (A) at (2,2.25);
+\coordinate (B) at (-1,2.25);
+\draw[-latex, color=\maincolour, thick] (B) -- (A);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (0,2.65) {Arbitrary \\ input word $x$};
+
+\coordinate (C) at (3.95,2.25);
+\coordinate (D) at (3.25,2.25);
+\draw[-latex, color=\maincolour, thick] (D) -- (C);
+\node[draw=none, color=\maincolour, font=\footnotesize] at (3.55,2.5) {$w$};
+
+\coordinate (E) at (9.9,1.75);
+\coordinate (F) at (5.55,1.75);
+\coordinate (G) at (9.9,2.45);
+\coordinate (H) at (5.55,2.45);
+\draw[-latex, color=\maincolour, thick] (F) -- (E);
+\draw[-latex, color=\maincolour, thick] (H) -- (G);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (6.6,2.7) {$\mathcal{M}$ accepts $w$};
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (6.6,2) {$\mathcal{M}$ rejects $w$};
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (8.75,2.7) {$\mathcal{M}'$ accepts $x$};
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (8.75,2) {$\mathcal{M}'$ rejects $x$};
+\end{tikzpicture}
+\caption{The Turing machine $\mathcal{M}'$ from the proof of Theorem~\ref{thm:ETMundecidable}}
+\label{fig:ETMreductionmachine}
+\end{figure}
+
+At this point, we can start to see how the proof will come together. Our reduction will turn the encoding $\langle \mathcal{M}, w \rangle$ into an encoding $\langle \mathcal{M}' \rangle$, where the behaviour of $\mathcal{M}'$ depends solely on the behaviour of $\mathcal{M}$ given $w$. Then, supposing we can test the emptiness of the language $L(\mathcal{M}')$, we can also determine whether $w \not\in L(\mathcal{M})$.
+
+\begin{theorem}\label{thm:ETMundecidable}
+$\mathit{E}_{\TM}$ is undecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{E}_{\TM}$ is decidable, and suppose that $\mathcal{M}_{\mathrm{E}}$ is a Turing machine that decides $\mathit{E}_{\TM}$.
+
+We construct a new Turing machine $\mathcal{M}_{\overline{\mathrm{A}}}$ for the non-membership problem $\overline{\mathit{A}_{\TM}}$ that uses the reduction $\overline{\mathit{A}_{\TM}} \mreducesto \mathit{E}_{\TM}$. The machine $\mathcal{M}_{\overline{\mathrm{A}}}$ takes as input $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is a Turing machine and $w$ is an input word, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\overline{\mathrm{A}}}$}{
+\begin{enumerate}
+\item Define a computable function $f$ that takes as input $\langle \mathcal{M}, w \rangle$ and produces as output $\langle \mathcal{M}' \rangle$, where $\mathcal{M}'$ behaves as follows:
+	\tmalgorithm[0.925]{$\mathcal{M}'$}{
+	\begin{enumerate}
+	\item Run $\mathcal{M}$ on the input word $w$.
+	\item If $\mathcal{M}$ accepts $w$, then accept. If $\mathcal{M}$ rejects $w$, then reject.
+	\end{enumerate}
+	}
+\item Run $\mathcal{M}_{\mathrm{E}}$ on the result $\langle \mathcal{M}' \rangle$ produced by $f$.
+\item If $\mathcal{M}_{\mathrm{E}}$ accepts, then accept. If $\mathcal{M}_{\mathrm{E}}$ rejects, then reject.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M}, w \rangle \in \overline{\mathit{A}_{\TM}}$, then $\mathcal{M}$ does not accept $w$ and $\mathcal{M}'$ will not accept any input word given to it, meaning that $\langle \mathcal{M}' \rangle \in \mathit{E}_{\TM}$. Otherwise, if $\langle \mathcal{M}, w \rangle \not\in \overline{\mathit{A}_{\TM}}$, then $\mathcal{M}$ accepts $w$ and $\mathcal{M}'$ will accept every input word given to it, meaning that $\langle \mathcal{M}' \rangle \not\in \mathit{E}_{\TM}$.
+
+If the machine $\mathcal{M}_{\mathrm{E}}$ existed to decide $\mathit{E}_{\TM}$, then we could decide $\overline{\mathit{A}_{\TM}}$ using the machine $\mathcal{M}_{\overline{\mathrm{A}}}$. However, we know that $\overline{\mathit{A}_{\TM}}$ is undecidable. Thus, $\mathcal{M}_{\mathrm{E}}$ must not exist, and so $\mathit{E}_{\TM}$ must be undecidable.
+\end{proof}
+\end{theorem}
+
+The careful reader might have noticed that the construction we used to prove Theorem~\ref{thm:ETMundecidable} in fact goes one step further in telling us about the properties of $\mathit{E}_{\TM}$. Since we know that $\overline{\mathit{A}_{\TM}}$ is non-semidecidable by Theorem~\ref{thm:coATMnotsemidecidable}, the reduction $\overline{\mathit{A}_{\TM}} \mreducesto \mathit{E}_{\TM}$ combined with Corollary~\ref{cor:XnotsemidecidableYnotsemidecidable} allows us to establish the following even stronger fact about $\mathit{E}_{\TM}$.
+
+\begin{corollary}\label{cor:ETMnotsemidecidable}
+$\mathit{E}_{\TM}$ is not semidecidable.
+\end{corollary}
+
+On the other hand, we at least have a glimmer of hope when it comes to handling instances of the Turing machine ``non-emptiness" problem $\overline{\mathit{E}_{\TM}}$.
+
+\begin{theorem}\label{thm:coETMsemidecidable}
+$\overline{\mathit{E}_{\TM}}$ is semidecidable.
+
+\begin{proof}
+Construct a Turing machine $\mathcal{M}_{\overline{\mathrm{ETM}}}$ that takes as input $\langle \mathcal{M} \rangle$, where $\mathcal{M}$ is a Turing machine, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\overline{\mathrm{ETM}}}$}{
+\begin{enumerate}
+\item Enumerate all words over $\Sigma^{*}$, producing a list $\{w_{1}, w_{2}, w_{3}, \dots\}$.
+\item For all $i \in \{1, 2, 3, \dots\}$, simulate $i$ steps of the computation of $\mathcal{M}$ on the first $i$ words $w_{1}$ to $w_{i}$.
+\item If $\mathcal{M}$ ever enters its accepting state $q_{\text{accept}}$ on any of the words, then accept.
+\end{enumerate}
+}
+Observe first that since $\Sigma^{*}$ is a countably infinite union of finite sets, it is itself countably infinite, and so we can perform the enumeration specified in Step 1 of $\mathcal{M}_{\overline{\mathrm{ETM}}}$.
+
+This Turing machine accepts its input $\langle \mathcal{M} \rangle$ if and only if the Turing machine $\mathcal{M}$ accepts at least one input word $w_{j}$ where $j \in \{1, 2, 3, \dots\}$, and if no word is accepted by $\mathcal{M}$, then the Turing machine loops forever. Thus, $\mathcal{M}_{\overline{\mathrm{ETM}}}$ semidecides the non-emptiness problem for Turing machines.
+\end{proof}
+\end{theorem}
+
+As a consequence of Theorem~\ref{thm:coETMsemidecidable}, we can also say that $\mathit{E}_{\TM}$ is co-semidecidable.
+
+Unfortunately, semidecidability is all that we can hope for with $\overline{\mathit{E}_{\TM}}$: since reductions are closed under complement by Lemma~\ref{lem:manyonereductioncomplement}, knowing that $\overline{\mathit{A}_{\TM}} \mreducesto \mathit{E}_{\TM}$ also tells us that $\mathit{A}_{\TM} \mreducesto \overline{\mathit{E}_{\TM}}$, and since $\mathit{A}_{\TM}$ is undecidable, we conclude that $\overline{\mathit{E}_{\TM}}$ must also be undecidable.
+
+Before we continue, let's revisit our choice to use the decision problem $\overline{\mathit{A}_{\TM}}$ in our reduction showing that $\mathit{E}_{\TM}$ is undecidable. Even though we saw an earlier justification for why it didn't make much sense for us to use $\mathit{A}_{\TM}$ in this situation, would it nevertheless have been possible for us to reduce $\mathit{A}_{\TM}$ to $\mathit{E}_{\TM}$ as an alternative proof? Interestingly, no! Using many-one reductions, there is in fact no way for us to reduce $\mathit{A}_{\TM}$ to $\mathit{E}_{\TM}$, and the proof follows directly from what we already know about both problems.
+
+\begin{theorem}\label{thm:ATMnotmanyonereducibleETM}
+$\mathit{A}_{\TM} \not\mreducesto \mathit{E}_{\TM}$.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{A}_{\TM} \mreducesto \mathit{E}_{\TM}$, and let $f$ be the computable function performing such a reduction. Since reductions are closed under complement by Lemma~\ref{lem:manyonereductioncomplement}, we also have that $\overline{\mathit{A}_{\TM}} \mreducesto \overline{\mathit{E}_{\TM}}$ by the same computable function $f$.
+
+We know by Theorem~\ref{thm:coETMsemidecidable} that $\overline{\mathit{E}_{\TM}}$ is semidecidable, so by Theorem~\ref{thm:YsemidecidableXsemidecidable}, this implies that $\overline{\mathit{A}_{\TM}}$ is also semidecidable. However, this contradicts Theorem~\ref{thm:coATMnotsemidecidable}, so no such reduction can exist.
+\end{proof}
+\end{theorem}
+
+Theorem~\ref{thm:ATMnotmanyonereducibleETM} raises a fascinating point about many-one reductions: sometimes, a many-one reduction between two decision problems simply cannot exist! This, in turn, highlights the importance of creatively constructing our reductions: if we wanted to prove directly that $\mathit{E}_{\TM}$ was undecidable, and we focused on using the classic undecidable problem $\mathit{A}_{\TM}$ in our proof, then we would've quickly hit a brick wall. Introducing the complementary problems $\overline{\mathit{E}_{\TM}}$ and $\overline{\mathit{A}_{\TM}}$ to our suite of undecidable problems gives us more flexibility.
+
+\begin{remark}
+Confusingly, some textbooks and learning materials purport to give a ``reduction" from $\mathit{A}_{\TM}$ to $\mathit{E}_{\TM}$ in their proof of the undecidability of $\mathit{E}_{\TM}$. These proofs typically use an informal notion of reducibility that disguises the fact that the reduction is actually from $\mathit{A}_{\TM}$ to $\overline{\mathit{E}_{\TM}}$.
+\end{remark}
+
+\subsection*{Universality Problem}
+
+Let's now move on to the universality problem for Turing machines, $\mathit{U}_{\TM}$. Since this decision problem asks whether the language of a Turing machine contains all words, one might think (as we did with finite automata) that $\mathit{U}_{\TM}$ is just the opposite of $\mathit{E}_{\TM}$, and so we can immediately draw a connection to our complementary decision problem $\overline{\mathit{E}_{\TM}}$. Unfortunately, things aren't so easy when it comes to Turing machines, as the class of semidecidable languages isn't closed under complement! A positive answer to an instance of $\overline{\mathit{E}_{\TM}}$ only tells us that the Turing machine in question accepts \emph{at least one} word, not that it accepts \emph{all} words.
+
+This doesn't mean we need to start from scratch, though: we can in fact reuse some of the ideas we had in showing that $\mathit{E}_{\TM}$ is undecidable to prove that $\mathit{U}_{\TM}$ is undecidable. If a Turing machine's language is universal, then it must accept \emph{every} word we give to it. This statement sounds very similar to $\mathit{A}_{\TM}$, which asks whether a Turing machine accepts whatever specific word we gave to it. Thus, just like we reduced $\overline{\mathit{A}_{\TM}}$ to $\mathit{E}_{\TM}$ in the previous section, it seems promising here for us to reduce $\mathit{A}_{\TM}$ to $\mathit{U}_{\TM}$.
+
+Recall that $\mathit{U}_{\TM}$ expects to receive a description of a Turing machine as input, while $\mathit{A}_{\TM}$ expects to receive as input both a description of a Turing machine and an input word to give to that machine. Thus, our reduction must have the property that, for any Turing machine $\mathcal{M}$ and input word $w$, $\langle \mathcal{M}, w \rangle \in \mathit{A}_{\TM}$ if and only if $\langle \mathcal{M}' \rangle \in \mathit{U}_{\TM}$ for some Turing machine $\mathcal{M}'$. As before, we must construct a Turing machine $\mathcal{M}'$ that accepts all input words if and only if $\mathcal{M}$ accepts $w$.
+
+It's no coincidence that we denoted this Turing machine by $\mathcal{M}'$ again: it turns out that we can use the exact same approach that we used with the Turing machine emptiness problem! Again, we will ensure that no matter what input word $\mathcal{M}'$ receives, it will ignore that word and instead simulate the computation of $\mathcal{M}$ on its input word $w$. Then, whatever answer $\mathcal{M}$ gives for $w$ will become the answer given by $\mathcal{M}'$. We're following the same idea by having $\mathcal{M}'$ generalize the answer given by $\mathcal{M}$: if $\mathcal{M}$ accepts $w$, then $\mathcal{M}'$ will accept \emph{everything}, while if $\mathcal{M}$ rejects $w$, then $\mathcal{M}'$ will accept \emph{nothing}.
+
+Our reduction will therefore behave identically to our previous reduction for $\mathit{E}_{\TM}$: we will turn the encoding $\langle \mathcal{M}, w \rangle$ into an encoding $\langle \mathcal{M}' \rangle$, where the behaviour of $\mathcal{M}'$ depends solely on the behaviour of $\mathcal{M}$ given $w$. Then, supposing we can test the universality of the language $L(\mathcal{M}')$, we can also determine whether $w \in L(\mathcal{M})$.
+
+\begin{theorem}\label{thm:UTMundecidable}
+$\mathit{U}_{\TM}$ is undecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{U}_{\TM}$ is decidable, and suppose that $\mathcal{M}_{\mathrm{U}}$ is a Turing machine that decides $\mathit{U}_{\TM}$.
+
+We construct a new Turing machine $\mathcal{M}_{\mathrm{A}}$ for the membership problem $\mathit{A}_{\TM}$ that uses the reduction $\mathit{A}_{\TM} \mreducesto \mathit{U}_{\TM}$. The machine $\mathcal{M}_{\mathrm{A}}$ takes as input $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is a Turing machine and $w$ is an input word, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\mathrm{A}}$}{
+\begin{enumerate}
+\item Define a computable function $f$ that takes as input $\langle \mathcal{M}, w \rangle$ and produces as output $\langle \mathcal{M}' \rangle$, where $\mathcal{M}'$ behaves as follows:
+	\tmalgorithm[0.925]{$\mathcal{M}'$}{
+	\begin{enumerate}
+	\item Run $\mathcal{M}$ on the input word $w$.
+	\item If $\mathcal{M}$ accepts $w$, then accept. If $\mathcal{M}$ rejects $w$, then reject.
+	\end{enumerate}
+	}
+\item Run $\mathcal{M}_{\mathrm{U}}$ on the result $\langle \mathcal{M}' \rangle$ produced by $f$.
+\item If $\mathcal{M}_{\mathrm{U}}$ accepts, then accept. If $\mathcal{M}_{\mathrm{U}}$ rejects, then reject.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M}, w \rangle \in \mathit{A}_{\TM}$, then $\mathcal{M}$ accepts $w$ and $\mathcal{M}'$ will accept every input word given to it, meaning that $\langle \mathcal{M}' \rangle \in \mathit{U}_{\TM}$. Otherwise, if $\langle \mathcal{M}, w \rangle \not\in \mathit{A}_{\TM}$, then $\mathcal{M}$ does not accept $w$ and $\mathcal{M}'$ will not accept any input word given to it, meaning that $\langle \mathcal{M}' \rangle \not\in \mathit{U}_{\TM}$.
+
+If the machine $\mathcal{M}_{\mathrm{U}}$ existed to decide $\mathit{U}_{\TM}$, then we could decide $\mathit{A}_{\TM}$ using the machine $\mathcal{M}_{\mathrm{A}}$. However, we know that $\mathit{A}_{\TM}$ is undecidable. Thus, $\mathcal{M}_{\mathrm{U}}$ must not exist, and so $\mathit{U}_{\TM}$ must be undecidable.
+\end{proof}
+\end{theorem}
+
+Now, even if we have a negative decidability result, we know that $\mathit{A}_{\TM}$ is semidecidable, so does the reduction $\mathit{A}_{\TM} \mreducesto \mathit{U}_{\TM}$ give us any clue as to the status of semidecidability for $\mathit{U}_{\TM}$? No---and be careful to remember the wording of Theorem~\ref{thm:YsemidecidableXsemidecidable}! If we have a reduction $X \mreducesto Y$ and we know that $Y$ is semidecidable, then we can conclude that $X$ is semidecidable, but we can't conclude anything about $Y$ in the case where $X$ is semidecidable.
+
+To tackle the question of semidecidability for $\mathit{U}_{\TM}$, let us introduce another decision problem known as the \emph{totality problem} for Turing machines:
+\begin{equation*}
+\mathit{T}_{\TM} = \{\langle \mathcal{M} \rangle \mid \mathcal{M} \text{ is a Turing machine that halts on all input words}\}.
+\end{equation*}
+By analogy, if $\mathit{H}_{\TM}$ is the ``halting only" version of $\mathit{A}_{\TM}$, then $\mathit{T}_{\TM}$ is the ``halting only" version of $\mathit{U}_{\TM}$. Naturally, since both $\mathit{H}_{\TM}$ and $\mathit{T}_{\TM}$ talk about halting, we can reduce one to the other in a rather straightforward way, and our reduction again uses our tried-and-true Turing machine $\mathcal{M}'$.
+
+\begin{lemma}\label{lem:HTMmanyonereducibleTTM}
+$\mathit{H}_{\TM} \mreducesto \mathit{T}_{\TM}$.
+
+\begin{proof}
+Define a computable function $f$ that takes as input $\langle \mathcal{M}, w \rangle$ and produces as output $\langle \mathcal{M}' \rangle$, where $\mathcal{M}'$ behaves as follows:
+\tmalgorithm{$\mathcal{M}'$}{
+\begin{enumerate}
+\item Run $\mathcal{M}$ on the input word $w$.
+\item If $\mathcal{M}$ accepts $w$, then accept. If $\mathcal{M}$ rejects $w$, then reject.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M}, w \rangle \in \mathit{H}_{\TM}$, then $\mathcal{M}$ halts on $w$ and $\mathcal{M}'$ will halt on any input word given to it, meaning that $\langle \mathcal{M}' \rangle \in \mathit{T}_{\TM}$. Otherwise, if $\langle \mathcal{M}, w \rangle \not\in \mathit{H}_{\TM}$, then $\mathcal{M}$ does not halt on $w$ and $\mathcal{M}'$ will likewise loop forever, meaning that $\langle \mathcal{M}' \rangle \not\in \mathit{T}_{\TM}$.
+\end{proof}
+\end{lemma}
+
+Since we know that reductions are closed under complement, Lemma~\ref{lem:HTMmanyonereducibleTTM} tells us that $\overline{\mathit{H}_{\TM}} \mreducesto \overline{\mathit{T}_{\TM}}$ as well. At the same time, we can also reduce the complement of the halting problem, $\overline{\mathit{H}_{\TM}}$, directly to $\mathit{T}_{\TM}$. Of course, since we're attempting to test \emph{non-}halting with this reduction, we must be careful not to fall into the trap of looping forever by bounding the length of our Turing machine's computation.
+
+\begin{lemma}\label{lem:HTMmanyonereduciblecoTTM}
+$\overline{\mathit{H}_{\TM}} \mreducesto \mathit{T}_{\TM}$.
+
+\begin{proof}
+Define a computable function $f$ that takes as input $\langle \mathcal{M}, w \rangle$ and produces as output $\langle \mathcal{M}'' \rangle$, where $\mathcal{M}''$ behaves as follows:
+\tmalgorithm{$\mathcal{M}''$}{
+\begin{enumerate}
+\item Run $\mathcal{M}$ on the input word $w$ for $|x|$ computation steps, where $|x|$ is the length of the input word $x$ given to $\mathcal{M}''$.
+\item If $\mathcal{M}$ halts on $w$ within those $|x|$ computation steps, then loop forever. Otherwise, accept.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M}, w \rangle \in \overline{\mathit{H}_{\TM}}$, then $\mathcal{M}$ will not halt on $w$ and $\mathcal{M}''$ will halt on any input word given to it, meaning that $\langle \mathcal{M}'' \rangle \in \mathit{T}_{\TM}$. Otherwise, if $\langle \mathcal{M}, w \rangle \not\in \overline{\mathit{H}_{\TM}}$, then $\mathcal{M}$ will halt on $w$ in some number of computation steps $s$ and $\mathcal{M}''$ will not halt on any input word of length at most $s$, meaning that $\langle \mathcal{M}'' \rangle \not\in \mathit{T}_{\TM}$.
+\end{proof}
+\end{lemma}
+
+You might be wondering at this point why we've introduced the complement of the halting problem, $\overline{\mathit{H}_{\TM}}$, and what this has to do with the totality problem for Turing machines. We haven't forgotten about our question of semidecidability for $\mathit{U}_{\TM}$; all of this is just building up to the answer.
+
+Recall from Theorem~\ref{thm:HTMundecidable} that there exists a reduction $\mathit{A}_{\TM} \mreducesto \mathit{H}_{\TM}$. Since reductions are (as we well know by now) closed under complement, this means that there also exists a reduction $\overline{\mathit{A}_{\TM}} \mreducesto \overline{\mathit{H}_{\TM}}$. But Theorem~\ref{thm:coATMnotsemidecidable} tells us that $\overline{\mathit{A}_{\TM}}$ is not semidecidable, and therefore $\overline{\mathit{H}_{\TM}}$ must not be semidecidable either. Now, everything begins to fall into place: since $\overline{\mathit{H}_{\TM}} \mreducesto \overline{\mathit{T}_{\TM}}$ and $\overline{\mathit{H}_{\TM}} \mreducesto \mathit{T}_{\TM}$, it must be the case that neither $\mathit{T}_{\TM}$ nor $\overline{\mathit{T}_{\TM}}$ is semidecidable.
+
+Completing this line of reasoning by connecting $\mathit{T}_{\TM}$ to $\mathit{U}_{\TM}$ gives us the final remarkable result: $\mathit{U}_{\TM}$ is not just undecidable, but it is also neither semidecidable nor co-semidecidable, and so it falls completely outside of our language hierarchy!
+
+\begin{theorem}\label{thm:UTMnotsemidecidable}
+$\mathit{U}_{\TM}$ is neither semidecidable nor co-semidecidable.
+
+\begin{proof}
+We begin by demonstrating the existence of a reduction $\mathit{T}_{\TM} \mreducesto \mathit{U}_{\TM}$. Define a computable function $f$ that takes as input $\langle \mathcal{M} \rangle$ and produces as output $\langle \mathcal{N} \rangle$, where $\mathcal{N}$ behaves as follows:
+\tmalgorithm{$\mathcal{N}$}{
+\begin{enumerate}
+\item Behave exactly as $\mathcal{M}$ behaves, except redirect all transitions to $q_{\text{reject}}$ to instead go to $q_{\text{accept}}$.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M} \rangle \in \mathit{T}_{\TM}$, then $\mathcal{M}$ halts on every input word and either accepts or rejects. Thus, $\mathcal{N}$ will also halt on every input word, but it will always accept, meaning that $\langle \mathcal{N} \rangle \in \mathit{U}_{\TM}$. Otherwise, if $\langle \mathcal{M} \rangle \not\in \mathit{T}_{\TM}$, then $\mathcal{M}$ must not halt on at least one input word, and so $\mathcal{N}$ will likewise never accept that input word, meaning that $\langle \mathcal{N} \rangle \not\in \mathit{U}_{\TM}$.
+
+From the reduction $\mathit{T}_{\TM} \mreducesto \mathit{U}_{\TM}$, we know also that $\overline{\mathit{T}_{\TM}} \mreducesto \overline{\mathit{U}_{\TM}}$. However, since neither $\mathit{T}_{\TM}$ nor $\overline{\mathit{T}_{\TM}}$ is semidecidable, it must be the case that neither $\mathit{U}_{\TM}$ nor $\overline{\mathit{U}_{\TM}}$ is semidecidable. Saying that $\overline{\mathit{U}_{\TM}}$ is not semidecidable is equivalent to saying that $\mathit{U}_{\TM}$ is not co-semidecidable.
+\end{proof}
+\end{theorem}
+
+\subsection*{Equivalence Problem}
+
+Recall that the equivalence problem for Turing machines, $\mathit{EQ}_{\TM}$, asks whether the languages of two Turing machines are equivalent; that is, whether no word belongs to one language but not the other.
+
+As we might reasonably expect by this point, $\mathit{EQ}_{\TM}$ is an undecidable problem, just like all of the other problems we've studied thus far for Turing machines. But in each of our previous undecidability proofs, the underlying decision problems focused only on a single Turing machine: $\mathit{A}_{\TM}$ and $\mathit{H}_{\TM}$ both took as input an encoding of the form $\langle \mathcal{M}, w \rangle$, while each of $\mathit{E}_{\TM}$, $\mathit{U}_{\TM}$, and $\mathit{T}_{\TM}$ took as input an encoding of the form $\langle \mathcal{M} \rangle$. The problem $\mathit{EQ}_{\TM}$, by contrast, takes as input $\langle \mathcal{M}, \mathcal{N} \rangle$, where both $\mathcal{M}$ and $\mathcal{N}$ are Turing machines.
+
+How, then, can we prove that $\mathit{EQ}_{\TM}$ is undecidable via some many-one reduction? We just need to use a little cleverness in our construction. Take, for example, the problem $\mathit{U}_{\TM}$. Going back to the definition of this problem, we have that $\langle \mathcal{M} \rangle \in \mathit{U}_{\TM}$ if and only if $L(\mathcal{M}) = \Sigma^{*}$. Look at what we just used in that definition: an equals sign! If we construct a new Turing machine specially designed to accept all input words, then we can compare the language of our original Turing machine $\mathcal{M}$ to the language of this new Turing machine, and therein lies the foundation for our reduction.
+
+\begin{theorem}\label{thm:EQTMundecidable}
+$\mathit{EQ}_{\TM}$ is undecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{EQ}_{\TM}$ is decidable, and suppose that $\mathcal{M}_{\mathrm{EQ}}$ is a Turing machine that decides $\mathit{EQ}_{\TM}$.
+
+We construct a new Turing machine $\mathcal{M}_{\mathrm{U}}$ for the universality problem $\mathit{U}_{\TM}$ that uses the reduction $\mathit{U}_{\TM} \mreducesto \mathit{EQ}_{\TM}$. The machine $\mathcal{M}_{\mathrm{U}}$ takes as input $\langle \mathcal{M} \rangle$, where $\mathcal{M}$ is a Turing machine, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\mathrm{U}}$}{
+\begin{enumerate}
+\item Define a computable function $f$ that takes as input $\langle \mathcal{M} \rangle$ and produces as output $\langle \mathcal{M}, \mathcal{M}_{\Sigma^{*}} \rangle$, where $\mathcal{M}_{\Sigma^{*}}$ behaves as follows:
+	\tmalgorithm[0.925]{$\mathcal{M}_{\Sigma^{*}}$}{
+	\begin{enumerate}
+	\item Accept.
+	\end{enumerate}
+	}
+\item Run $\mathcal{M}_{\mathrm{EQ}}$ on the result $\langle \mathcal{M}, \mathcal{M}_{\Sigma^{*}} \rangle$ produced by $f$.
+\item If $\mathcal{M}_{\mathrm{EQ}}$ accepts, then accept. If $\mathcal{M}_{\mathrm{EQ}}$ rejects, then reject.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M} \rangle \in \mathit{U}_{\TM}$, then $\mathcal{M}$ accepts every input word given to it. Therefore, $L(\mathcal{M})$ is equal to $L(\mathcal{M}_{\Sigma^{*}})$, meaning that $\langle \mathcal{M}, \mathcal{M}_{\Sigma^{*}} \rangle \in \mathit{EQ}_{\TM}$. Otherwise, if $\langle \mathcal{M} \rangle \not\in \mathit{U}_{\TM}$, then $\mathcal{M}$ does not accept at least one input word, and therefore its language cannot be equal to $L(\mathcal{M}_{\Sigma^{*}})$, meaning that $\langle \mathcal{M}, \mathcal{M}_{\Sigma^{*}} \rangle \not\in \mathit{EQ}_{\TM}$.
+
+If the machine $\mathcal{M}_{\mathrm{EQ}}$ existed to decide $\mathit{EQ}_{\TM}$, then we could decide $\mathit{U}_{\TM}$ using the machine $\mathcal{M}_{\mathrm{U}}$. However, we know that $\mathit{U}_{\TM}$ is undecidable. Thus, $\mathcal{M}_{\mathrm{EQ}}$ must not exist, and so $\mathit{EQ}_{\TM}$ must be undecidable.
+\end{proof}
+\end{theorem}
+
+Keen readers might have noticed that we could alternatively prove Theorem~\ref{thm:EQTMundecidable} via the reduction $\mathit{E}_{\TM} \mreducesto \mathit{EQ}_{\TM}$. In this case, the computable function $f$ would construct a Turing machine $\mathcal{M}_{\emptyset}$ that rejects all input words, but the rest of the proof would be otherwise identical.
+
+There's a good reason why we chose to reduce from $\mathit{U}_{\TM}$, though: this reduction provides an immediate proof that the equivalence problem for Turing machines is neither semidecidable nor co-semidecidable, giving us a second decision problem that falls completely outside of our language hierarchy.
+
+\begin{theorem}\label{thm:EQTMnotsemidecidable}
+$\mathit{EQ}_{\TM}$ is neither semidecidable nor co-semidecidable.
+
+\begin{proof}
+We demonstrated the existence of a reduction $\mathit{U}_{\TM} \mreducesto \mathit{EQ}_{\TM}$ in the proof of Theorem~\ref{thm:EQTMundecidable}, and since $\mathit{U}_{\TM}$ is not semidecidable by Theorem~\ref{thm:UTMnotsemidecidable}, $\mathit{EQ}_{\TM}$ is likewise not semidecidable.
+
+From the reduction $\mathit{U}_{\TM} \mreducesto \mathit{EQ}_{\TM}$, we know also that $\overline{\mathit{U}_{\TM}} \mreducesto \overline{\mathit{EQ}_{\TM}}$, and since $\overline{\mathit{U}_{\TM}}$ is not semidecidable by Theorem~\ref{thm:UTMnotsemidecidable}, $\overline{\mathit{EQ}_{\TM}}$ is likewise not semidecidable. Saying that $\overline{\mathit{EQ}_{\TM}}$ is not semidecidable is equivalent to saying that $\mathit{EQ}_{\TM}$ is not co-semidecidable.
+\end{proof}
+\end{theorem}
+
+\subsection*{Inclusion Problem}
+
+\begin{construction}
+As we might expect, the inclusion problem is also undecidable for Turing machines, and this is a fact that will soon be proven in this section.
+\end{construction}

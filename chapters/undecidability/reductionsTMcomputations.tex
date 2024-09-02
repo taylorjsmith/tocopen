@@ -1,0 +1,132 @@
+\section{Reducing from Turing Machine Computations}\label{sec:reductionsTMcomputations}
+
+\firstwords{At this point}, we're nearly done with our exploration of decision problems applied to our common models of computation. We've seen that all of the common decision problems about finite automata and other regular models are decidable, while all of the common decision problems about Turing machines are undecidable---and, in some cases, not even semidecidable. However, there remain three omissions from our landscape of decidability results: we haven't yet taken a closer look at the universality, equivalence, or inclusion problems for context-free languages.
+
+As we will see, the class of context-free languages is interesting in that it presents a sort-of middle ground where not every problem is decidable, but where we can still decide certain problems. We observed this in the previous chapter by proving that both $\mathit{A}_{\CFG}$ and $\mathit{E}_{\CFG}$ (as well as their pushdown automaton analogues) are decidable. Unlike the class of regular languages, where the decidability of $\mathit{U}_{\DFA}$ followed via a combination of the decidability of $\mathit{E}_{\DFA}$ and closure of the regular languages under complement, the question of decidability for $\mathit{U}_{\CFG}$ isn't as straightforward. This is primarily because, as we know, the class of context-free languages isn't closed under complement. This may suggest to us that $\mathit{U}_{\CFG}$ is undecidable, but at the same time, how can we prove the undecidability of $\mathit{U}_{\CFG}$ if the only tool we have at our disposal is a many-one reduction from an undecidable problem for a completely different model?
+
+While pondering this same question, Juris Hartmanis made a fascinating discovery that relates context-free languages to Turing machines \citeyearpar{Hartmanis1967CFLsAndTMComputations}. If we take all of the configurations of a Turing machine as it processes some input word, we can combine these configurations into something called a \emph{computation history}, which is effectively a complete record of everything the Turing machine did over the course of its computation. Hartmanis' key discovery was that the computation history of any Turing machine is itself a context-free language!
+
+What this means for us is that, if we wish to prove that a decision problem for context-free languages is undecidable, we no longer need to rely on coming up with a much-too-powerful many-one reduction from an undecidable problem for Turing machines. Instead, we can reframe the undecidable Turing machine problem in terms of the computation histories of some Turing machine, and if we could construct a context-free grammar that generates these computation histories, then that grammar would allow us to answer the undecidable problem. Essentially, we're using a more informal notion of a ``reduction" from Turing machine computation histories to context-free grammars.
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[b]{0.5\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2.5cm, >=latex, every state/.style={fill=white}]
+\node[state, initial] (q0) {$q_{0}$};
+\node[state] (q1) [right of=q0] {$q_{1}$};
+\node[state] (q2) [below=1cm of q0] {$q_{2}$};
+\node[state, accepting] (q3) [below=1cm of q1] {$q_{3}$};
+
+\path[-latex] (q0) edge [loop above] node {$\texttt{b} \mapsto \texttt{b}, R$} (q0);
+\path[-latex] (q0) edge [bend left, above] node {$\texttt{a} \mapsto \texttt{a}, R$} (q1);
+\path[-latex] (q1) edge [bend left, below] node {$\texttt{b} \mapsto \texttt{b}, R$} (q0);
+\path[-latex] (q1) edge [loop above] node {$\texttt{a} \mapsto \texttt{a}, R$} (q1);
+\path[-latex] (q0) edge [left] node {$\blankspace \mapsto \blankspace, R$} (q2);
+\path[-latex] (q1) edge [right] node {$\blankspace \mapsto \blankspace, R$} (q3);
+\end{tikzpicture}
+\caption{A Turing machine $\mathcal{M}$}
+\label{subfig:TMcomputationhistorymachine}
+\end{subfigure}
+\hspace{0.5em}
+\begin{subfigure}[b]{0.45\textwidth}
+\centering
+\captionsetup{width=.7\linewidth}
+$ \begin{aligned}
+C_{1}: \ & q_{0} \, \texttt{a} \, \texttt{b} \, \texttt{a} \, \texttt{a} \, \blankspace \\
+C_{2}: \ & \texttt{a} \, q_{1} \, \texttt{b} \, \texttt{a} \, \texttt{a} \, \blankspace \\
+C_{3}: \ & \texttt{a} \, \texttt{b} \, q_{0} \, \texttt{a} \, \texttt{a} \, \blankspace \\
+C_{4}: \ & \texttt{a} \, \texttt{b} \, \texttt{a} \, q_{1} \, \texttt{a} \, \blankspace \\
+C_{5}: \ & \texttt{a} \, \texttt{b} \, \texttt{a} \, \texttt{a} \, q_{1} \, \blankspace \\
+C_{6}: \ & \texttt{a} \, \texttt{b} \, \texttt{a} \, \texttt{a} \, \blankspace \, q_{3}
+\end{aligned} $
+\caption{The computation history of $\mathcal{M}$ on $w = \texttt{abaa}$}
+\label{subfig:TMcomputationhistorylist}
+\end{subfigure}
+
+\begin{subfigure}[b]{0.9\textwidth}
+\centering
+\captionsetup{width=.9\linewidth}
+\vspace{1.5em}
+$q_{0}\texttt{abaa} \blankspace \, 
+\texttt{\#} \, 
+\blankspace \texttt{aab} q_{1} \texttt{a} \,
+\texttt{\#} \, 
+\texttt{ab} q_{0} \texttt{aa} \blankspace \, 
+\texttt{\#} \, 
+\blankspace \texttt{a} q_{1} \texttt{aba} \,
+\texttt{\#} \, 
+\texttt{abaa} q_{1} \blankspace \, 
+\texttt{\#} \, 
+q_{3} \blankspace \texttt{aaba}$
+\vspace{0.5em}
+\caption{The computation history of $\mathcal{M}$ on $w = \texttt{abaa}$, represented as a string. Observe that every second configuration is reversed}
+\label{subfig:TMcomputationhistorystring}
+\end{subfigure}
+\caption{An example of a Turing machine and its computation history on an input word}
+\label{fig:TMcomputationhistory}
+\end{figure}
+
+Before we continue along this line of thought, let's reacquaint ourselves with some Turing machine definitions. Recall from Section~\ref{subsec:TMconfigurations} that we took the configuration of a Turing machine to be a representation of the current state, tape contents, and input head position of that Turing machine at some point in its computation. In other terms, a configuration is a ``snapshot" of the Turing machine mid-computation. Depending on the current state of the machine, a configuration may be a start configuration if the current state is $q_{0}$, an accepting configuration if the current state is $q_{\text{accept}}$, or a rejecting configuration if the current state is $q_{\text{reject}}$.
+
+Taking a sequence of configurations together, we get the aforementioned computation history, which we may represent either as a set of individual configurations or as a single string of concatenated configurations; examples of each are depicted in Figure~\ref{fig:TMcomputationhistory}.
+
+\begin{definition}[Computation history]\label{def:computationhistory}
+Given a Turing machine $\mathcal{M}$ and an input word $w$, a computation history for $\mathcal{M}$ on $w$ is a string of the form
+\begin{equation*}
+C_{1} \, \texttt{\#} \, (C_{2})^{\text{R}} \, \texttt{\#} \, C_{3} \, \texttt{\#} \, (C_{4})^{\text{R}} \, \texttt{\#} \, \dots,
+\end{equation*}
+where $\texttt{\#} \not\in \Gamma$ is a special boundary marker, $C_{i}$ is the $i$th configuration of $\mathcal{M}$, and $(C_{i})^{\text{R}}$ denotes the reversal of configuration $C_{i}$.
+\end{definition}
+
+Note that a computation history for a Turing machine $\mathcal{M}$ only exists when $\mathcal{M}$ halts on its input word $w$. As a result, the sequence of configurations $C_{1}, C_{2}, \dots, C_{n}$ always has a finite number of elements. Deterministic computations have exactly one computation history per input word, while nondeterministic computations may have multiple computation histories for the same input word.
+
+Just like how code may or may not contain syntax errors, we can have either \emph{valid} or \emph{invalid} computation histories depending on the configurations themselves and the order in which the configurations are sequenced. A valid computation history is one whose configurations satisfy four criteria.
+
+\begin{definition}[Valid computation history]\label{def:validcomputationhistory}
+Given a Turing machine $\mathcal{M}$ and an input word $w$, a valid computation history for $\mathcal{M}$ on $w$ is a computation history where all of the following are true:
+\begin{enumerate}
+\item For all $1 \leq i \leq n$, each configuration $C_{i}$ is of the form $\Gamma^{*} q \Gamma^{*}$, where $q \in Q$ is a state of $\mathcal{M}$;
+\item The configuration $C_{1}$ is a start configuration of the form $q_{0} w$, where $q_{0}$ is the initial state of $\mathcal{M}$ and $w \in \Sigma^{*}$;
+\item The configuration $C_{n}$ is either an accepting configuration or a rejecting configuration of the form $\Gamma^{*} q_{f} \Gamma^{*}$, where $q_{f} \in \{q_{\text{accept}}, q_{\text{reject}}\}$; and
+\item For all $1 \leq i \leq (n-1)$, $C_{i} \vdash C_{i+1}$.
+\end{enumerate}
+\end{definition}
+
+Naturally, then, an invalid computation history belongs to the complement of the language of valid computation histories; to be precise, an invalid computation history is one whose configurations \emph{do not} satisfy at least one of the four criteria provided in Definition~\ref{def:validcomputationhistory}.
+
+\begin{definition}[Invalid computation history]\label{def:invalidcomputationhistory}
+Given a Turing machine $\mathcal{M}$ and an input word $w$, an invalid computation history for $\mathcal{M}$ on $w$ is a computation history where at least one of the following is true:
+\begin{enumerate}
+\item For some $1 \leq i \leq n$, configuration $C_{i}$ is not of the form $\Gamma^{*} q \Gamma^{*}$, where $q \in Q$ is a state of $\mathcal{M}$; or
+\item The configuration $C_{1}$ is not a start configuration; or
+\item The configuration $C_{n}$ is neither an accepting configuration nor a rejecting configuration; or
+\item For some $1 \leq i \leq (n-1)$, $C_{i} \mkern-2mu\not\mkern2mu\vdash C_{i+1}$.
+\end{enumerate}
+\end{definition}
+
+We put a particular emphasis on invalid computation histories here since they will be the key to obtaining our desired undecidability results for context-free languages. Indeed, to draw the same connection between Turing machines and context-free languages as Hartmanis did, we can prove that each of the four violated Turing machine configuration conditions is recognized by some context-free model of computation.
+
+\begin{lemma}\label{lem:invalidcomputationhistoryCFL}
+Given a Turing machine $\mathcal{M}$ and an input word $w$, the set of invalid computation histories of $\mathcal{M}$ on $w$ is a context-free language.
+
+\begin{proof}
+We will prove this statement by showing that each of the four individual violated criteria corresponds to some context-free language.
+\begin{enumerate}
+\item Where some configuration $C_{i}$ is not of the form $\Gamma^{*} q \Gamma^{*}$, we can construct a finite automaton that checks whether a nondeterministically selected configuration does not consist of a (possibly empty) prefix of symbols from $\Gamma$, followed by an encoding of a state in $\mathcal{M}$, and finally a (possibly empty) suffix of symbols from $\Gamma$. Since all regular languages are context-free, the set of configurations violating the first criterion is context-free.
+
+\item Where the configuration $C_{1}$ is not a start configuration, we can again construct a finite automaton that checks whether this configuration does not consist of the encoding of the state $q_{0}$ followed by a (possibly empty) suffix of symbols from $\Sigma$. For the same reason as before, the set of configurations violating the second criterion is regular, and therefore context-free.
+
+\item Where the configuration $C_{n}$ is neither an accepting nor a rejecting configuration, we can once more construct a finite automaton that functions much like in the first case, except it checks specifically for encodings of either of the states $q_{\text{accept}}$ or $q_{\text{reject}}$. Thus, the set of configurations violating the third criterion is regular, and therefore context-free.
+
+\item To check whether $C_{i} \mkern-2mu\not\mkern2mu\vdash C_{i+1}$ for some $i$, due to the way the computation history string is formatted, we must consider two possible subcases based on whether configuration $C_{i}$ is odd-indexed or even-indexed:
+	\begin{enumerate}
+	\item Where $C_{i} \mkern-2mu\not\mkern2mu\vdash C_{i+1}$ for some odd $i$, we can construct a pushdown automaton that receives as input both the encoding of $\mathcal{M}$ as well as the computation history of $\mathcal{M}$ on $w$. This pushdown automaton then nondeterministically reads an even number of boundary markers \texttt{\#} from the computation history before beginning to read the configuration $C_{i}$. As the pushdown automaton reads $C_{i}$, it consults the encoding of $\mathcal{M}$ to determine some configuration $C'$ such that $C_{i} \vdash C'$, and pushes the symbols of $C'$ to its stack. Once the pushdown automaton reads another boundary marker \texttt{\#} from the computation history, it compares the configuration $(C_{i+1})^{\text{R}}$ to $C'$ symbol-by-symbol, and if there is any mismatch in symbols, it accepts.
+	
+	\item Where $C_{i} \mkern-2mu\not\mkern2mu\vdash C_{i+1}$ for some even $i$, we use essentially the same pushdown automaton construction as in the first subcase, making the appropriate modifications to handle $(C_{i})^{\text{R}}$.
+	\end{enumerate}
+In either case, as a consequence of the existence of these pushdown automata, the set of configurations violating the fourth criterion is context-free.
+\end{enumerate}
+Since the class of context-free languages is closed under union, taking the union of these individual context-free languages gives us our result.
+\end{proof}
+\end{lemma}

@@ -1,0 +1,65 @@
+\section{Undecidable Problems for Context-Free Languages}\label{sec:undecidableproblemscontextfree}
+
+\firstwords{Having established what it means} for a computation history to be invalid, and having showed that there exists a connection between the invalid computation histories of a Turing machine and our context-free models of computation, we have all we need to establish the undecidability of our remaining decision problems for context-free languages.
+
+\subsection*{Universality Problem}
+
+When we established the decidability of the universality problem for regular languages, we relied on Theorem~\ref{thm:FAclosurecomplement}, which showed that the class of regular languages was closed under complement. Taking the complement of a given finite automaton's language allowed us to use our existing decision procedure for $\mathit{E}_{\DFA}$ to decide $\mathit{U}_{\DFA}$, as shown in Theorem~\ref{thm:UDFAdecidable}.
+
+For context-free languages, we know by Theorem~\ref{thm:ECFGdecidable} that $\mathit{E}_{\CFG}$ is decidable, so one may be tempted to try a similar approach to establish the supposed decidability of $\mathit{U}_{\CFG}$. However, Theorem~\ref{thm:CFLnonclosurecomplement} tells us that the class of context-free languages is \emph{not} closed under complement, and so this approach is a non-starter.
+
+Instead, using a straightforward argument that relies on the connection between invalid computation histories and context-free languages, we can show that $\mathit{U}_{\CFG}$ is in fact \emph{undecidable}---the first such result we have for a model weaker than Turing machines!
+
+\begin{theorem}\label{thm:UCFGundecidable}
+$\mathit{U}_{\CFG}$ is undecidable.
+
+\begin{proof}
+Suppose that $\mathcal{M}$ is an arbitrary Turing machine. By Lemma~\ref{lem:invalidcomputationhistoryCFL}, we can construct a context-free grammar $G$ having the property that $L(G) = \Sigma^{*}$ if and only if $L(\mathcal{M}) = \emptyset$. This is because if $\mathcal{M}$ accepts no input words, then every input word given to $\mathcal{M}$ would produce an invalid computation history, and the aforementioned lemma tells us that the set of invalid computation histories of $\mathcal{M}$ is a context-free language.
+
+However, if it were possible for us to check whether $L(G) = \Sigma^{*}$, then it would also become possible for us to decide whether $L(\mathcal{M}) = \emptyset$, and we know by Theorem~\ref{thm:ETMundecidable} that $\mathit{E}_{\TM}$ is undecidable. Therefore, $\mathit{U}_{\CFG}$ must also be undecidable.
+\end{proof}
+\end{theorem}
+
+At this point, take a moment to reflect on the argument we just used to establish the undecidability of $\mathit{U}_{\CFG}$. Unlike our previous undecidability proofs using many-one reductions, we didn't need to construct any Turing machines here. Rather, we simply relied on a property that is true of any Turing machine: the set of invalid computation histories is a context-free language, and so we can construct a grammar for this language.
+
+\begin{dangerous}
+Note that nowhere did we say the language of our grammar $G$ \emph{is} $\Sigma^{*}$; all we said is that $L(G) = \Sigma^{*}$ \emph{if and only if} $L(\mathcal{M}) = \emptyset$. The language of $G$ depends on whatever arbitrary Turing machine $\mathcal{M}$ we are given, but if we had a method of deciding whether the language of $G$ was universal, then that same method could decide whether the language of this Turing machine $\mathcal{M}$ is empty.
+\end{dangerous}
+
+Naturally, since context-free grammars and pushdown automata are equivalent, this negative decidability result transfers over to our other context-free model of computation.
+
+\begin{corollary}\label{cor:UPDAundecidable}
+$\mathit{U}_{\PDA}$ is undecidable.
+\end{corollary}
+
+\subsection*{Equivalence Problem}
+
+Recall that we can test the equivalence of two languages $L_{1}$ and $L_{2}$ by testing the emptiness of their symmetric difference, where the symmetric difference operation is defined in terms of union, intersection, and complement:
+\begin{equation*}
+L_{1} \symdiff L_{2} = \left( L_{1} \cap \overline{L_{2}} \right) \cup \left( \overline{L_{1}} \cap L_{2} \right).
+\end{equation*}
+Now, again, we know by Theorem~\ref{thm:ECFGdecidable} that we can test the emptiness of a context-free grammar, so we can test emptiness for two individual, separate context-free grammars just as easily. However, the class of context-free languages is not closed under intersection (by Theorem~\ref{thm:CFLnonclosureintersection}), nor is it closed under complement (by Theorem~\ref{thm:CFLnonclosurecomplement}). Thus, we have no way of testing the emptiness of the symmetric difference of two context-free grammars, and so it is hopeless for us to expect that we can decide the equivalence problem for context-free grammars.
+
+But how do we formally prove the undecidability of $\mathit{EQ}_{\CFG}$? We need only fix one of our two context-free grammars to be ``special", which will then allow us to use what we know about $\mathit{U}_{\CFG}$ to arrive at our desired outcome.
+
+\begin{theorem}\label{thm:EQCFGundecidable}
+$\mathit{EQ}_{\CFG}$ is undecidable.
+
+\begin{proof}
+Let $G_{1}$ be an arbitrary context-free grammar, and let $G_{2}$ be a context-free grammar that generates all words over its alphabet $\Sigma$. If it were possible for us to check whether $L(G_{1}) = L(G_{2})$, then it would also become possible for us to decide whether $L(G_{1}) = \Sigma^{*}$, and we know by Theorem~\ref{thm:UCFGundecidable} that $\mathit{U}_{\CFG}$ is undecidable. Therefore, $\mathit{EQ}_{\CFG}$ must also be undecidable.
+\end{proof}
+\end{theorem}
+
+In this proof, we have reduced in the sense that we made an instance of the decision problem $\mathit{EQ}_{\CFG}$ appear like an instance of the decision problem $\mathit{U}_{\CFG}$, and since the latter problem is undecidable, so too must the former problem be undecidable.
+
+As we would expect, the same outcome holds for pushdown automata.
+
+\begin{corollary}\label{cor:EQPDAundecidable}
+$\mathit{EQ}_{\PDA}$ is undecidable.
+\end{corollary}
+
+\subsection*{Inclusion Problem}
+
+\begin{construction}
+Yes, the inclusion problem is also undecidable for context-free languages. This fact will be proved in due time.
+\end{construction}

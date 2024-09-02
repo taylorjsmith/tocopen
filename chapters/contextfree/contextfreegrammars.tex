@@ -1,0 +1,670 @@
+\section{Context-Free Grammars}\label{sec:contextfreegrammars}
+
+\firstwords{The Java grammar} is an example of a \emph{context-free grammar}. Such a grammar consists of a set of rules that we can use, in this instance, to generate valid programs in Java. These rules take on a very general form: observe, for example, that we can replace a \textit{Statement} by a \textit{Block}, or by the line \texttt{return} \textit{[Expression]} \texttt{;}, or by a number of other combinations of keywords and rules, all of which are specified by the lines of the grammar following the \textit{Statement} label.
+
+Before we look at some more examples, let's formalize the notion of a context-free grammar. To construct a grammar, we need only four elements.
+
+\begin{definition}[Context-free grammar]\label{def:contextfreegrammar}
+A context-free grammar is a tuple $(V, \Sigma, R, S)$, where
+\begin{itemize}
+\item $V$ is a finite set of elements called \emph{nonterminal symbols};
+\item $\Sigma$ is a finite set of elements called \emph{terminal symbols}, where $\Sigma \cap V = \emptyset$;
+\item $R$ is a finite set of \emph{rules}, where each rule consists of a nonterminal on the left-hand side and a combination of nonterminals and terminals on the right-hand side; and
+\item $S \in V$ is the \emph{start nonterminal}.
+\end{itemize}
+\end{definition}
+
+In a context-free grammar, the set of nonterminal symbols $V$ correspond to parts of a word that we have yet to ``fill in" with terminal symbols from $\Sigma$. The set of rules $R$ tell us how we can perform this ``filling in". If we have a rule of the form $A \rightarrow \alpha$, then we can replace any instance of the symbol $A$ in our word with whatever symbols make up $\alpha$. The start nonterminal $S$ is self-explanatory; it is the first thing in our word that we ``fill in".
+
+Returning to our Java grammar excerpt in Figure~\ref{fig:javalanguage}, we see that (for example) some of the nonterminals in the grammar include \textit{Statement}, \textit{Block}, \textit{Identifier}, and \textit{ParExpression}, while some of the terminals include \texttt{if}, \texttt{while}, \texttt{for}, and \texttt{;} (semicolon).
+
+Importantly, we have in our definition of a context-free grammar that $\Sigma \cap V = \emptyset$; that is, the set of terminals and the set of nonterminals must be disjoint. This is to prevent the grammar from confusing terminals and nonterminals, and this is exactly why the Java language designers used uppercase letters in their nonterminals and lowercase letters in their terminals.
+
+\subsection{Language of a Context-Free Grammar}
+
+The sequence of rule applications we follow beginning with the start nonterminal $S$ and ending with a completed word containing symbols from $\Sigma$ is called a \emph{derivation}. Each word of the form $(V \cup \Sigma)^{*}$ produced during a derivation is sometimes referred to as a \emph{sentential form}.
+
+For any nonterminal $A$ and terminals $u$, $w$, and $v$, if we have a rule $A \rightarrow w$ in our grammar and some step of our derivation takes us from $uAv$ to $uwv$, then we say that $uAv$ \emph{yields} $uwv$ and we write $uAv \Rightarrow uwv$. We can represent a sequence of ``yields" relations using similar notation; given words $x$ and $y$, if $x = y$ or if there exists a sequence $x_{1}, x_{2}, \dots, x_{k}$ where $k \geq 0$ such that
+\begin{equation*}
+x \Rightarrow x_{1} \Rightarrow x_{2} \Rightarrow \dots \Rightarrow x_{k} \Rightarrow y,
+\end{equation*}
+then we write $x \Rightarrow^{*} y$. This is very similar to the Kleene star notation, where the star indicates zero or more ``yields" relations taking us from $x$ to $y$.
+
+With this, we can define the \emph{language of a grammar} $G$ over an alphabet $\Sigma$ by $L(G) = \{w \in \Sigma^{*} \mid S \Rightarrow^{*} w\}$. In other terms, the language of a grammar contains all words that can be derived by that grammar beginning with the start nonterminal $S$.
+
+\begin{example}\label{ex:equalzeroone}
+Consider the context-free grammar where $V = \{S, A\}$, $\Sigma = \{\texttt{a}, \texttt{b}\}$, and $R$ contains two rules:
+\begin{align*}
+S	&\rightarrow \texttt{a}A\texttt{b} \\
+A	&\rightarrow \texttt{a}A\texttt{b} \mid \epsilon
+\end{align*}
+
+Using this context-free grammar, we can generate words like
+\begin{align*}
+&S \Rightarrow \highlightmath{\texttt{a}A\texttt{b}} \Rightarrow \texttt{a}\highlightmath{\epsilon}\texttt{b} = \texttt{ab}, \\
+&S \Rightarrow \highlightmath{\texttt{a}A\texttt{b}} \Rightarrow \texttt{a}\highlightmath{\texttt{a}A\texttt{b}}\texttt{b} \Rightarrow \texttt{aa}\highlightmath{\epsilon}\texttt{bb} = \texttt{aabb}, \text{ and} \\
+&S \Rightarrow \highlightmath{\texttt{a}A\texttt{b}} \Rightarrow \texttt{a}\highlightmath{\texttt{a}A\texttt{b}}\texttt{b} \Rightarrow \texttt{aa}\highlightmath{\texttt{a}A\texttt{b}}\texttt{bb} \Rightarrow \texttt{aaa}\highlightmath{\epsilon}\texttt{bbb} = \texttt{aaabbb},
+\end{align*}
+and so on. For each step, the highlighted symbols indicate which symbols were added at that step. We get things started by replacing the $S$ nonterminal by $\texttt{a}A\texttt{b}$, and from there we may replace the $A$ nonterminal as many times as we like.
+
+This context-free grammar generates all words over the alphabet $\Sigma = \{\texttt{a}, \texttt{b}\}$ where the number of \texttt{a}s is equal to the number of \texttt{b}s, where there is at least one \texttt{a} and one \texttt{b}, and where all \texttt{a}s come before any \texttt{b}s in the word. Thus, the language of this grammar is $L_{\texttt{a}=\texttt{b}} = \{\texttt{a}^{n}\texttt{b}^{n} \mid n \geq 1\}$.
+\end{example}
+
+Observe that the rule $A$ in Example~\ref{ex:equalzeroone} included a vertical bar. This is simply a shorthand for writing multiple rules where each rule contains $A$ on the left-hand side. Writing $A \rightarrow \texttt{a}A\texttt{b} \mid \epsilon$ is therefore equivalent to writing
+\begin{align*}
+A 	&\rightarrow \texttt{a}A\texttt{b} \\
+A 	&\rightarrow \epsilon
+\end{align*}
+
+There are very few limitations we must abide by when we write rules for a context-free grammar. All we need to ensure is that the left-hand side of each rule consists of exactly one nonterminal by itself. The right-hand side of each rule can contain any combination of terminals and nonterminals, including the empty word $\epsilon$.
+
+\begin{example}\label{ex:balancedparens}
+Consider the context-free grammar where $V = \{S\}$, $\Sigma = \{\texttt{(}, \texttt{)}\}$, and $R$ contains one rule:
+\begin{align*}
+S	&\rightarrow \texttt{(}S\texttt{)} \mid SS \mid \epsilon
+\end{align*}
+This rule allows us to surround an occurrence of $S$ with parentheses, to ``duplicate" an occurrence of $S$, or to replace some occurrence of $S$ with $\epsilon$, effectively removing that occurrence of $S$ from the derivation.
+
+Using this context-free grammar, we can generate a word like
+\begin{align*}
+S 	&\Rightarrow \highlightmath{SS} \\
+	&\Rightarrow \highlightmath{\texttt{(}S\texttt{)}}S \\
+	&\Rightarrow \texttt{(}\highlightmath{\texttt{(}S\texttt{)}}\texttt{)}S \\
+	&\Rightarrow \texttt{((}\highlightmath{\epsilon}\texttt{))}S \\
+	&\Rightarrow \texttt{(())}S \\
+	&\Rightarrow \texttt{(())}\highlightmath{\texttt{(}S\texttt{)}} \\
+	&\Rightarrow \texttt{(())(}\highlightmath{\epsilon}\texttt{)} = \texttt{(())()}.
+\end{align*}
+Again, the highlighted symbols indicate which symbols were added at a given step.
+
+This context-free grammar generates all words over the alphabet $\Sigma = \{\texttt{(}, \texttt{)}\}$ where each word contains \emph{balanced parentheses}: every opening parenthesis is matched by a closing parenthesis, and each pair of parentheses is correctly nested. We can express the language of the grammar as
+\begin{align*}
+L_{\texttt{()}} = \{w \in \{\texttt{(}, \texttt{)}\}^{*} \mid &\text{ all prefixes of } w \text{ contain no more \texttt{)}s than \texttt{(}s, } \\ 
+	&\text{ and } |w|_{\texttt{(}} = |w|_{\texttt{)}}\}.
+\end{align*}
+\end{example}
+
+\begin{remark}
+Languages of balanced symbols are also known as \emph{Dyck languages}, named for the mathematician Walther von Dyck, who studied the word problem for free groups. This problem can be thought of as a language where we must balance both parentheses \texttt{(} \texttt{)} and brackets \texttt{[} \texttt{]}. In the computer science context, such languages were originally called \emph{D-events} \citep{Schutzenberger1962CertainElementaryFamilies} before later being termed \emph{Dyck sets} \citep{Schutzenberger1963OnCFLsPDAs}.
+\end{remark}
+
+\subsubsection*{Context-Free Languages}
+
+With our notion of a context-free grammar, it's easy for us to define a \emph{context-free language}. Just like we defined a regular language to be a language represented by a regular expression, we can define a context-free language in terms of a context-free grammar.
+
+\begin{definition}[Context-free language]\label{def:contextfreelanguage}
+If some language $L$ is generated by a context-free grammar, then $L$ is context-free.
+\end{definition}
+
+Thus, both the language of words $\texttt{a}^{n}\texttt{b}^{n}$ and the language of balanced parentheses are context-free languages. As a shorthand, we denote the class of languages generated by a context-free grammar by \CFG.
+
+The class of context-free languages is remarkably less restrictive than the class of regular languages and, as we've seen, context-freeness allows us to perform certain simple actions like counting or matching symbols. Let's now consider a couple of other examples of context-free languages and their grammars.
+
+\begin{example}
+Consider the language $L = \{\texttt{a}^{2i}\texttt{b}^{i}\texttt{c}^{j+2} \mid i, j \geq 0\}$ over the alphabet $\Sigma = \{\texttt{a}, \texttt{b}, \texttt{c}\}$. Here, we can see that the counts of \texttt{a}s and \texttt{b}s are related, while the number of \texttt{c}s is independent of the number of \texttt{a}s and \texttt{b}s.
+
+Let's construct a context-free grammar generating words in $L$. Evidently, we will need two kinds of rules: one rule will generate the \texttt{a}s and \texttt{b}s together, while the other rule will generate the \texttt{c}s. We can use the start nonterminal to apply these rules in the correct order. Our context-free grammar will therefore look like the following:
+\begin{align*}
+S	&\rightarrow UV \\
+U	&\rightarrow \texttt{aa}U\texttt{b} \mid \epsilon \\
+V	&\rightarrow \texttt{c}V \mid \texttt{cc}
+\end{align*}
+Let's now take a look at each rule in turn.
+\begin{itemize}
+\item The first rule, $S$, ensures that we apply the $U$ rule before the $V$ rule. This in turn ensures that all \texttt{a}s and \texttt{b}s occur before the \texttt{c}s in the generated word.
+\item The second rule, $U$, either recursively produces two \texttt{a}s and one \texttt{b} or produces the empty word. This ensures that we maintain the correct count of $2i$ \texttt{a}s and $i$ \texttt{b}s.
+\item Finally, the third rule, $V$, either recursively produces one \texttt{c} or produces the symbols \texttt{cc}. This ensures that we have exactly $j+2$ \texttt{c}s in our generated word.
+\end{itemize}
+\end{example}
+
+\begin{example}
+Recall our context-free language $L_{\texttt{a}=\texttt{b}} = \{\texttt{a}^{n}\texttt{b}^{n} \mid n \geq 1\}$. Here, let's consider a more general language:
+\begin{equation*}
+L_{\text{mixed}\texttt{a}=\texttt{b}} = \{w \in \{\texttt{a}, \texttt{b}\}^{*} \mid |w|_{\texttt{a}} = |w|_{\texttt{b}}\}.
+\end{equation*}
+Observe that the main difference with this language is that the order of \texttt{a}s and \texttt{b}s no longer matters; we just need the same count of \texttt{a}s and \texttt{b}s. Can we construct a context-free grammar for $L_{\text{mixed}\texttt{a}=\texttt{b}}$?
+
+Since order no longer matters, we just need our context-free grammar to generate a pair of \texttt{a}s and \texttt{b}s each time we add terminal symbols. For this, we can use essentially the same rule as we used in our context-free grammar for $L_{\texttt{a}=\texttt{b}}$: $S \rightarrow \texttt{a}S\texttt{b} \mid \texttt{b}S\texttt{a}$. We also need a rule that allows us to mix the order of \texttt{a}s and \texttt{b}s; for instance, to place two \texttt{a}s or two \texttt{b}s next to each other, or to generate words with matching first and last symbols (like \texttt{abba}). For this, we can use a rule similar to one we included in our context-free grammar for $L_{\texttt{()}}$: $S \rightarrow SS$.
+
+Thus, our context-free grammar will look like the following:
+\begin{align*}
+S	&\rightarrow SS \mid \texttt{a}S\texttt{b} \mid \texttt{b}S\texttt{a} \mid \epsilon
+\end{align*}
+\end{example}
+
+As an aside, one very common and popular question asks why these grammars and languages are given the name ``context-free". To understand where this name comes from, we must take a closer look at the form of any rule in a context-free grammar. Definition~\ref{def:contextfreegrammar} states that each rule in a context-free grammar consists of ``a nonterminal on the left-hand side and a combination of nonterminals and terminals on the right-hand side", and if we were to represent this using symbols, we would get rules that are of the form
+\begin{equation*}
+A \rightarrow \alpha,
+\end{equation*}
+where $A \in V$ and $\alpha \in (V \cup \Sigma)^{*}$. Now, if during some derivation we wish to replace an occurrence of the nonterminal $A$ with whatever symbols are in $\alpha$, we can just substitute $A$ for the symbols in $\alpha$ directly. In other words, the symbols surrounding $A$ (also known as the \emph{context}) don't have any effect on the substitution, and so the process of replacing $A$ with $\alpha$ is \emph{free of context}! By contrast, if we had rules of the form
+\begin{equation*}
+\beta A \gamma \rightarrow \beta \alpha \gamma,
+\end{equation*}
+where $A \in V$, $\alpha \in (V \cup \Sigma)^{+}$, and $\beta, \gamma \in (V \cup \Sigma)^{*}$, then we could replace $A$ with $\alpha$ only when $A$ appears within the context $\beta \, \square \, \gamma$. This gives rise to the notions of \emph{context-sensitive grammars} and \emph{context-sensitive languages}, which are interesting in their own right but omitted from our discussion here.
+
+%\subsection{Constructing Context-Free Grammars}
+
+%\begin{construction}
+% I would like to write a short section about how one can design a context-free grammar for a given language/application/etc.
+%\end{construction}
+
+\subsection{Ambiguity}
+
+If we are given a derivation of a word for some context-free grammar, we need not always represent it in a linear fashion like we did in previous examples. We could alternatively represent it as a tree structure, where the root of the tree corresponds to the start nonterminal $S$ and each branch of the tree adds a new nonterminal or terminal symbol. We refer to such trees as \emph{parse trees}.
+
+Parse trees are very familiar to linguists: the idea is used all the time to break down sentences or phrases into their constituent components, like nouns, verbs, and so on. In doing so, linguists are able to study the structures of sentences in different languages. For example, consider the parse tree for an English sentence depicted in Figure~\ref{fig:parsetree}.
+\begin{figure}
+\centering
+\scalebox{0.9}{
+\Tree[.S
+		[.NP
+			[.Det \textit{the} ]
+			[.Nom
+				[.Adj \textit{intelligent} ]
+				[.N \textit{professor} ]
+			]
+		]
+		[.VP
+			[.V \textit{illustrated} ]
+			[.NP
+				[.Det \textit{a} ]
+				[.Nom
+					[.Adj \textit{beautiful} ]
+					[.N \textit{tree} ]
+				]
+			]
+		]
+	]
+}
+\caption{A parse tree for an English sentence}
+\label{fig:parsetree}
+\end{figure}
+In this tree, the sentence (S) is broken down into a noun phrase (NP) and a verb phrase (VP); the noun phrase is broken down further into a determiner (Det) and a nominal (Nom); and so on. There are all kinds of rules specifying exactly how we can break down English sentences in this way.
+
+In every parse tree, the root of the tree is the start nonterminal $S$, the leaves of the tree contain terminal symbols from $\Sigma$ (or $\epsilon$), and all other vertices of the tree contain nonterminal symbols from $V$. If a parse tree contains an internal (non-leaf) vertex $A$, and all the children of the vertex $A$ are labelled $a_{1}, a_{2}, \dots, a_{n}$, then the underlying grammar's rule set must contain a rule of the form $A \rightarrow a_{1}a_{2} \dots a_{n}$.
+
+For most grammars we deal with, there exists exactly one way to generate any given word in the language of the grammar, and thus exactly one parse tree for each word. However, this is not always the case. There are some grammars that allow us to generate the same word in more than one way.
+
+Perhaps one of the most well-known examples where this is the case---namely, from viral posts online that ask you to simplify $8 \div 2 (2 + 2)$ or something similar---is the grammar generating the language of arithmetic expressions. If you recall grade school mathematics, you'll remember that there is an order of operations that specify the order in which we should apply arithmetic operations in a given expression. We first evaluate expressions in parentheses, then exponents, then multiplications and divisions, and finally additions and subtractions.
+
+Let's consider a simplified set of operations, where we only use parentheses, addition, and multiplication. The grammar generating the language of arithmetic expressions using these three operators together with the standard set of numbers is as follows:
+\begin{align}
+\label{eq:grammararithmeticbad}
+\begin{split}
+S	&\rightarrow \texttt{(} S \texttt{)} \\
+S	&\rightarrow S + S \\
+S	&\rightarrow S \times S \\
+S	&\rightarrow \texttt{num}
+\end{split}
+\end{align}
+
+If we consider the expression $\texttt{num} \times \texttt{num} + \texttt{num}$, we discover that there exists more than one way to generate this expression, depending on whether we apply the $+$ rule or the $\times$ rule first. This is evidenced by the fact that there exist two parse trees for the same expression:
+
+\begin{center}
+\scalebox{0.9}{
+\Tree[.$S$ 
+		[.$S$ 
+			[.$S$ 
+				[.\texttt{num} ]
+			]
+			[.$\times$ ]
+			[.$S$ 
+				[.\texttt{num} ]
+			]
+		]
+		[.$+$ ]
+		[.$S$ 
+			[.\texttt{num} ]
+		]
+	]
+\hspace{1.5cm}
+\Tree[.$S$ 
+		[.$S$ 
+			[.\texttt{num} ]
+		]
+		[.$\times$ ]
+		[.$S$ 
+			[.$S$ 
+				[.\texttt{num} ]
+			]
+			[.$+$ ]
+			[.$S$ 
+				[.\texttt{num} ]
+			]
+		]
+	]
+}
+\end{center}
+
+We don't need to do anything tricky in order to obtain these different parse trees. In fact, both parse trees can be obtained simply by applying rules to each nonterminal from left to right; that is, at some level of the parse tree where there exists two nonterminals, we apply a rule to the first (left) nonterminal before the second (right) nonterminal. This process is known as a \emph{leftmost derivation}.
+
+If there exists some word in the language of a grammar for which there is more than one leftmost derivation of that word, then we say that the word is derived \emph{ambiguously}. Likewise, the grammar producing that word is itself ambiguous.
+
+\begin{definition}[Ambiguous context-free grammar]
+A context-free grammar $G$ is ambiguous if there exists some word $w \in L(G)$ that can be derived ambiguously.
+\end{definition}
+
+\begin{example}
+The grammar from Example~\ref{ex:balancedparens} generating our language of words with balanced parentheses is ambiguous. Consider again the word \texttt{(())()}. There exist two different parse trees corresponding to leftmost derivations of this word:
+
+\begin{center}
+\scalebox{0.9}{
+\Tree[.$S$ 
+		[.$S$ 
+			[.\texttt{(} ]
+			[.$S$ 
+				[.\texttt{(} ]
+				[.$S$ 
+					[.$\epsilon$ ]
+				]
+				[.\texttt{)} ]
+			]
+			[.\texttt{)} ]
+		]
+		[.$S$ 
+			[.\texttt{(} ]
+			[.$S$ 
+				[.$\epsilon$ ]
+			]
+			[.\texttt{)} ]
+		]
+	]
+\hspace{1.5cm}
+\Tree[.$S$ 
+		[.$S$ 
+			[.$S$ 
+				[.$\epsilon$ ]
+			]
+			[.$S$ 
+				[.\texttt{(} ]
+				[.$S$ 
+					[.\texttt{(} ]
+					[.$S$ 
+						[.$\epsilon$ ]
+					]
+					[.\texttt{)} ]
+				]
+				[.\texttt{)} ]
+			]
+		]
+		[.$S$ 
+			[.\texttt{(} ]
+			[.$S$ 
+				[.$\epsilon$ ]
+			]
+			[.\texttt{)} ]
+		]
+	]
+}
+\end{center}
+\end{example}
+
+\subsubsection*{Reducing and Removing Ambiguity}
+
+In certain cases, if we have an ambiguous context-free grammar, then we can create a context-free grammar for the same language that has reduced, or even no, ambiguity.
+
+As an example, recall our three-operation arithmetic grammar:
+\begin{align}
+\begin{split}
+S	&\rightarrow \texttt{(} S \texttt{)} \\
+S	&\rightarrow S + S \\
+S	&\rightarrow S \times S \\
+S	&\rightarrow \texttt{num}
+\end{split}
+\tag{\ref{eq:grammararithmeticbad}}
+\end{align}
+Nothing in this grammar forces us to use one rule before another, so we end up being able to derive the same word via different sequences of rule applications. However, we can construct an unambiguous grammar simply by adding a little more structure to our rules---specifically, by adding a few more nonterminals:
+\begin{align}
+\label{eq:grammararithmeticgood}
+\begin{split}
+S	&\rightarrow E \\
+E	&\rightarrow E + T \mid T \\
+T	&\rightarrow T \times F \mid F \\
+F	&\rightarrow \texttt{(} E \texttt{)} \mid \texttt{num}
+\end{split}
+\end{align}
+Now, each nonterminal plays a particular role. The nonterminal $S$, as usual, serves as our starting point and produces an expression, $E$. Each expression consists of subexpressions $E$ or additive terms $T$. Likewise, each term consists of subterms $T$ or multiplicative factors $F$. Finally, each factor can be either a \texttt{num} or a parenthesized subexpression, starting the whole process over again.
+
+Our revised grammar now allows us to draw one unambiguous parse tree for the expression $\texttt{num} \times \texttt{num} + \texttt{num}$:
+
+\begin{center}
+\scalebox{0.9}{
+\Tree[.$S$ 
+		[.$E$ 
+			[.$E$ 
+				[.$T$ 
+					[.$T$ 
+						[.$F$ 
+							[.\texttt{num} ]
+						]
+					]
+					[.$\times$ ]
+					[.$F$ 
+						[.\texttt{num} ]
+					]
+				]
+			]
+			[.$+$ ]
+			[.$T$ 
+				[.$F$ 
+					[.\texttt{num} ]
+				]
+			]
+		]
+	]
+}
+\end{center}
+
+We won't verify here that this grammar is in fact equivalent to our original one, though we can intuit that they both generate the same language. Suffice it to say that, with this revised grammar, we're able to guarantee that the addition rule is always applied before the multiplication rule.
+
+\begin{remark}
+The reason why we didn't verify that our two context-free grammars are equivalent is because the problem of determining the equivalence of context-free grammars is impossible for a computer to solve in general. We will discuss this in greater depth in Sections~\ref{sec:reductionsTMcomputations} and \ref{sec:undecidableproblemscontextfree}.
+\end{remark}
+
+\subsubsection*{Inherent Ambiguity}
+
+Unfortunately, there is no general procedure or algorithm for removing ambiguity from a context-free grammar; indeed, it isn't even possible to remove ambiguity in some cases. Some context-free languages are \emph{inherently ambiguous}, meaning that any grammar generating the language will have some unavoidable ambiguous component to it.
+
+\begin{example}
+Let $\Sigma = \{\texttt{a}, \texttt{b}, \texttt{c}\}$, and consider the language
+\begin{equation*}
+L_{\text{twoequal}} = \{\texttt{a}^{i}\texttt{b}^{j}\texttt{c}^{k} \mid i, j, k \geq 0 \text{ and } i = j \text { or } j = k\}.
+\end{equation*}
+This language contains all words that have either the same number of \texttt{a}s and \texttt{b}s or the same number of \texttt{b}s and \texttt{c}s.
+
+We can generate this language using the following grammar:
+\begin{align*}
+S		&\rightarrow S_{1} \mid S_{2} \\
+S_{1}	&\rightarrow S_{1}\texttt{c} \mid A \\
+A		&\rightarrow \texttt{a}A\texttt{b} \mid \epsilon \\
+S_{2}	&\rightarrow \texttt{a}S_{2} \mid B \\
+B		&\rightarrow \texttt{b}B\texttt{c} \mid \epsilon
+\end{align*}
+The rules $S_{1}$ and $A$ generate words of the form $\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{m}$ and the rules $S_{2}$ and $B$ generate words of the form $\texttt{a}^{m}\texttt{b}^{n}\texttt{c}^{n}$, each where $m, n \geq 0$.
+
+Now, consider words of the form $\texttt{a}^{n}\texttt{b}^{n}\texttt{c}^{n}$, where $n \geq 0$. All words of this form belong to the language $L_{\text{twoequal}}$, but each such word has two distinct derivations in this grammar: it can be generated either by the rules $S_{1}$ and $A$, or by the rules $S_{2}$ and $B$.
+
+While the formal proof that this language is inherently ambiguous is quite long, we can intuitively see that (for instance) any grammar generating this language must have rules similar to $S_{1}$ and $A$ to produce balanced pairs of \texttt{a}s and \texttt{b}s followed by some number of \texttt{c}s. We can make a similar argument for the rules $S_{2}$ and $B$. Thus, any grammar for this language will include some degree of ambiguity.
+\end{example}
+
+\subsection{Normal Forms}
+
+Up to now, we've imposed no restrictions on the form of each rule in our context-free grammars. As long as each rule of our context-free grammar looked like $A \rightarrow \alpha$, where $A$ is a nonterminal symbol and $\alpha$ is a combination of terminal and nonterminal symbols, we were happy.
+
+However, computers (and, by extension, the people who program computers) like having structure. For instance, a compiler for a programming language usually incorporates a context-free grammar into its workflow at some point during the compilation of a program, and having a structured grammar makes the compiler's job both easier and faster.
+
+Therefore, at times, we might like to transform a context-free grammar into a more-structured \emph{normal form}; that is, to modify the grammar in such a way that each rule takes a canonical form. There are a number of normal forms to choose from, and each one comes with its own benefits.
+
+\subsubsection{Chomsky Normal Form}
+
+The \emph{Chomsky normal form}, as the name suggests, was first studied by the linguist Noam Chomsky~\citeyearpar{Chomsky1959FormalPropertiesGrammars} as he attempted to develop a model for natural language using grammars. A grammar in Chomsky normal form is one where each rule either has two nonterminal symbols or one terminal symbol on the right-hand side.
+
+\begin{definition}[Chomsky normal form]
+A context-free grammar is in Chomsky normal form if every rule in the grammar is of one of the two following forms:
+\begin{enumerate}
+\item $A \rightarrow BC$ for $A, B, C \in V$ with $B, C \neq S$; or
+\item $A \rightarrow a$ for $A \in V$ and $a \in \Sigma$.
+\end{enumerate}
+Additionally, we may allow the rule $S \rightarrow \epsilon$.
+\end{definition}
+
+The main benefit of converting a grammar into Chomsky normal form comes in how we can represent and store derivations of words in memory. Since each rule derives either two nonterminal symbols or one terminal symbol, every parse tree will have a branching factor of either 2 or 1. This fact allows us to use efficient data structures for representing binary trees in memory, as well as to apply efficient algorithms to process parse trees and derivations. Moreover, the number of steps in a derivation using a grammar in Chomsky normal form is easy to bound: if the grammar generates a word $w$, then the derivation of $w$ will contain $|w| - 1$ applications of a rule of the first form and $|w|$ applications of a rule of the second form.
+
+\begin{example}
+Let $\Sigma = \{\texttt{a}, \texttt{b}\}$, and consider the following two grammars. Each grammar generates words consisting of one \texttt{b} surrounded on either side by zero or more \texttt{a}s. The grammar on the left is not in Chomsky normal form. The grammar on the right is in Chomsky normal form, and it is equivalent to the grammar on the left.
+\begin{equation*}
+\begin{aligned}[t]
+S	&\rightarrow A\texttt{b}A \\
+A	&\rightarrow A\texttt{a} \mid \epsilon
+\end{aligned}
+\hspace{2cm}
+\begin{aligned}[t]
+S_{0}	&\rightarrow TA \mid BA \mid AB \mid \texttt{b} \\
+T		&\rightarrow AB \\
+A		&\rightarrow AC \mid \texttt{a} \\
+B		&\rightarrow \texttt{b} \\
+C		&\rightarrow \texttt{a}
+\end{aligned}
+\end{equation*}
+\end{example}
+
+Every context-free grammar can be converted into a context-free grammar in Chomsky normal form, and the conversion process consists of five steps:
+\begin{colouredbox}
+\begin{enumerate}
+\item \textbf{START}: Replace the start nonterminal.
+
+Add a new start nonterminal $S_{0}$ together with a new rule $S_{0} \rightarrow S$, where $S$ is the start nonterminal of the original grammar.
+
+This ensures that the new start nonterminal $S_{0}$ will not occur on the right-hand side of any rule.
+
+\item \textbf{TERM}: Remove nonsolitary terminals from the right-hand side of all rules.
+
+For each rule of the form $A \rightarrow \alpha_{1} \dots a \dots \alpha_{n}$, where $A \in V$, $\alpha_{1}, \dots, \alpha_{n} \in V \cup \Sigma$ and $a \in \Sigma$, add a new rule $T_{a} \rightarrow a$ and replace the existing rule with one of the form $A \rightarrow B_{1} \dots T_{a} \dots B_{n}$. If multiple terminals appear on the right-hand side of the rule, replace all terminals simultaneously.
+
+This ensures that the right-hand sides of all rules consist either of a single terminal or some number of nonterminals.
+
+\item \textbf{BIN}: Split up groups of three or more nonterminals on the right-hand side of all rules.
+
+For each rule of the form $A \rightarrow B_{1}B_{2} \dots B_{n}$, where $A, B_{1}, \dots, B_{n} \in V$ and $n \geq 3$, replace the existing rule with the set of rules
+\begin{align*}
+A		&\rightarrow B_{1}A_{1}, \\
+A_{1}	&\rightarrow B_{2}A_{2}, \\
+		&\vdots \\
+A_{n-2}	&\rightarrow B_{n-1}B_{n}.
+\end{align*}
+
+This ensures that every parse tree produced by the resultant grammar will have a bounded branching factor.
+
+\item \textbf{DEL}: Remove epsilon rules.
+
+Remove all rules of the form $A \rightarrow \epsilon$, where $A \neq S_{0}$. For all rules of the form $A \rightarrow BC$ where $A, B, C \in V$ and either $B$ or $C$ is \emph{nullable} (i.e., where there exists a rule $B \rightarrow \epsilon$ or $C \rightarrow \epsilon$), replace the existing rule with one where the nullable nonterminal is removed.
+
+\item \textbf{UNIT}: Remove unit rules.
+
+For each pair of rules of the form $A \rightarrow B$ and $B \rightarrow C$, where $A, B \in V$ and $C \in V^{+}$, replace the existing rule $A \rightarrow B$ with one of the form $A \rightarrow C$, unless this replacement produces a unit rule that has previously been removed.
+\end{enumerate}
+\end{colouredbox}
+
+The process of converting a context-free grammar to Chomsky normal form can be lengthy and tedious, so the job is often automated by a subroutine within a compiler or a similar program. However, we're here to learn, and learning is best done by doing. Thus, let's work through an example of this conversion process step by step.
+
+\begin{example}
+Consider the following grammar not in Chomsky normal form:
+\begin{align*}
+S	&\rightarrow ASB \\
+A	&\rightarrow \texttt{a}AS \mid \texttt{a} \mid \epsilon \\
+B	&\rightarrow S\texttt{b}S \mid A \mid \texttt{bb}
+\end{align*}
+We will convert this grammar to an equivalent grammar in Chomsky normal form.
+
+\begin{enumerate}
+\item \textbf{START}: Replace the start nonterminal.
+
+We begin by adding a new start nonterminal and the rule $S_{0} \rightarrow S$, which gives us the following:
+\begin{align*}
+\highlightmath{S_{0}}	&\rightarrow \highlightmath{S} \\
+S				&\rightarrow ASB \\
+A				&\rightarrow \texttt{a}AS \mid \texttt{a} \mid \epsilon \\
+B				&\rightarrow S\texttt{b}S \mid A \mid \texttt{bb}
+\end{align*}
+
+\item \textbf{TERM}: Remove nonsolitary terminals from the right-hand side of all rules.
+
+We have three rules to handle here: $A \rightarrow \texttt{a}AS$, $B \rightarrow S\texttt{b}S$, and $B \rightarrow \texttt{bb}$. Adding the new rules $T_{\texttt{a}} \rightarrow \texttt{a}$ and $T_{\texttt{b}} \rightarrow \texttt{b}$ and making the appropriate substitutions gives us the following:
+\begin{align*}
+S_{0}					&\rightarrow S \\
+S						&\rightarrow ASB \\
+\highlightmath{A}			&\rightarrow \highlightmath{T_{\texttt{a}}AS} \mid \texttt{a} \mid \epsilon \\
+\highlightmath{B}			&\rightarrow \highlightmath{ST_{\texttt{b}}S} \mid A \mid \highlightmath{T_{\texttt{b}}T_{\texttt{b}}} \\
+\highlightmath{T_{\texttt{a}}}	&\rightarrow \highlightmath{\texttt{a}} \\
+\highlightmath{T_{\texttt{b}}}	&\rightarrow \highlightmath{\texttt{b}}
+\end{align*}
+
+\item \textbf{BIN}: Split up groups of three or more nonterminals on the right-hand side of all rules.
+
+Again, we have three rules to split up: $S \rightarrow ASB$, $A \rightarrow T_{\texttt{a}}AS$, and $B \rightarrow ST_{\texttt{b}}S$. Splitting these rules gives us the following:
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow S \\
+\highlightmath{S}			&\rightarrow \highlightmath{AS_{1}} \\
+\highlightmath{A}			&\rightarrow \highlightmath{T_{\texttt{a}}A_{1}} \mid \texttt{a} \mid \epsilon \\
+\highlightmath{B}			&\rightarrow \highlightmath{SB_{1}} \mid A \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+\highlightmath{S_{1}}			&\rightarrow \highlightmath{SB} \\
+\highlightmath{A_{1}}			&\rightarrow \highlightmath{AS} \\
+\highlightmath{B_{1}}			&\rightarrow \highlightmath{T_{\texttt{b}}S}
+\end{aligned}
+\end{equation*}
+
+\item \textbf{DEL}: Remove epsilon rules.
+
+This grammar has one obvious epsilon rule, which is $A \rightarrow \epsilon$. However, we must also modify the rules that contain the nullable nonterminal $A$: these rules are $S \rightarrow AS_{1}$, $A_{1} \rightarrow AS$, and $B \rightarrow A$. For each of these rules, we add a new rule that is of the same form, but with the nonterminal $A$ removed.
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow S \\
+\highlightmath{S}			&\rightarrow AS_{1} \mid \highlightmath{S_{1}} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \mid {\color{\neutralcolour}\cancel{\epsilon}} \phantom{\highlightmath{S_{0}}} \\
+\highlightmath{B}			&\rightarrow SB_{1} \mid A \mid \highlightmath{\epsilon} \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+S_{1}					&\rightarrow SB \phantom{\highlightmath{S_{0}}} \\
+\highlightmath{A_{1}}			&\rightarrow AS \mid \highlightmath{S} \\
+B_{1}					&\rightarrow T_{\texttt{b}}S \phantom{\highlightmath{S_{0}}}
+\end{aligned}
+\end{equation*}
+
+Observe that removing the nullable nonterminal $A$ from the rule $B \rightarrow A$ produced another epsilon rule, $B \rightarrow \epsilon$, so we must remove that rule as well. This also means that $B$ is a nullable nonterminal, and so we must modify rules containing $B$: the only rule affected here is $S_{1} \rightarrow SB$. For this rule, we again add a new rule that is of the same form, but with the nonterminal $B$ removed.
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow S \\
+S						&\rightarrow AS_{1} \mid S_{1} \phantom{\highlightmath{S_{0}}} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \\
+B						&\rightarrow SB_{1} \mid A \mid {\color{\neutralcolour}\cancel{\epsilon}} \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+\highlightmath{S_{1}}			&\rightarrow SB \mid \highlightmath{S} \\
+A_{1}					&\rightarrow AS \mid S \\
+B_{1}					&\rightarrow T_{\texttt{b}}S
+\end{aligned}
+\end{equation*}
+
+\item \textbf{UNIT}: Remove unit rules.
+
+Lastly, we handle all of the unit rules in this grammar. We'll begin by removing the unit rule $S_{0} \rightarrow S$ to obtain the following:
+\begin{equation*}
+\begin{aligned}[t]
+\highlightmath{S_{0}}			&\rightarrow \highlightmath{AS_{1}} \mid \highlightmath{S_{1}} \\
+S						&\rightarrow AS_{1} \mid S_{1} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \\
+B						&\rightarrow SB_{1} \mid A \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \phantom{\highlightmath{S_{0}}} \\
+S_{1}					&\rightarrow SB \mid S \\
+A_{1}					&\rightarrow AS \mid S \\
+B_{1}					&\rightarrow T_{\texttt{b}}S
+\end{aligned}
+\end{equation*}
+
+In removing this rule, we added a new unit rule $S_{0} \rightarrow S_{1}$, so let's take care of that rule next. Note that straightforwardly performing the substitution on the right-hand side would again produce the unit rule $S_{0} \rightarrow S$ that we already removed, so we omit that rule and obtain the following:
+\begin{equation*}
+\begin{aligned}[t]
+\highlightmath{S_{0}}			&\rightarrow AS_{1} \mid \highlightmath{SB} \\
+S						&\rightarrow AS_{1} \mid S_{1} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \\
+B						&\rightarrow SB_{1} \mid A \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \phantom{\highlightmath{S_{0}}} \\
+S_{1}					&\rightarrow SB \mid S \\
+A_{1}					&\rightarrow AS \mid S \\
+B_{1}					&\rightarrow T_{\texttt{b}}S
+\end{aligned}
+\end{equation*}
+
+We now remove the unit rule $S \rightarrow S_{1}$. Performing the substitution on the right-hand side would produce the (useless) unit rule $S \rightarrow S$, so we omit that rule and obtain the following:
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow AS_{1} \mid SB \\
+\highlightmath{S}			&\rightarrow AS_{1} \mid \highlightmath{SB} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \\
+B						&\rightarrow SB_{1} \mid A \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+S_{1}					&\rightarrow SB \mid S \phantom{\highlightmath{S_{0}}} \\
+A_{1}					&\rightarrow AS \mid S \\
+B_{1}					&\rightarrow T_{\texttt{b}}S
+\end{aligned}
+\end{equation*}
+
+We can now remove the unit rules $S_{1} \rightarrow S$ and $A_{1} \rightarrow S$, which both have the nonterminal $S$ on the right-hand side. This produces the following:
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow AS_{1} \mid SB \\
+S						&\rightarrow AS_{1} \mid SB \phantom{\highlightmath{S_{0}}} \\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \phantom{\highlightmath{S_{0}}} \\
+B						&\rightarrow SB_{1} \mid A \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+\highlightmath{S_{1}}			&\rightarrow SB \mid \highlightmath{AS_{1}} \\
+\highlightmath{A_{1}}			&\rightarrow AS \mid \highlightmath{AS_{1}} \mid \highlightmath{SB} \\
+B_{1}					&\rightarrow T_{\texttt{b}}S
+\end{aligned}
+\end{equation*}
+
+Lastly, we remove the unit rule $B \rightarrow A$, which gives us our Chomsky normal form grammar:
+\begin{equation*}
+\begin{aligned}[t]
+S_{0}					&\rightarrow AS_{1} \mid SB \\
+S						&\rightarrow AS_{1} \mid SB\\
+A						&\rightarrow T_{\texttt{a}}A_{1} \mid \texttt{a} \\
+\highlightmath{B}			&\rightarrow SB_{1} \mid \highlightmath{T_{\texttt{a}}A_{1}} \mid \highlightmath{\texttt{a}} \mid T_{\texttt{b}}T_{\texttt{b}} \\
+T_{\texttt{a}}				&\rightarrow \texttt{a} \\
+T_{\texttt{b}}				&\rightarrow \texttt{b}
+\end{aligned}
+\hspace{0.75cm}
+\begin{aligned}[t]
+\phantom{S_{0}} & \\
+S_{1}					&\rightarrow SB \mid AS_{1} \\
+A_{1}					&\rightarrow AS \mid AS_{1} \mid SB \\
+B_{1}					&\rightarrow T_{\texttt{b}}S \phantom{\highlightmath{S_{0}}}
+\end{aligned}
+\end{equation*}
+\end{enumerate}
+\end{example}
+
+\futuresubsubsection{Greibach Normal Form}
+
+\phantom{.} \par
+
+\begin{construction}
+Together with the section on Chomsky normal form, I would also like to write a discussion of Greibach normal form~\citeyearpar{Greibach1965NewNormalFormTheorem}, its benefits, and how we can convert a context-free grammar into GNF.
+\end{construction}
+
+%\subsubsection{Backus--Naur Form}

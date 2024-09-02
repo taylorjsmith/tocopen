@@ -1,0 +1,153 @@
+\section{The Halting Problem}\label{sec:haltingproblem}
+
+\firstwords{Most, if not all,} of the code we write in our daily lives has the desirable behaviour that it eventually ends its computation and produces an output. For example, the following code can easily be seen to stop after some time:
+\begin{colouredbox}
+\begin{algorithmic}
+\State $i \gets 1$
+\For{$2 \leq j \leq 10$}
+	\State $i \gets i \times j$
+\EndFor
+\State \Return $i$
+\end{algorithmic}
+\end{colouredbox}
+\noindent
+On the other hand, the following code will never stop, ceaselessly churning on and on until either the user intervenes or the computer shuts off:
+\begin{colouredbox}
+\begin{algorithmic}
+\State $i \gets 0$
+\While{true}
+	\State $i \gets i + 1$
+\EndWhile
+\end{algorithmic}
+\end{colouredbox}
+\noindent
+Does it happen to be the case that any useful code we write exhibits the behaviour of eventually stopping and producing something for us? Let's consider one more block of code, which has both a ``while true" infinite loop and a ``return" statement within that loop giving us a possible avenue to stop computing:
+\begin{colouredbox}
+\begin{algorithmic}
+\State $i \gets 4$
+\While{true}
+	\If{$i$ is not the sum of two prime numbers}
+		\State \Return false
+	\Else
+		\State \textbf{print} the two prime numbers that sum to $i$
+		\State $i \gets i + 2$
+	\EndIf
+\EndWhile
+\end{algorithmic}
+\end{colouredbox}
+\noindent
+The utility of this code might be up for debate if you're not in any pressing need to know whether a number can be represented as a sum of two primes, but mathematicians would argue that this code is very useful: it will reach that internal ``return" statement if and only if the Goldbach conjecture is false! So, will this code ever stop and return false? The Goldbach conjecture has been verified to hold for all even numbers up to $4 \times 10^{18}$---an incredibly large value---but no general proof or disproof is yet known. Thus, if we could determine whether this code will ever come to a halt (and assuming it doesn't do so due to a computer bug), it would be very big news in the mathematical world.
+
+The question of whether code halts has deep connections and implications across computer science, from the most abstract theory to the most applied software engineering. Some infinite-looping behaviour is desirable in code---say, in software that polls the status of a computer---but in other code, it is very important for us to know whether or not we'll eventually get the answer we desire. This has led to the \emph{halting problem} becoming one of the most famous problems in all of computer science.
+
+Although we have framed our discussion so far in terms of code, the halting problem formally asks whether the computation of a Turing machine halts on some given input word. Of course, thanks to the Church--Turing thesis in Section~\ref{sec:churchturingthesis}, we know that code and Turing machines are ``the same" in the sense that code implements algorithms and algorithms can be computed on Turing machines. Thus, we can formulate the halting problem precisely as follows:
+\begin{equation*}
+\mathit{H}_{\TM} = \{\langle \mathcal{M}, w \rangle \mid \mathcal{M} \text{ is a Turing machine that halts on input } w\}.
+\end{equation*}
+Observe that the formulation of $\mathit{H}_{\TM}$ looks very similar to that of $A_{\TM}$. However, there exists a subtle difference between the two problems: $A_{\TM}$ asks not only whether a given Turing machine \emph{halts}, but also whether it \emph{accepts} a given input word. By contrast, $\mathit{H}_{\TM}$ only cares about whether the machine halts.
+
+We can at least say that $\mathit{H}_{\TM}$ is semidecidable, since we can construct a Turing machine that takes as input a description of a Turing machine $\mathcal{M}$ along with an input word $w$ and accepts if and only if the simulated computation of $\mathcal{M}$ on $w$ halts.
+
+\begin{theorem}\label{thm:HTMsemidecidable}
+$\mathit{H}_{\TM}$ is semidecidable.
+
+\begin{proof}
+Construct a Turing machine $\mathcal{M}_{\mathrm{HTM}}$ that takes as input $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is a Turing machine and $w$ is a word, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\mathrm{HTM}}$}{
+\begin{enumerate}
+\item Run $\mathcal{M}$ on the input word $w$.
+\item If $\mathcal{M}$ halts, then accept.
+\end{enumerate}
+}
+This Turing machine accepts its input $\langle \mathcal{M}, w \rangle$ if and only if the Turing machine $\mathcal{M}$ halts when given its input $w$. If $\mathcal{M}$ enters an infinite loop on the input $w$, then $\mathcal{M}_{\mathrm{HTM}}$ will likewise loop forever. Thus, $\mathcal{M}_{\mathrm{HTM}}$ semidecides the halting problem.
+\end{proof}
+\end{theorem}
+
+Now, we will prove the undecidability of $\mathit{H}_{\TM}$ by way of reduction from our known-undecidable problem $A_{\TM}$. Note that reducing \emph{from} $A_{\TM}$ \emph{to} $\mathit{H}_{\TM}$ means that we can turn instances of $A_{\TM}$ into instances of $\mathit{H}_{\TM}$, and since we know that $A_{\TM}$ is undecidable, this must mean that $\mathit{H}_{\TM}$ is similarly undecidable by Corollary~\ref{cor:XundecidableYundecidable}.
+
+\begin{theorem}\label{thm:HTMundecidable}
+$\mathit{H}_{\TM}$ is undecidable.
+
+\begin{proof}
+Assume by way of contradiction that $\mathit{H}_{\TM}$ is decidable, and suppose that $\mathcal{M}_{\mathrm{H}}$ is a Turing machine that decides $\mathit{H}_{\TM}$.
+
+We construct a new Turing machine $\mathcal{M}_{\mathrm{A}}$ for the membership problem $\mathit{A}_{\TM}$ that uses the reduction $\mathit{A}_{\TM} \mreducesto \mathit{H}_{\TM}$. The machine $\mathcal{M}_{\mathrm{A}}$ takes as input $\langle \mathcal{M}, w \rangle$, where $\mathcal{M}$ is a Turing machine and $w$ is an input word, and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{\mathrm{A}}$}{
+\begin{enumerate}
+\item Define a computable function $f$ that takes as input $\langle \mathcal{M}, w \rangle$ and produces as output $\langle \mathcal{M}', w \rangle$, where $\mathcal{M}'$ behaves as follows:
+	\tmalgorithm[0.925]{$\mathcal{M}'$}{
+	\begin{enumerate}
+	\item Run $\mathcal{M}$ on the input word given to $\mathcal{M}'$.
+	\item If $\mathcal{M}$ accepts, then accept. If $\mathcal{M}$ rejects, then loop forever.
+	\end{enumerate}
+	}
+\item Run $\mathcal{M}_{\mathrm{H}}$ on the result $\langle \mathcal{M}', w \rangle$ produced by $f$.
+\item If $\mathcal{M}_{\mathrm{H}}$ accepts, then accept. If $\mathcal{M}_{\mathrm{H}}$ rejects, then reject.
+\end{enumerate}
+}
+Observe that if $\langle \mathcal{M}, w \rangle \in \mathit{A}_{\TM}$, then $\mathcal{M}$ accepts $w$ and $\mathcal{M}'$ likewise accepts and therefore halts, meaning that $\langle \mathcal{M}', w \rangle \in \mathit{H}_{\TM}$. Otherwise, if $\langle \mathcal{M}, w \rangle \not\in \mathit{A}_{\TM}$, then $\mathcal{M}$ either rejects $w$ or loops forever, and in either case $\mathcal{M}'$ loops forever, meaning that $\langle \mathcal{M}', w \rangle \not\in \mathit{H}_{\TM}$.
+
+If the machine $\mathcal{M}_{\mathrm{H}}$ existed to decide $\mathit{H}_{\TM}$, then we could decide $A_{\TM}$ using the machine $\mathcal{M}_{\mathrm{A}}$. However, we know that $A_{\TM}$ is undecidable. Thus, $\mathcal{M}_{\mathrm{H}}$ must not exist, and so $\mathit{H}_{\TM}$ must be undecidable.
+\end{proof}
+\end{theorem}
+
+In our proof that $\mathit{H}_{\TM}$ is undecidable, we constructed a Turing machine $\mathcal{M}_{\mathrm{A}}$ that ostensibly decides $A_{\TM}$ and is composed of two parts: a reduction that computes a function $f$ turning instances of $A_{\TM}$ into instances of $\mathit{H}_{\TM}$, and a black-box Turing machine $\mathcal{M}_{\mathrm{H}}$ that decides $\mathit{H}_{\TM}$. As before, the Turing machine using this reduction from $\mathit{A}_{\TM}$ to $\mathit{H}_{\TM}$ is illustrated in Figure~\ref{fig:manyonereductionATMHTM}.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, thick, fill=\fourthcolour, rounded corners] (0,1) rectangle (7.1,4);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (0.75,1.5) rectangle (3.25,3);
+\draw[draw=black, thick, fill=black] (4.75,1.5) rectangle (6.35,3);
+
+\node[draw=none, color=\maincolour, font=\large] at (3.55,3.5) {$\mathcal{M}_{\mathrm{A}}$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center] at (2,2.25) {Reduction from $\mathit{A}_{\TM}$ to $\mathit{H}_{\TM}$};
+\node[draw=none, color=white, text width=2cm, align=center, font=\large] at (5.55,2.25) {$\mathcal{M}_{\mathrm{H}}$};
+
+\coordinate (A) at (0.75,2.25);
+\coordinate (B) at (-1.4,2.25);
+\draw[-latex, color=\maincolour, thick] (B) -- (A);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (-0.7,2.65) {$\langle \mathcal{M}, w \rangle$};
+
+\coordinate (C) at (4.75,2.25);
+\coordinate (D) at (3.25,2.25);
+\draw[-latex, color=\maincolour, thick] (D) -- (C);
+\node[draw=none, color=\maincolour, font=\footnotesize] at (4,2.65) {$\langle \mathcal{M}', w \rangle$};
+
+\coordinate (E) at (9.8,2.25);
+\coordinate (F) at (6.35,2.25);
+\draw[-latex, color=\maincolour, thick] (F) -- (E);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (8.5,2.75) {$\langle \mathcal{M}', w \rangle \in \mathit{H}_{\TM}$ \\ iff $\langle \mathcal{M}, w \rangle \in \mathit{A}_{\TM}$};
+\end{tikzpicture}
+\caption{A Turing machine for $\mathit{A}_{\TM}$ using the reduction $\mathit{A}_{\TM} \mreducesto \mathit{H}_{\TM}$}
+\label{fig:manyonereductionATMHTM}
+\end{figure}
+
+We don't know how the black-box Turing machine $\mathcal{M}_{\mathrm{H}}$ decides $\mathit{H}_{\TM}$; we only assume that it exists. However, we \emph{do} know how the reduction works---this is step 1 in our procedure! The function $f$ takes the description of the input Turing machine $\mathcal{M}$ and converts it into a new Turing machine $\mathcal{M}'$ that halts on its input word if and only if $\mathcal{M}$ accepts the same input word.
+
+At this point, you may ask yourself: doesn't this reduction implicitly decide $A_{\TM}$, since it has to figure out whether $\mathcal{M}$ accepts or rejects its input word? This is a reasonable question, since if the reduction did work in this way, we would find ourselves trapped in a snare of circular logic. Fortunately for us, we avoid such a trap, since the reduction does no deciding on its own: it only modifies the description of $\mathcal{M}$. Namely,
+\begin{colouredbox}
+\begin{itemize}
+\item if $\langle \mathcal{M} \rangle$ has a transition leading to $q_{\text{accept}}$, then the reduction leaves this transition as is; and
+\item if $\langle \mathcal{M} \rangle$ has a transition leading to $q_{\text{reject}}$, then the reduction modifies this transition to instead enter a new ``infinite loop" state and render $q_{\text{reject}}$ unreachable.
+\end{itemize}
+\end{colouredbox}
+Thus, the reduction only changes how certain transitions of $\mathcal{M}$ behave, and it doesn't consider the output of $\mathcal{M}$ on any particular input word.
+
+Ultimately, our construction establishes that $\mathcal{M}$ accepts $w$ if and only if $\mathcal{M}'$ halts on $w$ (i.e., $\langle \mathcal{M}, w \rangle \in A_{\TM}$ if and only if $\langle \mathcal{M}', w \rangle \in \mathit{H}_{\TM}$). At the same time, $\mathcal{M}$ does not accept $w$ or $\mathcal{M}$ loops forever on $w$ if and only if $\mathcal{M}'$ loops forever on $w$ (i.e., $\langle \mathcal{M}, w \rangle \not\in A_{\TM}$ if and only if $\langle \mathcal{M}', w \rangle \not\in \mathit{H}_{\TM}$).
+
+You may be wondering whether we needed such a complicated proof to show that the halting problem is undecidable, and strictly speaking, we didn't. In fact, we can return to the code-oriented approach with which we started this section! \citet{Strachey1965AnImpossibleProgram} showed that there can exist no function that behaves like our Turing machine $\mathcal{M}_{H}$ using just a few lines of code. In his approach, Strachey takes $T[R]$ to be a Boolean function receiving an arbitrary program $R$ as input, where $R$ has no free variables as arguments. (In other words, such a program $R$ is ``fixed" in the sense that it will always exhibit the same behaviour when run.) The function $T$ behaves in the following way: for all programs $R$, $T[R]$ returns true if $R$ terminates when run, and $T[R]$ returns false otherwise. Then, Strachey writes the following program $P$:
+\begin{colouredbox}
+\begin{algorithmic}
+\State \textbf{rec} \textbf{routine} $P$
+\State \hspace{\algorithmicindent} \defaultS \ $L$ : \textbf{if} $T[P]$ \textbf{go to} $L$
+\State \hspace{\algorithmicindent}\hspace{\algorithmicindent} \Return \vertchar{\defaultS}
+\end{algorithmic}
+\end{colouredbox}
+\noindent
+Unless you're familiar with the programming language CPL, this code may look a little obscure to you, but we can look beyond the syntax to tease out the general idea of what the code is doing. As we noted, $T[P]$ checks whether or not $P$ terminates when run, and it returns either true or false. If $T[P]$ returns true, then we will enter the body of the if statement and jump to the line labelled $L$, which puts us back at the beginning of the if statement; that is, $P$ loops forever. On the other hand, if $T[P]$ returns false, then we will skip over the if statement entirely and return an empty output; that is, $P$ halts. In either case, $P$ behaves in a manner opposite to what $T[P]$ indicated, and so the function $T$ cannot exist!
+
+\epigraph{I have never actually seen a proof of this in print, and\par
+though Alan Turing once gave me a verbal proof (in a railway\par
+carriage on the way to a Conference at the NPL in 1953),\par
+I unfortunately and promptly forgot the details.}{Christopher Strachey}{An impossible program}{}

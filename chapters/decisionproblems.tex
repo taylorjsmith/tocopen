@@ -1,0 +1,77 @@
+\chapter{Decision Problems}\label{chap:decisionproblems}
+
+\firstwords{A fundamental aspect} of studying various models of computation is determining precisely what kinds of questions about that model can be answered algorithmically. For example, does there exist an algorithm that can tell us whether or not a deterministic finite automaton accepts a given input word? It seems obvious---after all, such an algorithm only needs to figure out whether the finite automaton, given the input word, would end up in an accepting state or not---but it's still something that we need to establish formally.
+
+In the previous chapter, we introduced the notions of decidable and semidecidable languages. Using much of the same terminology we developed for reasoning about languages, we can talk more generally not just about languages but about \emph{problems} pertaining to our various models of computation, and we can formally prove which problems can be decided in much the same way as languages can be decided.
+
+A \emph{decision problem} is a problem for which each input instance corresponds to either a ``yes" or a ``no" answer. At its core, a decision problem is a language, and the elements of the language are input instances that correspond to a ``yes" answer. Each element of the language is an encoding of whatever model of computation we're considering, in some cases with an input word given to that model: in the case of regular languages, we use encodings of finite automata, and so on.
+
+If there exists a \emph{decision algorithm} that produces the correct ``yes" or ``no" answer for any instance of a given decision problem, and the algorithm halts on all inputs, then we say that the decision problem is \emph{decidable}. If no such decision algorithm exists, then we say that the decision problem is \emph{undecidable}.
+
+\begin{remark}
+Note that ``undecidable" doesn't mean the decision problem is impossible; ``undecidable" only means ``not decidable", as in ``no decision algorithm exists that \emph{always} halts and gives a yes/no answer".
+\end{remark}
+
+There are a number of common decision problems that we can ask about a model of computation $\textsf{X} \in \{\RE, \DFA, \NFA, \ENFA, \CFG, \PDA, \TM, \dots\}$, and these problems are summarized in Table~\ref{tab:commondecisionproblems}. In this chapter, we will get our first taste of ``programming" Turing machines to solve each of these decision problems. Note that we no longer need to construct a specific Turing machine for a particular decision problem, because (as we now know) the Church--Turing thesis tells us that any function that can be computed by an algorithm can also be computed by a Turing machine.
+
+\begin{table}
+\centering
+\caption{Common decision problems and their definitions}
+\label{tab:commondecisionproblems}
+\begin{tabular}{l l}
+\toprule
+Membership	& $\mathit{A}_{\textsf{X}} = \{\langle \mathcal{B}, w \rangle \mid \mathcal{B} \text{ is an \textsf{X} that accepts input word } w\}$ \\
+Emptiness		& $\mathit{E}_{\textsf{X}} = \{\langle \mathcal{B} \rangle \mid \mathcal{B} \text{ is an \textsf{X} and } L(\mathcal{B}) = \emptyset\}$ \\
+Universality	& $\mathit{U}_{\textsf{X}} = \{\langle \mathcal{B} \rangle \mid \mathcal{B} \text{ is an \textsf{X} and } L(\mathcal{B}) = \Sigma^{*}\}$ \\
+Equivalence	& $\mathit{EQ}_{\textsf{X}} = \{\langle \mathcal{B}, \mathcal{C} \rangle \mid \mathcal{B} \text{ and } \mathcal{C} \text{ are both \textsf{X} and } L(\mathcal{B}) = L(\mathcal{C})\}$ \\
+Inclusion		& $\mathit{IN}_{\textsf{X}} = \{\langle \mathcal{B}, \mathcal{C} \rangle \mid \mathcal{B} \text{ and } \mathcal{C} \text{ are both \textsf{X} and } L(\mathcal{B}) \subseteq L(\mathcal{C})\}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{construction}
+The study of computation doesn't end with decision problems. As Table~\ref{tab:typesofproblems} illustrates, a number of types of computational problems exist depending on what specifically we would like to know about a problem. Decision problems are the most common formulation, but I will eventually write a few paragraphs about these other problem types, as they will appear in later chapters.
+\end{construction}
+
+\begin{sidewaystable}
+\centering
+\caption{Types of computational problems}
+\label{tab:typesofproblems}
+\begin{tabular}{l >{\raggedright\arraybackslash}p{0.2\linewidth} l l l}
+\toprule
+\textbf{Type of problem}		& \textbf{Description}		& \textbf{Typical formulation}	& \textbf{Example} \\
+\midrule
+Decision problem			& Answer to every instance is either ``yes" or ``no" & \linebreakcell{l}{$f \from \Sigma^{*} \to \{0,1\}$ \\ $L = \{x \in \Sigma^{*} \mid f(x) = 1\}$} & \linebreakcell{l}{Primality testing: \\ $2 \rightarrow \text{``yes, prime"}$} \\
+\addlinespace[0.5em]
+Function problem			& Answer to every instance exists, but is not necessarily binary (i.e., ``yes" or ``no") & \linebreakcell{l}{$f \from \Sigma^{*} \to \Sigma^{*}$ \\ $L = \{(x, f(x))\}$} & \linebreakcell{l}{Prime factorization: \\ $2021 \rightarrow \{(2021, 43 \times 47)\}$} \\
+\addlinespace[0.5em]
+Search problem			& Answer is a relation of instance-solution pairs & \linebreakcell{l}{$R \subseteq \Sigma^{*} \times \Sigma^{*}$ \\ $A_{x} = \text{set of solutions for } x \in \Sigma^{*}$ \\ $L = \{(x,y) \mid (x,y) \in R, \ y \in A_{x}\}$} & \linebreakcell{l}{Nontrivial factors: \\ $6 \rightarrow \{(6,2), (6,3)\}$} \\
+\addlinespace[0.5em]
+Counting problem			& Answer is the number of solutions to a given search problem & \linebreakcell{l}{$R \subseteq \Sigma^{*} \times \Sigma^{*}$ \\ $A_{x} = \text{set of solutions for } x \in \Sigma^{*}$ \\ $L = \left| \{(x,y) \mid (x,y) \in R, \ y \in A_{x}\} \right|$} & \linebreakcell{l}{\# of nontrivial factors: \\ $16 \rightarrow 3$} \\
+\addlinespace[0.5em]
+Optimization problem		& Answer is the ``best possible" solution among a set of all feasible solutions & \linebreakcell{l}{Find $x \in \Sigma^{*}$ such that \\ $f(x)$ is minimal/maximal} & \linebreakcell{l}{Largest prime factor: \\ $93 \rightarrow 31$} \\
+\bottomrule
+\end{tabular}
+\end{sidewaystable}
+
+\input{./chapters/decisionproblems/decidableproblemsregular}
+\input{./chapters/decisionproblems/decidableproblemscontextfree}
+%\input{./chapters/decisionproblems/undecidableproblemscontextfree}
+\input{./chapters/decisionproblems/undecidableproblemsturingmachines}
+\input{./chapters/decisionproblems/nonsemidecidableproblemsturingmachines}
+
+\unnumberedsection{Chapter Notes}
+
+\begin{enumerate}
+\item[\ref{sec:decidableREG}.] The decidability of the membership problem for the class of regular languages is practically folklore, in that the result follows immediately from simply giving an input word to a finite automaton. The decidability of the (non-)emptiness problem was established by \citet{Moore1956GedankenExperiments}, who used an argument different from ours that essentially resembles the pumping lemma for regular languages. As we observed, the decidability of the universality, equivalence, and inclusion problems all follow from the positive answer for the emptiness problem.
+
+\item[\ref{sec:decidableCFL}.] \citet*{BarHillel1961FormalPropertiesPhraseStructureGrammars} showed that both the membership problem (or ``the property of sentencehood" in their terminology) and the emptiness problem are decidable for the class of context-free languages.
+
+\item[\ref{sec:undecidableTM}.] It can be said that the undecidability of $\mathit{A}_{\TM}$ was established by \citet{Turing1936OnComputableNumbers}, although he didn't prove this exact result. Turing instead proved the undecidability of the \emph{printing problem}, which takes a machine $\mathcal{M}$ and asks ``whether $\mathcal{M}$ ever prints a given symbol (0 say)". We can, however, easily draw a connection between the printing problem and the membership problem by, for instance, modifying a given machine to write some special symbol ``\texttt{a}" to its tape before reaching $q_{\text{accept}}$.
+
+Although Cantor's diagonal argument appeared in~\citeyear{Cantor1891Mannigfaltigkeitslehre}, it was not Cantor's first proof pertaining to uncountability. Two decades earlier, Cantor published a paper~\citeyearpar{Cantor1874Zahlen} demonstrating, among other things, the uncountability of the set of real numbers using an approach inspired by Liouville's argument for the existence of transcendental numbers. For further details about Cantor's proofs, see the article by~\citet{Gray1994CantorTranscendental}.
+
+\item[\ref{sec:nonsemidecidableTM}.] The argument we employed in the proof of Theorem~\ref{thm:nonsemidecidablelanguages} is essentially identical to that used by \citet{Cantor1891Mannigfaltigkeitslehre}, but applied to languages instead of general sets.
+
+Theorem~\ref{thm:decidablesemidecidable}, on the relationship between decidability, semidecidability, and co-semidecidability, is due to \citet{Post1944RecursivelyEnumerableSets}.
+\end{enumerate}

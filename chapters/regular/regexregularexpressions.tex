@@ -1,0 +1,183 @@
+\section{Regex and Regular Expressions}\label{sec:regexregularexpressions}
+
+\firstwords{To define regular expressions}, let's think about the types of things we can match. For example, as a base case, we might want to be able to match nothing---this can be represented by a nonsensical regex like \texttt{a\^}, which attempts to match a symbol \texttt{a} that occurs before the start of a line. We might also want to match an empty line (which is distinct from matching nothing!), which can be done with the regex \texttt{\^{}\$}.
+
+Let's now actually attempt to match something more meaningful. The smallest nonempty thing we can match is a single symbol, which can be matched by a regex consisting of the symbol itself; say, \texttt{a}. From this, we can build up more complicated regexes by joining together smaller ones. For instance, we can match two regexes independently by joining them together with a special \emph{union} symbol; say, \texttt{(a | b)}, which matches lines that contain either an \texttt{a}, or a \texttt{b}, or both. We can also combine, or \emph{concatenate}, two regexes by simply putting them together---the regex \texttt{ab} matches an \texttt{a} immediately followed by a \texttt{b}. Lastly, it would be nice to incorporate some kind of \emph{repetition} mechanism to match something never, once, or many times. This can be done using a special ``star" symbol such as that in the trivial regex \texttt{.*}, which matches zero or more occurrences (represented by the star, \texttt{*}) of any symbol (represented by the dot, \texttt{.}).
+
+Now, since we're in a mathematically oriented course, we should properly formalize each of these match types. Fortunately, we can bring over notions from mathematics to correspond to each match type. Matching nothing can be denoted by an empty set symbol, $\emptyset$. Likewise, matching an empty line is like matching a set that contains one element which has zero length---let's denote this zero-length element by the symbol $\epsilon$. To denote the union of two regular expressions, we could use $\cup$, but since we're dealing with regular expressions and (strictly speaking) not sets, we'll instead use the symbol $+$. Concatenation is straightforward; we'll simply write the regular expressions side-by-side. Finally, we can keep the star symbol as it is.
+
+Taking this all together, we arrive at a formal definition for regular expressions.
+
+\begin{definition}[Regular expressions]\label{def:regularexpressions}
+Let $\Sigma$ be an alphabet. The class of regular expressions is defined inductively as follows:
+\begin{enumerate}
+\item $\regex{r} = \emptyset$ is a regular expression;
+\item $\regex{r} = \epsilon$ is a regular expression;
+\item For each $a \in \Sigma$, $\regex{r} = a$ is a regular expression;
+\item For regular expressions $\regex{r_{1}}$ and $\regex{r_{2}}$, $\regex{r_{1}} + \regex{r_{2}}$ is a regular expression;
+\item For regular expressions $\regex{r_{1}}$ and $\regex{r_{2}}$, $\regex{r_{1}}\regex{r_{2}}$ is a regular expression; and
+\item For a regular expression $\regex{r}$, $\regex{r}^{*}$ is a regular expression.
+\end{enumerate}
+\end{definition}
+
+Note that our earlier regex examples used symbols like \texttt{\^}, \texttt{.}, and \texttt{\$}, when Definition~\ref{def:regularexpressions} didn't define any of those symbols. This is because regexes and regular expressions aren't exactly the same thing. In fact, our definition of a regular expression is the purely theoretic definition, meant simply to give us the bare minimum needed to match simple patterns. It is therefore different from a practical regex implementation, where we can use special symbols to indicate the start or end of a word, match any symbol instead of one specific symbol, and make back-references, among other things. Appropriately, the literature sometimes refers to these practical regex implementations as \emph{extended regular expressions}, and this is what you'll encounter on most computers. In the context of this lecture, though, when we refer to a regular expression, we will be following Definition~\ref{def:regularexpressions}.
+
+\subsection{Words, Languages, and Operations}
+
+Another way in which regular expressions stand apart is in the terminology we use to refer to what we're matching. Since we aren't using a terminal to write our theoretical regular expressions, we aren't simply matching lines of text in a text file. Instead, a regular expression corresponds more generally to some collection of things that match a pre-specified pattern.
+
+To describe what we can do with regular expressions (and other models of computation we will see later), we will borrow some terminology from linguistics, which happens to be the field from which much of early theoretical computer science developed!
+\begin{colouredbox}
+\begin{itemize}
+\item The symbols we use, like $\{\texttt{a}, \texttt{b}\}$ or $\{\texttt{0}, \texttt{1}\}$, come from an \emph{alphabet}. Often, we represent an alphabet by the symbol $\Sigma$.
+\item Sequences of symbols are called \emph{words} or \emph{strings}. For example, consider the English lowercase alphabet $\{\texttt{a}, \texttt{b}, \dots, \texttt{z}\}$. Some words we can create with this alphabet are \texttt{cat}, \texttt{computer}, and \texttt{pneumonoultramicroscopicsilicovolcanoconiosis}. We often use lowercase variables like $w$, $x$, $y$, or $z$ to denote words, and we use the symbol $\epsilon$ to denote the special zero-length \emph{empty word}.
+\item Sets of words are called \emph{languages}. Much like with plain sets, we can either list the words in a language explicitly, or we can describe a language in terms of some property or properties of each word therein. For example, over the English lowercase alphabet, the language of words with three consecutive double letters is
+	\begin{equation*}
+	\{\texttt{bookkeep}, \texttt{bookkeeper}, \texttt{bookkeepers}, \texttt{bookkeeping}\}.
+	\end{equation*}
+	Also much like sets, languages can be either finite or infinite. We often use uppercase variables like $L$ to denote languages, and we use the symbol $\emptyset$ to denote the special \emph{empty language} containing no words.
+\end{itemize}
+\end{colouredbox}
+
+Since languages are essentially sets, we can apply operations from set theory directly to languages, and doing so allows us to produce new languages. Indeed, we already saw three operations being applied not to languages, but to regular expressions in Definition~\ref{def:regularexpressions}. This trio of operations has their own name: the \emph{regular operations}.
+
+\begin{definition}[Regular operations]\label{def:regularoperations}
+Let $L$, $L_{1}$, and $L_{2}$ be languages. The three regular operations are defined as follows:
+\begin{itemize}
+\item Union: $L_{1} \cup L_{2} = \{w \mid w \in L_{1} \text{ or } w \in L_{2}\}$;
+\item Concatenation: $L_{1}L_{2} = \{wv \mid w \in L_{1} \text{ and } v \in L_{2}\}$; and
+\item Kleene star: $L^{*} = \bigcup_{i \geq 0} L^{i}$, where
+	\begin{align*}
+	L^{0}		&= \{\epsilon\}, \\
+	L^{1}		&= L, \text{ and} \\
+	L^{i}		&= \{wv \mid w \in L^{i-1} \text{ and } v \in L\}.
+	\end{align*}
+\end{itemize}
+\end{definition}
+
+The union operation, naturally, works in exactly the same way for languages as it does for sets. The concatenation operation takes two words and ``connects" the end of the first word to the beginning of the second word. Lastly, the Kleene star operation---or, as we previously referred to it, the star operation---is simply repeated concatenation of all words with all other words in some language.
+
+Note that, since the Kleene star allows us to take zero copies of a word, the empty word $\epsilon$ is always included in the resulting language.
+
+\begin{example}
+Let $L_{1} = \{\texttt{a}, \texttt{b}\}$ and $L_{2} = \{\texttt{d}, \texttt{e}\}$. Then
+\begin{align*}
+L_{1} \cup L_{2} &= \{\texttt{a}, \texttt{b}, \texttt{d}, \texttt{e}\}, \\
+L_{1}L_{2} &= \{\texttt{ad}, \texttt{ae}, \texttt{bd}, \texttt{be}\}, \\
+L_{1}^{*} &= \{\epsilon, \texttt{a}, \texttt{b}, \texttt{aa}, \texttt{ab}, \texttt{ba}, \texttt{bb}, \texttt{aaa}, \texttt{aab}, \dots\}, \text{ and} \\
+L_{2}^{*} &= \{\epsilon, \texttt{d}, \texttt{e}, \texttt{dd}, \texttt{de}, \texttt{ed}, \texttt{ee}, \texttt{ddd}, \texttt{dde}, \dots\}.
+\end{align*}
+\end{example}
+
+\subsubsection*{Empty Words and Empty Languages}
+
+The empty word $\epsilon$ and the empty language $\emptyset$ interact with operations a little differently than other words and languages.
+\begin{colouredbox}
+For the empty word $\epsilon$ and any language $L$, we have that
+	\begin{align*}
+	L \cup \epsilon = \epsilon \cup L		&\neq L \text{ in general;} \\
+	L\epsilon = \epsilon L			&= L \text{; and} \\
+	\epsilon^{*}					&= \{\epsilon\}.
+	\end{align*}
+\end{colouredbox}
+\begin{colouredbox}
+For the empty language $\emptyset$ and any language $L$, we have that
+	\begin{align*}
+	L \cup \emptyset = \emptyset \cup L	&= L \text{; \phantom{in general}} \\
+	L\emptyset = \emptyset L			&= \emptyset \text{; and} \\
+	\emptyset^{*}					&= \{\epsilon\}.
+	\end{align*}
+\end{colouredbox}
+
+\subsubsection*{Other Operations}
+
+We may additionally define some shorthand to make our notation look nicer, though strictly speaking, this notation is not ``official". Recall that the star symbol matches zero or more occurrences of whatever it's associated with. If we wanted to match one or more occurrences, we could write $L^{+} = LL^{*} = L^{*}$, and this is referred to as the ``Kleene plus" symbol. Similarly, as we did in Definition~\ref{def:regularoperations}, we can use exponents to denote iterated concatenation; that is, $L^{i}$ denotes $L$ concatenated with itself $i$ times.
+
+\subsection{Language of a Regular Expression}
+
+To tie everything together thus far, we can observe a direct correspondence between regular expressions and languages. Every regular expression \emph{represents} a language, and we denote the language represented by a regular expression \regex{r} by $L(\regex{r})$. Note that each of the six basic regular expressions correspond to their own language. If $\regex{r} = \emptyset$, then $L(\regex{r}) = \emptyset$. Likewise, if $\regex{r} = \epsilon$, then $L(\regex{r}) = \{\epsilon\}$, and if $\regex{r} = a$, then $L(\regex{r}) = \{a\}$. The remaining three regular expressions correspond exactly to the union, concatenation, or repetition of their constituent languages. We will denote the class of languages represented by some regular expression by \RE.
+
+Often, figuring out the language represented by a given regular expression is as simple as reading through the regular expression and breaking it into its constituent components.
+
+\begin{example}\label{ex:odda}
+Let $\Sigma = \{\texttt{a}, \texttt{b}\}$, and consider the language
+\begin{equation*}
+L_{\text{odda}} = \{w \mid w \text{ contains an odd number of } \texttt{a} \text{s}\}.
+\end{equation*}
+This language is represented by the regular expression
+\begin{equation*}
+\regex{r}_{\text{odda}} = \texttt{b}^{*}(\texttt{ab}^{*}\texttt{ab}^{*})^{*}\texttt{ab}^{*}.
+\end{equation*}
+The first component of \regex{r}, $\texttt{b}^{*}$, recognizes zero or more leading \texttt{b}s. The middle component, $(\texttt{ab}^{*}\texttt{ab}^{*})^{*}$, recognizes zero or more pairs of \texttt{a}s, where each \texttt{a} is followed by zero or more \texttt{b}s. The last component, $\texttt{ab}^{*}$, recognizes an additional \texttt{a} to ensure the total number of \texttt{a}s is odd, followed by zero or more \texttt{b}s.
+\end{example}
+
+Note that regular expressions need not be unique; to illustrate, the same language in Example~\ref{ex:odda} is recognized by the regular expression $\regex{r}'_{\text{odda}} = \texttt{b}^{*}\texttt{ab}^{*}(\texttt{ab}^{*}\texttt{ab}^{*})^{*}$.
+
+Working in reverse, we can take a regular expression and determine the language it represents through a straightforward substitution process.
+
+\begin{example}
+Consider the regular expression $\regex{r} = (\texttt{a} + \texttt{b})^{*}\texttt{b}$ over the alphabet $\Sigma = \{\texttt{a}, \texttt{b}\}$. We can ``decompose" the language represented by \regex{r} in the following way:
+\begin{align*}
+L(\regex{r})	& = L((\texttt{a} + \texttt{b})^{*}\texttt{b}) \\
+			& = L(\texttt{a} + \texttt{b})^{*}L(\texttt{b}) \hspace{1cm} \text{(breaking apart concatenation)} \\
+			& = (L(\texttt{a}) \cup L(\texttt{b}))^{*}L(\texttt{b}) \hspace{0.25cm} \text{(rewriting as union of languages)} \\
+			& = (\{\texttt{a}\} \cup \{\texttt{b}\})^{*}\{\texttt{b}\} \hspace{0.725cm} \text{(rewriting as single-symbol languages)} \\
+			& = \{\texttt{a}, \texttt{b}\}^{*}\{\texttt{b}\}. \hspace{1.5cm} \text{(rewriting as union of symbols)}
+\end{align*}
+Therefore, \regex{r} represents the language $L = \{w \mid w \text{ ends with \texttt{b}}\}$.
+\end{example}
+
+\subsubsection*{Operational Order of Precedence}
+
+Just like how mathematics has an order of operations, regular expressions abide by their own order of precedence. The star is always applied first, followed by concatenation, and then union. If we want to, we can modify the order in which operations are applied by adding parentheses to a regular expression, and this does not affect the language represented by that regular expression.
+
+\begin{example}
+Consider the regular expressions
+\begin{equation*}
+\regex{r}_{1} = \texttt{0} + \texttt{1}^{*}\texttt{10} + \texttt{1}^{*} \text{ and } \regex{r}_{2} = (\texttt{0} + \texttt{1})^{*}\texttt{1}(\texttt{0} + \texttt{1})^{*}.
+\end{equation*}
+Clearly, the only visual difference between $\regex{r}_{1}$ and $\regex{r}_{2}$ is the addition of parentheses. However, the languages represented by $\regex{r}_{1}$ and $\regex{r}_{2}$ are quite different:
+\begin{itemize}
+\item The expression $\regex{r}_{1}$ represents the language containing (i) the word \texttt{0}, (ii) all words consisting of at least one \texttt{1} with one \texttt{0} at the end, and (iii) all words consisting of zero or more \texttt{1}s.
+\item The expression $\regex{r}_{2}$ represents the language consisting of all words that contain at least one \texttt{1}.
+\end{itemize}
+\end{example}
+
+\subsubsection*{Regular Languages}
+
+Going all the way back to Definition~\ref{def:regularoperations}, why did we refer to these three operations as the ``regular" operations? As it turns out, taking just these three operations is sufficient to allow us to define the smallest class of languages that is interesting enough to study: the \emph{regular languages}.
+
+\begin{definition}[Regular languages]\label{def:regularlanguages}
+Let $\Sigma$ be an alphabet. The class of regular languages is defined inductively as follows:
+\begin{enumerate}
+\item The empty language $\emptyset$ is regular.
+\item The language $\{\epsilon\}$ containing only the empty word is regular.
+\item For each $a \in \Sigma$, the language $\{a\}$ is regular.
+\item If $L_{1}$ and $L_{2}$ are regular, then $L_{1} \cup L_{2}$ is regular.
+\item If $L_{1}$ and $L_{2}$ are regular, then $L_{1}L_{2}$ is regular.
+\item If $L$ is regular, then $L^{*}$ is regular.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}
+There is a smaller class called the class of \emph{finite languages}. However, it's not too interesting: it consists only of languages with a finite number of words. Introducing the Kleene star allows us to produce infinite-size languages.
+\end{remark}
+
+If we compare Definitions~\ref{def:regularexpressions} and \ref{def:regularlanguages}, we can start to convince ourselves why we used the word ``regular" to refer to both of these concepts. All regular languages have a corresponding regular expression, and all regular expressions correspond to a regular language! The similarities between our two definitions mean that we can actually rewrite our definition of the regular languages to draw a direct connection to regular expressions:
+
+\begin{customtitlebox}[Definition 1.7$\,^{\prime}$ (Regular languages)]
+If some regular expression \regex{r} represents a language $L$, then $L$ is regular.
+\end{customtitlebox}
+
+Now, you might be asking yourself: from where did the word ``regular" arise to refer to these expressions and languages? Stephen Kleene introduced the notion of a regular language in the 1950s, but his justification for the terminology was basically that he couldn't come up with any better name:\par
+\epigraph{We would welcome any suggestions as to a more descriptive term.}{Stephen Kleene}{Representation of Events in Nerve Nets and Finite Automata}{}
+\vspace{1em}
+\noindent
+This, in turn, brings to mind another famous quote in computer science:\par
+\epigraph{There are only two hard things in Computer Science:\par cache invalidation and naming things.}{Phil Karlton}{attributed to him by his son, David Karlton (https://www.karlton.org/2017/12/naming-things-hard/)}{}
+
+%\subsection{Constructing Regular Expressions}
+
+%\begin{construction}
+% I would like to write a short section about how one can design a regular expression for a given language/application/etc.
+%\end{construction}

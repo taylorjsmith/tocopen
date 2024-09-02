@@ -1,0 +1,148 @@
+\chapter{Regular Languages}\label{chap:regular}
+
+\firstwords{If you frequently use} a Unix-based system with a terminal, you may be familiar with utilities such as \texttt{grep}, which searches an input text file for lines that match a specified format. For example, on your computer, you can search the dictionary file (\texttt{/usr/share/dict/words}) for all words that contain {\color{\maincolour}\texttt{theory}}:
+
+\lstset{style=codeblock,basicstyle=\small\ttfamily}
+\begin{lstlisting}[language=bash,xleftmargin=0cm]
+ !\color{\maincolour}\$! grep theory /usr/share/dict/words
+ counter!\color{\maincolour}theory!
+ !\color{\maincolour}theory!
+ !\color{\maincolour}theory!less
+ !\color{\maincolour}theory!monger
+\end{lstlisting}
+
+But, to be fair, doing something like that is a bit overkill when you could just open the file in a text editor and use the Find tool to search for the word ``theory". Where \texttt{grep} really shines is when you need to search for text matching a \emph{pattern}, like so:
+
+\begin{lstlisting}[language=bash,xleftmargin=0cm]
+ !\color{\maincolour}\$! grep ^u.*ity$ /usr/share/dict/words
+ !\color{\maincolour}u!biqu!\color{\maincolour}ity!
+ !\color{\maincolour}u!ltim!\color{\maincolour}ity!
+ !\color{\maincolour}u!ltrafilterabil!\color{\maincolour}ity!
+ ...
+ !\color{\maincolour}u!sabil!\color{\maincolour}ity!
+ !\color{\maincolour}u!til!\color{\maincolour}ity!
+ !\color{\maincolour}u!tterabil!\color{\maincolour}ity!
+ !\color{\maincolour}u!xorial!\color{\maincolour}ity!
+\end{lstlisting}
+
+In this example, we searched for all words in \texttt{/usr/share/dict/words} that began with a \texttt{u} and ended with \texttt{ity}, such as \texttt{{\color{\maincolour}\texttt{u}}nivers{\color{\maincolour}ity}}. The \texttt{{\color{\maincolour}u}biqu{\color{\maincolour}ity}} of this pattern in the English language is evident:
+
+\begin{lstlisting}[language=bash,xleftmargin=0cm]
+ !\color{\maincolour}\$! grep ^u.*ity$ /usr/share/dict/words | wc -l
+      235
+\end{lstlisting}
+
+Utilities like \texttt{grep} use patterns to perform fast searches in text files, and the sequence of symbols that makes up such a pattern is known as \emph{regex} or, formally, a \emph{regular expression}.
+
+\input{./chapters/regular/regexregularexpressions}
+\input{./chapters/regular/finiteautomata}
+\input{./chapters/regular/equivalenceofmodels}
+\input{./chapters/regular/closureproperties}
+%\input{./chapters/regular/finiteautomatawithoutput}
+\input{./chapters/regular/nonregular}
+
+\subsubsection*{Summary}
+
+Now that we've established that there exist both regular languages and nonregular languages, we can draw a diagram to represent the theory world as we know it currently. At this point, we're only familiar with two language classes: the class of regular languages and the class of finite languages, which is a subclass of the regular languages that we mentioned very briefly. We also only know about one machine model: finite automata.
+
+\begin{remark}
+Finite languages are recognized by a special kind of deterministic finite automaton with no cycles.
+\end{remark}
+
+As a result, our diagram in Figure~\ref{fig:chomskyregular} admittedly isn't very interesting right now, but as we continue through future chapters, we will expand and add to it.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, fill=\fourthcolour, thick, rounded corners, shift={(2,1)}] (-3,-2) rectangle (3,2);
+\draw[draw=\fifthcolour, fill=\fifthcolour, thick, rounded corners, shift={(2,1)}] (-1.75,-1.4) rectangle (1.75,0.6);
+
+\node[color=\maincolour] at (2,1.15) {Finite Languages};
+\node[color=\maincolour] at (2,0) {\textit{Acyclic DFAs}};
+\node[color=black] at (1,0.6) {$\{\epsilon\}$};
+\node[color=black] at (2,0.6) {$\{a\}$};
+\node[color=black] at (3,0.6) {$\emptyset$};
+
+\node[color=\maincolour] at (2,2.6) {Regular Languages};
+\node[color=\maincolour] at (2,-0.667) {\textit{Finite Automata}};
+\node[color=black] at (-0.35,1.25) {$\Sigma^{*}$};
+\node[color=black] at (0.25,2) {$\texttt{a} \cup \texttt{ba}$};
+\node[color=black] at (2,2) {$\{\texttt{a}, \texttt{b}\}^{*}\texttt{c}$};
+\node[color=black] at (3.75,2) {$\texttt{01}^{*} \cup \texttt{1}$};
+\node[color=black] at (4.35,1.25) {$\texttt{a}^{n}$};
+
+\node[color=\maincolour] at (0,3.5) {$L_{a>b}$};
+\node[color=\maincolour] at (2,3.5) {$\texttt{a}^{n}\texttt{b}^{n}$};
+\node[color=\maincolour] at (4,3.5) {$ww^{\text{R}}$};
+\end{tikzpicture}
+\caption{The hierarchy of language classes and models of computation, as we know it currently}
+\label{fig:chomskyregular}
+\end{figure}
+
+\unnumberedsection{Chapter Notes}
+
+\firstwords{Many of the references} given here and in later chapters, especially those that pertain to early work in formal languages and automata theory, were sourced from the remarkable and comprehensive survey article written by~\citet{Greibach1981FormalLanguagesOrigins}. For readers who understand French, another in-depth survey article has been published by~\citet{Perrin1995DebutsTheorieAutomates}.
+
+The book chapter by \citet{Yu1997RegularLanguages} provides an excellent starting point for those wanting to learn more about the class of regular languages.
+
+\begin{enumerate}
+\item[\ref{sec:regexregularexpressions}.] Regular expressions originated in the work of \citet{Kleene1951RepresentationEvents, Kleene1956RepresentationEvents}, who framed the idea in terms of ``regular events", which are now known as regular languages. Kleene defined three operations on events $E$ and $F$: their ``sum", denoted $E \vee F$; their ``product", denoted $EF$; and the ``iterate of $E$ on $F$", denoted $E^{*}F$. These, in turn, became the regular operations with which we are familiar.
+
+\citet{Brzozowski1962SurveyRegularExpressions} has published a detailed survey on the major results pertaining to regular expressions, many of which we discussed in this chapter.
+
+Although we have used $\epsilon$ here to denote the empty word, some other authors use symbols like $\lambda$ or $\Lambda$ instead. Likewise, you may see the notation $\{\}$ being used to denote the empty language instead of $\emptyset$.
+
+Extended regular expressions, or what we here have called regex, have also been studied in the literature under the name of ``practical regular expressions"; see, for example, the work of~\citet*{Campeanu2003PracticalRegex}. There is a vast body of material on extended regular expressions and their use in the professional world; see, for example, the book by~\citet{Friedl2006MasteringRegularExpressions}. \citet{Cox2007RegexMatchingSimpleFast} discusses how regular expression matching algorithms are implemented and gives a comparative analysis of the performance of such implementations in various programming languages and software tools.
+
+The word ``Kleene" in ``Kleene star" and ``Kleene plus" is pronounced /\textipa{"kleIni}/ (\textsc{klay}-nee), as that's how Stephen Kleene pronounced his last name.\par
+\epigraph{As far as I am aware this pronunciation is incorrect\par
+in all known languages. I believe that this novel\par
+pronunciation was invented by my father.}{Ken Kleene}{as quoted in the entry on ``Stephen Kleene" in the Free On-Line Dictionary of Computing}{}
+\vspace{1em}
+
+\item[\ref{sec:finiteautomata}.] The study of finite automata has its origins, of all places, in biology. \citet{McCullochPitts1943LogicalCalculus} were the first to develop a mathematical model of nervous system activity using ideas from propositional logic. Their work on ``nerve nets" laid the foundation for modern research into the applications of neural networks to artificial intelligence.
+
+It seems the first use of the phrase ``theory of automata" came in a symposium talk delivered by \citet{VonNeumann1951GeneralLogicalTheoryAutomata}, where he discussed the direction and future of the then-nascent field. The published version of von~Neumann's talk is interesting since it is followed by a discussion between him and symposium attendees, including McCulloch---one of the authors of the aforementioned ``nerve nets" paper! Von~Neumann spent the final years of his life studying automata theory; for details about his contributions, see the memorial survey written by \citet{Shannon1958VonNeumannAutomataTheory}.
+
+\citet{Kleene1951RepresentationEvents, Kleene1956RepresentationEvents} drew a direct connection between the nerve nets of McCulloch and Pitts and the idea of a finite automaton, and established the fundamental result that a language is ``representable by a nerve net" (i.e., recognized by a finite automaton) if and only if it is a regular language.
+
+\citet{Huffman1954SynthesisSwitchingCircuits, Huffman1954SynthesisSwitchingCircuitsPart2} formalized the notions of states and transition tables (which he called ``flow tables") in the context of analyzing electronic circuits; this work originally appeared in his 1953 doctoral thesis. You may know Huffman better from his work in coding theory and his discovery of \emph{Huffman coding}, which he made as a graduate student.
+
+Building upon Huffman's work, both \citet{Mealy1955MethodSynthesizingCircuits} and \citet{Moore1956GedankenExperiments} investigated further properties of electronic circuits and abstracted the study from circuits to ``representations of circuit requirements", otherwise known as flow charts or finite automata.
+
+Nondeterministic finite automata were introduced by \citet{RabinScott1959FiniteAutomata}, and for this paper Rabin and Scott jointly received the Turing Award in 1976.
+
+As we observed in comparing Figures~\ref{fig:deterministicthirdfromlast} and \ref{fig:deterministicfourthfromlast} to Figures~\ref{fig:nondeterministicthirdfromlast} and \ref{fig:nondeterministicfourthfromlast}, respectively, recognizing the language of words whose $n$th-from-last symbol is \texttt{0} requires $n+1$ states in the nondeterministic case and $2^{n}$ states in the deterministic case. \citet{RabinScott1959FiniteAutomata} first observed an exponential upper bound in the number of states between nondeterministic and deterministic finite automata recognizing the same language, but were uncertain whether this upper bound could be improved. \citet{Moore1971BoundsStateSetSize} showed that the finite automata recognizing these ``$n$th-from-last" languages meet this upper bound exactly. The question of how the size of a finite automaton is affected by converting between models or applying language operations gives rise to the study of \emph{descriptional complexity}, also known as \emph{state complexity}. For more details about this area of research, see the surveys by \citet{HolzerKutrib2011DescriptionalComputationalComplexity} and by \citet*{Gao2016SurveyOperationalStateComplexity}.
+
+Nondeterministic finite automata with epsilon transitions were studied by \citet{OttFeinstein1961DesignSequentialMachines}, although in their paper they referred to such machines as ``improper state diagrams". (For the curious, a ``proper state diagram" to Ott and Feinstein is a deterministic finite automaton.)
+
+\citet{McNaughton1961TheoryOfAutomataSurvey} surveys many of the early major results in automata theory that we have covered here, and also discusses extensions of the model such as probabilistic automata. Readers who would like a more applied introduction to finite automata, with an eye to programming applications and connections to other areas of computer science, may be interested in the survey by \citet{Barnes1972ProgrammersViewAutomata}.
+
+\item[\ref{sec:equivalenceofmodelsregular}.] The idea of using epsilon closure to convert a nondeterministic finite automaton with epsilon transitions into one without was proposed by~\citet{OttFeinstein1961DesignSequentialMachines}.
+
+The subset construction for converting a nondeterministic finite automaton to a deterministic finite automaton is due to~\citet{RabinScott1959FiniteAutomata}. Interestingly, the same fundamental idea was explored independently by~\citet{ChomskyMiller1958FiniteStateLanguages}, one year before the notion of a nondeterministic finite automaton was formalized!
+
+The state elimination algorithm presented here for converting a finite automaton to a regular expression is inspired by that given by~\citet{BrzozowskiMcCluskey1963SignalFlow}.
+
+The McNaughton--Yamada--Thompson algorithm for converting a regular expression to a finite automaton was first published by~\citet{McNaughtonYamada1960RegularExpressionsAutomata} in a purely theoretical context and was later rediscovered by~\citet{Thompson1968RegularExpressionSearch} in the context of compiler theory. In their same paper, McNaughton and Yamada also gave a matrix-based procedure to convert a finite automaton back to a regular expression, but their approach shares the same fundamental idea as the state elimination algorithm.
+
+Kleene's theorem is so named because Kleene established an early equivalence between regular expressions and finite automata in his \citeyear{Kleene1951RepresentationEvents} report. \citet*{Copi1958RealizationEventsLogicalNets} give clearer explications and proofs of Kleene's ``analysis and synthesis theorems" establishing the equivalence. \citet{Lee1960AutomataAndFiniteAutomata} obtained a result matching Kleene's, but using a different abstract machine framework.
+
+\item[\ref{sec:closurepropertiesregular}.] Closure of the class of regular languages under union, concatenation, Kleene star, complement, and intersection was established by~\citet{RabinScott1959FiniteAutomata}. In their paper, Rabin and Scott referred to the concatenation operation as the ``complex product" and the Kleene star operation, perhaps confusingly, as ``closure".
+
+\item[\ref{sec:nonregular}.] The pumping lemma for regular languages was first given by~\citet{RabinScott1959FiniteAutomata}, and also appears in a different form in the paper of~\citet*{BarHillel1961FormalPropertiesPhraseStructureGrammars}.
+
+\citet{Ritchie1963FiniteAutomataSquares} proved that the language of binary squares
+\begin{equation*}
+L_{\text{sq}2} = \{(n^{2})_{2} \mid (n)_{2} \text{ is the binary representation of } n \in \mathbb{N}\}
+\end{equation*}
+is not a regular language; as an intermediate step, he shows that the language $\{\texttt{1}^{n}\texttt{0}^{n+1}\texttt{1} \mid n > 0\}$ is nonregular. \citet{Huzino1977ElementaryProofRitchie} give an alternative proof of Ritchie's result.
+
+\citet{Minsky1966UnrecognizableSets} show more generally that any language consisting of a set of binary representations of numbers is nonregular if it violates certain asymptotic density properties; specific examples of nonregular languages they give are
+\begin{align*}
+L_{k2} &= \{(n^{k})_{2} \mid n \in \mathbb{N} \text{ and } k \geq 1\} \text{ and} \\
+L_{\text{primes}2} &= \{(p)_{2} \mid p \text{ is a prime number}\}.
+\end{align*}
+
+Although the pumping lemma for regular languages provides only a necessary, but not sufficient, condition for a language to be regular, \citet{Jaffe1978NecessarySufficientPumpingLemma} established a pumping condition for regularity that is both necessary and sufficient.
+\end{enumerate}

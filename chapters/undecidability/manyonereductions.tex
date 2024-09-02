@@ -1,0 +1,201 @@
+\section{Many-One Reductions}\label{sec:manyonereductions}
+
+\firstwords{In our proof} showing that $A_{\TM}$ was undecidable, we constructed a Turing machine $\mathcal{X}$ that took as input $\langle \mathcal{M} \rangle$, the encoding of a Turing machine $\mathcal{M}$, converted that input to the form $\langle \mathcal{M}, \langle \mathcal{M} \rangle \rangle$, and gave that converted input to another Turing machine $\mathcal{M}_{\mathrm{A}}$. The machine $\mathcal{X}$ then used the output of $\mathcal{M}_{\mathrm{A}}$ to determine what its own output should be. This was the ad hoc diagonalization approach: what we wish to avoid going forward.
+
+Generalizing this notion---that is, the notion of a Turing machine taking an input corresponding to some decision problem $X$, converting it into an input corresponding to some other decision problem $Y$, and then giving that converted input to another Turing machine for $Y$---gives us the foundation for proving undecidability using \emph{many-one reductions} or, more generally, just \emph{reductions}.
+
+\begin{remark}
+There exist other kinds of reductions that we will study later in this book. In this chapter, though, we will only consider many-one reductions, so we will often use the word ``reduction" here as a shorthand to refer to many-one reductions.
+\end{remark}
+
+Computationally speaking, a many-one reduction is the middle step in our aforementioned generalization that converts the instance of the problem $X$ into an instance of the other problem $Y$. The reason why this step is called a ``many-one" reduction is because the conversion process is performed by a computable function, to which we were introduced in Section~\ref{subsec:computingfunctions}. If a computable function exists that gets us from $X$ to $Y$, then we say that $X$ is \emph{many-one reducible} (or just \emph{reducible}) to $Y$.
+
+\begin{definition}[Many-one reduction]\label{def:manyonereduction}
+Given two decision problems $X$ and $Y$ over alphabets $\Sigma$ and $\Gamma$, respectively, problem $X$ is many-one reducible to problem $Y$ if there exists a computable function $f \from \Sigma^{*} \to \Gamma^{*}$ where, for all $w \in \Sigma^{*}$, $w \in X$ if and only if $f(w) \in Y$.
+\end{definition}
+
+Having a reduction tells us not only that we can transform every instance $w$ of $X$ into an instance $f(w)$ of $Y$, but also that we \emph{cannot} transform non-instances of $X$ into instances of $Y$ or vice versa. Moreover, since $w \in X$ if and only if $f(w) \in Y$, we know that the transformed instance will produce the same output as the original instance---since we're dealing with decision problems, this means that both $w$ and $f(w)$ will give us either a ``yes" answer or a ``no" answer. This observation reveals something very useful indeed: since we'll get the same answer for the instance of $Y$ as we would for the instance of $X$, we can use a reduction along with a decision algorithm for problem $Y$ to decide the original problem $X$.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[draw=\fourthcolour, thick, fill=\fourthcolour, rounded corners] (0,1) rectangle (8,4);
+\draw[draw=\fifthcolour, thick, fill=\fifthcolour] (0.75,1.5) rectangle (3.25,3);
+\draw[draw=black, thick, fill=black] (4.75,1.5) rectangle (7.25,3);
+
+\node[draw=none, color=\maincolour] at (4,3.5) {Decider for $X$};
+\node[draw=none, color=\maincolour, text width=2cm, align=center] at (2,2.25) {Reduction from $X$ to $Y$};
+\node[draw=none, color=white, text width=2cm, align=center] at (6,2.25) {Decider for $Y$};
+
+\coordinate (A) at (0.75,2.25);
+\coordinate (B) at (-1.5,2.25);
+\draw[-latex, color=\maincolour, thick] (B) -- (A);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (-0.8,2.75) {Instance \\ $w$ of $X$};
+
+\coordinate (C) at (4.75,2.25);
+\coordinate (D) at (3.25,2.25);
+\draw[-latex, color=\maincolour, thick] (D) -- (C);
+\node[draw=none, color=\maincolour, font=\footnotesize] at (4,2.65) {$f(w)$};
+
+\coordinate (E) at (9.7,2.25);
+\coordinate (F) at (7.25,2.25);
+\draw[-latex, color=\maincolour, thick] (F) -- (E);
+\node[draw=none, color=\maincolour, align=center, font=\footnotesize] at (8.9,2.75) {$f(w) \in Y$ \\ iff $w \in X$};
+\end{tikzpicture}
+\caption{A Turing machine for $X$ using the reduction $X \mreducesto Y$}
+\label{fig:manyonereduction}
+\end{figure}
+
+We denote a reduction from $X$ to $Y$ by the notation $X \mreducesto Y$. Figure~\ref{fig:manyonereduction} illustrates how such a reduction works, while Figure~\ref{fig:manyonereductionsets} shows how the computable function $f$ maps elements from one set to another.
+
+\begin{dangerous}
+Reductions are in general not reversible, so the direction of a reduction is important: if $X \mreducesto Y$, then we say that we reduce \emph{from} $X$ \emph{to} $Y$. Mixing up the direction of a reduction is a very common mistake made by the novice and the expert alike, so don't feel discouraged if it happens to you at least once.
+\end{dangerous}
+
+If we have a reduction from $X$ to $Y$, then we can make some claims about the relative difficulty of $X$ based on what we know about $Y$, or vice versa. The existence of a reduction from $X$ to $Y$ implies that finding an answer to $X$ is no more difficult than finding an answer to $Y$, or equivalently, finding an answer to $Y$ is at least as difficult as finding an answer to $X$. This is because, as Figure~\ref{fig:manyonereduction} illustrates, we must use the decider for $Y$ as an intermediate step in the overall decider for $X$. Thus, we have the following rules of thumb:
+\begin{colouredbox}
+\begin{itemize}
+\item if $X$ reduces to $Y$ and $Y$ is ``easy", then we know that $X$ must similarly be ``easy"; and
+\item if $X$ reduces to $Y$ and $X$ is ``hard", then we know that $Y$ must similarly be ``hard".
+\end{itemize}
+\end{colouredbox}
+We can intuit about both of these rules of thumb as follows. If $Y$ is ``easy", then we already have a decider for $Y$, and we need only build the decider for $X$ around the decider for $Y$. On the other hand, if $X$ is ``hard", then everything inside a supposed decider for $X$---including the decider for $Y$---must be ``hard" for us to solve.
+
+It's worth emphasizing once more that directionality is crucial with reductions. It wouldn't make sense for us to reduce from an ``easy" problem to a ``hard" problem, since our Turing machine could just decide the ``easy" problem directly while skipping over the supposed decider for the ``hard" problem: we don't need the reduction at all in this case.\par
+\epigraph{If you are taller than someone who is tall, then you must be tall.\par
+But if someone tall is taller than you, you might be\par
+short or tall---we wouldn't yet know.}{Joel David Hamkins}{in a post on X (formerly Twitter) dated February 27, 2024}{}
+\vspace{1em}
+
+For now, we write ``easy" and ``hard" in quotation marks, since these notions are still informal. Soon, we will introduce complexity classes and define more precise notions of easiness and hardness for decision problems.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+	\node (p1) at (0, 0) {};
+	\node (p2) at (1.33, 1.5) {};
+	\node (p3) at (0.75, 3.6) {};
+	\node (p4) at (-1, 3.6) {};
+	\node (p5) at (-1.5, 1) {};
+	\draw[draw=\fourthcolour, fill=\fourthcolour] plot [smooth cycle,tension=1] coordinates {(p1) (p2) (p3) (p4) (p5)};
+	\draw[draw=\thirdcolour, fill=\thirdcolour] (-0.1, 1.6) ellipse (0.7cm and 1cm);
+	
+	\node (q1) at (4, 0) {};
+	\node (q2) at (5.5, 1) {};
+	\node (q3) at (5.33, 3.3) {};
+	\node (q4) at (3.5, 3.8) {};
+	\node (q5) at (2.66, 1.33) {};
+	\draw[draw=\fourthcolour, fill=\fourthcolour] plot [smooth cycle,tension=1] coordinates {(q1) (q2) (q3) (q4) (q5)};
+	\draw[draw=\thirdcolour, fill=\thirdcolour] (4.2, 1.8) ellipse (0.7cm and 1cm);
+	
+	\node[color=white] at (-0.09, 2) {\large $X$};
+	\node[color=\maincolour] at (-1.33, 4) {\large $\Sigma^{*}$};
+	\node[color=white] at (4.25, 2.2) {\large $Y$};
+	\node[color=\maincolour] at (5.5, 4) {\large $\Gamma^{*}$};
+	
+	\node[color=\maincolour] at (2, 0.25) {$f$};
+	\node[color=\maincolour] at (2.1, 4.25) {$f$};
+
+	\fill[color=\maincolour] (-0.4, 3) circle (2pt);
+	\fill[color=\maincolour] (4.6, 3.2) circle (2pt);
+	\fill[color=\maincolour] (-0.1, 1.2) circle (2pt);
+	\fill[color=\maincolour] (4.2, 1.4) circle (2pt);
+
+	\path[-Latex, thick, color=\maincolour] (-0.4, 3) edge[bend left] (4.6, 3.2);
+	\path[-Latex, thick, color=\maincolour] (-0.1, 1.2) edge[bend right] (4.2, 1.4);
+\end{tikzpicture}
+\caption{How a reduction $X \mreducesto Y$ maps elements. All elements in $X$ are mapped by $f$ to some element in $Y$, while all other elements in $\Sigma^{*} \setminus X$ are mapped by $f$ to some other element in $\Gamma^{*} \setminus Y$}
+\label{fig:manyonereductionsets}
+\end{figure}
+
+\subsection{Properties of Reductions}
+
+Let's now establish some basic facts about the many-one reduction relation itself. We've already observed that reductions are in general not reversible, so we can say that the many-one reduction relation is not symmetric: if $X \mreducesto Y$, then it is not always the case that $Y \mreducesto X$ as well. However, we can prove two other nice properties.
+
+\begin{lemma}\label{lem:manyonereductionreflexivetransitive}
+The many-one reduction relation $\mreducesto$ is reflexive and transitive.
+
+\begin{proof}
+Let $X$, $Y$, and $Z$ be arbitrary decision problems.
+
+To show that $\mreducesto$ is reflexive, take $f(x) = x$ as our computable function. Then $X \mreducesto X$ for all decision problems $X$.
+
+To show that $\mreducesto$ is transitive, suppose that $X \mreducesto Y$ by way of some computable function $f$ and $Y \mreducesto Z$ by way of some other computable function $g$. Then $X \mreducesto Z$ by taking $h(x) = g(f(x))$ as our computable function.
+\end{proof}
+\end{lemma}
+
+Another fact about reductions that will come in handy for us later is that the many-one reduction relation is closed under complement.
+
+\begin{lemma}\label{lem:manyonereductioncomplement}
+Given two decision problems $X$ and $Y$, $X \mreducesto Y$ if and only if $\overline{X} \mreducesto \overline{Y}$.
+
+\begin{proof}
+Since $X \mreducesto Y$, we know by Definition~\ref{def:manyonereduction} that there exists some computable function $f$ where, for all $w$, $w \in X$ if and only if $f(w) \in Y$.
+
+If $w \in \overline{X}$, then $w \not\in X$, so $f(w) \not\in Y$ and thus $f(w) \in \overline{Y}$. Similarly, if $w \not\in \overline{X}$, then $w \in X$, so $f(w) \in Y$ and thus $f(w) \not\in \overline{Y}$. Therefore, $w \in \overline{X}$ if and only if $f(w) \in \overline{Y}$, and the same computable function $f$ gives us the reduction $\overline{X} \mreducesto \overline{Y}$.
+\end{proof}
+\end{lemma}
+
+\subsection{Reductions, Decidability, and Semidecidability}
+
+We can combine the notion of a decidable problem with that of a reduction to allow us to characterize an unknown problem in terms of another known problem.
+
+\begin{theorem}\label{thm:YdecidableXdecidable}
+If $Y$ is decidable and $X \mreducesto Y$, then $X$ is decidable.
+
+\begin{proof}
+Since $Y$ is decidable, there exists a Turing machine $\mathcal{M}_{Y}$ that decides instances of $Y$. Moreover, since $X \mreducesto Y$, there exists a computable function $f$ that reduces instances of $X$ to instances of $Y$.
+
+We construct a Turing machine $\mathcal{M}_{X}$ that takes as input a word $w$ and performs the following steps:
+\tmalgorithm{$\mathcal{M}_{X}$}{
+\begin{enumerate}
+\item Compute $f(w)$ using the reduction $X \mreducesto Y$.
+\item Run $\mathcal{M}_{Y}$ on the result $f(w)$.
+\item If $\mathcal{M}_{Y}$ accepts, then accept. If $\mathcal{M}_{Y}$ rejects, then reject.
+\end{enumerate}
+}
+The computable function $f$---that is, our reduction from $X$ to $Y$---tells us that if $f(w) \in Y$, then it must be the case that $w \in X$. On the other hand, if $f(w) \not\in Y$, then $w \not\in X$. In either case, we can use the answer produced by the Turing machine $\mathcal{M}_{Y}$ to obtain an answer for our original decision problem $X$ and its original input $w$.
+\end{proof}
+\end{theorem}
+\noindent
+The main benefit of Theorem~\ref{thm:YdecidableXdecidable} is that, as long as we know two things---namely, that $Y$ is decidable and that there exists a reduction $X \mreducesto Y$---we don't need to construct an entirely new Turing machine just to decide $X$. We can just sit back and let the existing Turing machine $\mathcal{M}_{Y}$ do all the work on the reduced instance of $X$!
+
+Of course, the main focus of this chapter is proving undecidability, and so it makes sense for us to connect reductions to this notion as well. By taking the contrapositive of Theorem~\ref{thm:YdecidableXdecidable}, we get the following important result that we will use frequently in future proofs.
+
+\begin{corollary}\label{cor:XundecidableYundecidable}
+If $X$ is undecidable and $X \mreducesto Y$, then $Y$ is undecidable.
+\end{corollary}
+
+Indeed, if we have an undecidable problem $X$ and a reduction $X \mreducesto Y$ to some other decision problem $Y$ we wish to prove undecidable, Corollary~\ref{cor:XundecidableYundecidable} gives us a general template for such a proof:
+\begin{colouredbox}
+\begin{enumerate}
+\item Assume by way of contradiction that $Y$ is decidable by some Turing machine $\mathcal{M}_{Y}$.
+\item Construct the following Turing machine $\mathcal{M}_{X}$ that takes as input a word $w$ and supposedly decides $X$ using the machine $\mathcal{M}_{Y}$:
+\tmalgorithm[0.92]{$\mathcal{M}_{X}$}{
+\begin{enumerate}
+\item[\textbf{1.}] \textbf{Compute $\bm{f(w)}$ using the reduction $\bm{X \mreducesto Y}$.}
+\item[2.] Run $\mathcal{M}_{Y}$ on the result $f(w)$.
+\item[3.] If $\mathcal{M}_{Y}$ accepts, then accept. If $\mathcal{M}_{Y}$ rejects, then reject.
+\end{enumerate}
+}
+\item Since $X$ is undecidable, conclude that such machines $\mathcal{M}_{X}$ and $\mathcal{M}_{Y}$ cannot exist, and so $Y$ cannot be decidable either.
+\end{enumerate}
+\end{colouredbox}
+\noindent
+The key part of any proof of undecidability that uses reductions comes in the first step of the description of $\mathcal{M}_{X}$, which we have emphasized in \textbf{boldface}. We must develop the reduction $X \mreducesto Y$ specifically for the decision problems $X$ and $Y$ under consideration in the proof, and so this step is the one that most often requires creative thinking and customization. Thankfully, the rest of the proof is mostly boilerplate and can be reused.
+
+\begin{dangerous}
+Another warning about the directionality of reductions: take careful note of the wordings of Theorem~\ref{thm:YdecidableXdecidable} and Corollary~\ref{cor:XundecidableYundecidable}. If $X$ is \emph{decidable} and $X \mreducesto Y$, then we can't make any conclusions about the decidability of $Y$. It's possible that $Y$ may be undecidable even if $X$ is decidable.
+\end{dangerous}
+
+We can make similar claims about semidecidability instead of decidability by using essentially the same proof as in Theorem~\ref{thm:YdecidableXdecidable}. The difference here, of course, is that we no longer have the guarantee that our Turing machine $\mathcal{M}_{Y}$ will always halt.
+
+\begin{theorem}\label{thm:YsemidecidableXsemidecidable}
+If $Y$ is semidecidable and $X \mreducesto Y$, then $X$ is semidecidable.
+\end{theorem}
+
+Again, taking the contrapositive gives us another important result that will come in handy later.
+
+\begin{corollary}\label{cor:XnotsemidecidableYnotsemidecidable}
+If $X$ is not semidecidable and $X \mreducesto Y$, then $Y$ is not semidecidable.
+\end{corollary}
